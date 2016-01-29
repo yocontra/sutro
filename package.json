@@ -1,0 +1,105 @@
+{
+  "name": "sutro",
+  "version": "1.0.0",
+  "description": "API",
+  "main": "dist/index.js",
+  "keywords": [
+    "rethinkdb",
+    "api",
+    "realtime",
+    "rest",
+    "http",
+    "express",
+    "middleware",
+    "streaming",
+    "eventsource",
+    "sse"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shastajs/sutro.git"
+  },
+  "author": "Contra <yo@contra.io> (http://contra.io)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shastajs/sutro/issues"
+  },
+  "homepage": "https://github.com/shastajs/sutro#readme",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "preversion": "npm run clean && npm run build && npm docs",
+    "postversion": "npm run changelog",
+    "build": "babel src --out-dir dist",
+    "clean": "rimraf dist",
+    "lint": "eslint src test",
+    "changelog": "github-changes -o contra -r sutro -b master -f ./CHANGELOG.md --order-semver --use-commit-body",
+    "test": "npm run-script lint && mocha --compilers js:babel-register --recursive --reporter spec",
+    "docs": "npm run docs:pre && npm run docs:build && npm run docs:publish",
+    "docs:pre": "gitbook install && rimraf _book",
+    "docs:build": "gitbook build -g shastajs/sutro",
+    "docs:publish": "cd _book && git init && git commit --allow-empty -m 'update book' && git checkout -b gh-pages && touch .nojekyll && git add . && git commit -am 'update book' && git push git@github.com:shastajs/sutro gh-pages --force"
+  },
+  "devDependencies": {
+    "babel": "^6.3.26",
+    "babel-cli": "^6.4.0",
+    "babel-core": "^6.4.0",
+    "babel-eslint": "^4.1.6",
+    "babel-loader": "^6.2.1",
+    "babel-plugin-add-module-exports": "^0.1.2",
+    "babel-plugin-transform-runtime": "^6.4.3",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-es2015-loose": "^7.0.0",
+    "babel-preset-stage-0": "^6.3.13",
+    "babel-register": "^6.4.3",
+    "babelify": "^7.2.0",
+    "eslint": "^1.10.3",
+    "eslint-config-rackt": "^1.1.1",
+    "gitbook-cli": "^1.0.1",
+    "github-changes": "^1.0.1",
+    "mocha": "^2.3.4",
+    "rimraf": "^2.5.0",
+    "should": "^8.0.0",
+    "thinky": "^2.2.4"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-0"
+    ],
+    "plugins": [
+      "transform-runtime",
+      "add-module-exports"
+    ]
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": "rackt",
+    "env": {
+      "node": true,
+      "es6": true,
+      "mocha": true
+    },
+    "ecmaFeatures": {
+      "modules": true
+    },
+    "globals": {
+      "it": true,
+      "describe": true
+    }
+  },
+  "dependencies": {
+    "debug": "^2.2.0",
+    "express": "^4.13.4",
+    "lodash.foreach": "^4.0.0",
+    "lodash.map": "^4.0.1",
+    "lodash.mapvalues": "^4.0.1",
+    "lodash.omit": "^4.0.2",
+    "palisade": "^1.0.3",
+    "pluralize": "^1.2.1",
+    "require-dir": "^0.3.0",
+    "thinky-export-schema": "^1.0.1",
+    "through2": "^2.0.0"
+  }
+}
