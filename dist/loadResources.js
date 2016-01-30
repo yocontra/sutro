@@ -8,10 +8,6 @@ var _pluralize = require('pluralize');
 
 var _pluralize2 = _interopRequireDefault(_pluralize);
 
-var _requireDir = require('require-dir');
-
-var _requireDir2 = _interopRequireDefault(_requireDir);
-
 var _lodash = require('lodash.mapvalues');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -35,10 +31,7 @@ var getDefaultFn = function getDefaultFn(m) {
   return m.__esModule ? m.default : m;
 };
 
-exports.default = function (opt) {
-  if (!opt.path) throw new Error('Missing path');
-  var resources = (0, _requireDir2.default)(opt.path, { recurse: true });
-
+exports.default = function (resources) {
   var getPath = function getPath(resourceName, methodName, methodInfo) {
     var path = '/' + _pluralize2.default.plural(resourceName);
     if (!_methods2.default[methodName]) {

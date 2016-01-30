@@ -3,12 +3,17 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.load = undefined;
 
 var _express = require('express');
 
 var _lodash = require('lodash.foreach');
 
 var _lodash2 = _interopRequireDefault(_lodash);
+
+var _requireDir = require('require-dir');
+
+var _requireDir2 = _interopRequireDefault(_requireDir);
 
 var _loadResources = require('./loadResources');
 
@@ -44,18 +49,23 @@ var wireResource = function wireResource(router) {
   };
 };
 
-exports.default = function (opt) {
-  var resources = (0, _loadResources2.default)(opt);
-  var meta = (0, _displayResources2.default)(resources, opt);
+var load = exports.load = function load(path) {
+  return (0, _requireDir2.default)(path, { recurse: true });
+};
 
-  // construct the router
+exports.default = function (_ref) {
+  var prefix = _ref.prefix;
+  var resources = _ref.resources;
+
+  if (!resources) throw new Error('Missing resources option');
+  var loadedResources = (0, _loadResources2.default)(resources);
+  var meta = (0, _displayResources2.default)(prefix, loadedResources);
   var router = (0, _express.Router)({ mergeParams: true });
   router.meta = meta;
+
   (0, _lodash2.default)(resources, wireResource(router));
   router.get('/_resources', function (req, res) {
     return res.json(meta);
   });
   return router;
 };
-
-module.exports = exports['default'];

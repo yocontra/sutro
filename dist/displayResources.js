@@ -18,7 +18,9 @@ var _lodash4 = _interopRequireDefault(_lodash3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = function (resources, opt) {
+exports.default = function () {
+  var prefix = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+  var resources = arguments[1];
   return (0, _lodash2.default)(resources, function (endpoints) {
     return {
       model: (0, _thinkyExportSchema2.default)(endpoints[0].model),
@@ -26,7 +28,7 @@ exports.default = function (resources, opt) {
         return {
           name: endpoint.name,
           method: endpoint.method.toUpperCase(),
-          path: opt.prefix ? '' + opt.prefix + endpoint.path : endpoint.path,
+          path: prefix ? '' + prefix + endpoint.path : endpoint.path,
           instance: endpoint.instance
         };
       })
