@@ -63,7 +63,7 @@ exports.default = function (_ref) {
   var router = (0, _express.Router)({ mergeParams: true });
   router.meta = meta;
 
-  (0, _lodash2.default)(resources, wireResource(router));
+  (0, _lodash2.default)(loadedResources, wireResource(router));
   router.get('/_resources', function (req, res) {
     return res.json(meta);
   });
