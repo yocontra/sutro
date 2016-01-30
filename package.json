@@ -99,7 +99,7 @@
     "palisade": "^1.0.3",
     "pluralize": "^1.2.1",
     "require-dir": "^0.3.0",
-    "thinky-export-schema": "^1.0.1",
+    "thinky-export-schema": "^2.0.0",
     "through2": "^2.0.0"
   }
 }

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import each from 'lodash.foreach'
+import requireDir from 'require-dir'
 import loadResources from './loadResources'
 import handleRequest from './handleRequest'
 import displayResources from './displayResources'
@@ -16,13 +17,15 @@ const wireResource = (router) => (endpoints, resourceName) => {
   each(endpoints, wireEndpoint(router))
 }
 
-export default (opt) => {
-  let resources = loadResources(opt)
-  let meta = displayResources(resources, opt)
+export const load = (path) => requireDir(path, { recurse: true })
 
-  // construct the router
+export default ({ prefix, resources }) => {
+  if (!resources) throw new Error('Missing resources option')
+  let loadedResources = loadResources(resources)
+  let meta = displayResources(prefix, loadedResources)
   let router = Router({ mergeParams: true })
   router.meta = meta
+
   each(resources, wireResource(router))
   router.get('/_resources', (req, res) => res.json(meta))
   return router

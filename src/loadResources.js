@@ -1,5 +1,4 @@
 import pluralize from 'pluralize'
-import requireDir from 'require-dir'
 import mapValues from 'lodash.mapvalues'
 import map from 'lodash.map'
 import omit from 'lodash.omit'
@@ -8,10 +7,7 @@ import methods from './methods'
 const blacklist = [ 'model' ]
 const getDefaultFn = (m) => m.__esModule ? m.default : m
 
-export default (opt) => {
-  if (!opt.path) throw new Error('Missing path')
-  const resources = requireDir(opt.path, { recurse: true })
-
+export default (resources) => {
   const getPath = (resourceName, methodName, methodInfo) => {
     let path = `/${pluralize.plural(resourceName)}`
     if (!methods[methodName]) {
