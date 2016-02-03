@@ -4,7 +4,9 @@ import map from 'lodash.map'
 
 export default (prefix = '', resources) =>
   mapValues(resources, (endpoints) => ({
-    model: exportSchema(endpoints[0].model),
+    model: endpoints[0] && endpoints[0].model
+      ? exportSchema(endpoints[0].model)
+      : undefined,
     endpoints: map(endpoints, (endpoint) => ({
       name: endpoint.name,
       method: endpoint.method.toUpperCase(),
