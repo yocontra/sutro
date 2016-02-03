@@ -23,7 +23,7 @@ exports.default = function () {
   var resources = arguments[1];
   return (0, _lodash2.default)(resources, function (endpoints) {
     return {
-      model: (0, _thinkyExportSchema2.default)(endpoints[0].model),
+      model: endpoints[0] && endpoints[0].model ? (0, _thinkyExportSchema2.default)(endpoints[0].model) : undefined,
       endpoints: (0, _lodash4.default)(endpoints, function (endpoint) {
         return {
           name: endpoint.name,
