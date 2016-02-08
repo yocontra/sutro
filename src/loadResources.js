@@ -40,6 +40,7 @@ export default (resources) => {
       return {
         name: methodName,
         method: methodInfo.method.toLowerCase(),
+        successCode: methodInfo.successCode || 200,
         path: getPath(resourceName, methodName, methodInfo),
         instance: !!methodInfo.instance,
         handler: fn,

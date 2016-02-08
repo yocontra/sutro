@@ -9,7 +9,7 @@ const debug = _debug('sutro:loader')
 
 const wireEndpoint = (router) => (endpoint) => {
   debug(`  - ${endpoint.name} (${endpoint.method.toUpperCase()} ${endpoint.path})`)
-  router[endpoint.method](endpoint.path, handleRequest(endpoint.handler))
+  router[endpoint.method](endpoint.path, handleRequest(endpoint))
 }
 
 const wireResource = (router) => (endpoints, resourceName) => {

@@ -31,7 +31,6 @@ const api = sutro({
       create: (opts, cb) => {
         return cb(null, { created: true })
         // TODO: sutro assumes body-parser?
-        // TODO: why no 201 created?
       },
       find: (opts, cb) => {
         return cb(null, JSON.stringify(users))
@@ -76,7 +75,7 @@ describe('sutro', () => {
 
   it('should register a resource creation endpoint', (done) => {
     request(app).post('/users')
-      .expect(200, { created: true }, done)
+      .expect(201, { created: true }, done)
   })
 
   it('should register a resource deletion endpoint', (done) => {

@@ -25,7 +25,7 @@ const sendError = (err, res) => {
   res.end()
 }
 
-export default (handler) => (req, res) => {
+export default ({ handler, successCode }) => (req, res) => {
   let stream = null
   let called = false
   let formatter = screenDeep.bind(null, req.user)
@@ -64,7 +64,7 @@ export default (handler) => (req, res) => {
     if (opt.tail) return sendError(new Error('Endpoint not capable of SSE'), res)
     let transformedData = formatter(data)
     if (transformedData) {
-      res.status(200)
+      res.status(successCode)
       res.json(transformedData)
     } else {
       res.status(204)

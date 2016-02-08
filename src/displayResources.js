@@ -10,6 +10,7 @@ export default (prefix = '', resources) =>
     endpoints: map(endpoints, (endpoint) => ({
       name: endpoint.name,
       method: endpoint.method.toUpperCase(),
+      successCode: endpoint.successCode,
       path: prefix ? `${prefix}${endpoint.path}` : endpoint.path,
       instance: endpoint.instance
     }))
