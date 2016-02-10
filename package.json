@@ -97,6 +97,7 @@
     "lodash.map": "^4.0.1",
     "lodash.mapvalues": "^4.0.1",
     "lodash.omit": "^4.0.2",
+    "lodash.sortby": "^4.1.0",
     "palisade": "^1.0.3",
     "pluralize": "^1.2.1",
     "require-dir": "^0.3.0",
