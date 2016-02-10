@@ -39,7 +39,9 @@ var sendError = function sendError(err, res) {
   res.end();
 };
 
-exports.default = function (handler) {
+exports.default = function (_ref) {
+  var handler = _ref.handler;
+  var successCode = _ref.successCode;
   return function (req, res) {
     var stream = null;
     var called = false;
@@ -79,7 +81,7 @@ exports.default = function (handler) {
       if (opt.tail) return sendError(new Error('Endpoint not capable of SSE'), res);
       var transformedData = formatter(data);
       if (transformedData) {
-        res.status(200);
+        res.status(successCode);
         res.json(transformedData);
       } else {
         res.status(204);

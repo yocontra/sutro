@@ -28,6 +28,7 @@ exports.default = function () {
         return {
           name: endpoint.name,
           method: endpoint.method.toUpperCase(),
+          successCode: endpoint.successCode,
           path: prefix ? '' + prefix + endpoint.path : endpoint.path,
           instance: endpoint.instance
         };

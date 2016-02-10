@@ -38,7 +38,7 @@ var debug = (0, _debug3.default)('sutro:loader');
 var wireEndpoint = function wireEndpoint(router) {
   return function (endpoint) {
     debug('  - ' + endpoint.name + ' (' + endpoint.method.toUpperCase() + ' ' + endpoint.path + ')');
-    router[endpoint.method](endpoint.path, (0, _handleRequest2.default)(endpoint.handler));
+    router[endpoint.method](endpoint.path, (0, _handleRequest2.default)(endpoint));
   };
 };
 
