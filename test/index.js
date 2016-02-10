@@ -25,7 +25,7 @@ let users = [ {
 
 const app = express()
 
-const api = sutro({
+let config = {
   resources: {
     user: {
       create: (opts, cb) => {
@@ -46,10 +46,20 @@ const api = sutro({
       },
       replaceById: (opts, cb) => {
         return cb(null, { replaced: true })
+      },
+      me: (opts, cb) => {
+        return cb(null, { me: true })
       }
     }
   }
-})
+}
+
+config.resources.user.me.http = {
+  method: 'get',
+  instance: false
+}
+
+const api = sutro(config)
 app.use(api)
 
 
@@ -91,5 +101,10 @@ describe('sutro', () => {
   it('should register a resource update endpoint', (done) => {
     request(app).patch('/users/1')
       .expect(200, { updated: true }, done)
+  })
+
+  it('should register a custom resource', (done) => {
+    request(app).get('/users/me')
+      .expect(200, { me: true }, done)
   })
 })

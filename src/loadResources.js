@@ -2,6 +2,7 @@ import pluralize from 'pluralize'
 import mapValues from 'lodash.mapvalues'
 import map from 'lodash.map'
 import omit from 'lodash.omit'
+import sort from 'lodash.sortby'
 import methods from './methods'
 
 const blacklist = [ 'model' ]
@@ -21,7 +22,7 @@ export default (resources) => {
   }
 
   const getEndpoints = (handlers, resourceName) =>
-    map(omit(handlers, blacklist), (handler, methodName) => {
+    sort(map(omit(handlers, blacklist), (handler, methodName) => {
       let fn = getDefaultFn(handler)
       if (typeof fn !== 'function') {
         throw new Error(`"${resourceName}" handler "${methodName}" did not export a function`)
@@ -44,9 +45,11 @@ export default (resources) => {
         path: getPath(resourceName, methodName, methodInfo),
         instance: !!methodInfo.instance,
         handler: fn,
+        custom: !methods[methodName],
         model: handlers.model
       }
-    })
+
+    }), (endpoint) => !endpoint.custom)
 
   return mapValues(resources, getEndpoints)
 }
