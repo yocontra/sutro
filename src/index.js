@@ -7,14 +7,16 @@ import displayResources from './displayResources'
 import _debug from 'debug'
 const debug = _debug('sutro:loader')
 
-const wireEndpoint = (router) => (endpoint) => {
+const wireEndpoint = (router, endpoint, resourceName) => {
   debug(`  - ${endpoint.name} (${endpoint.method.toUpperCase()} ${endpoint.path})`)
-  router[endpoint.method](endpoint.path, handleRequest(endpoint))
+  router[endpoint.method](endpoint.path, handleRequest(endpoint, resourceName))
 }
 
 const wireResource = (router) => (endpoints, resourceName) => {
   debug(`Loaded ${endpoints.length} endpoints for "${resourceName}"`)
-  each(endpoints, wireEndpoint(router))
+  each(endpoints, (endpoint) =>
+    wireEndpoint(router, endpoint, resourceName)
+  )
 }
 
 export const load = (path) => requireDir(path, { recurse: true })

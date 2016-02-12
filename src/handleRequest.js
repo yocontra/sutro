@@ -55,7 +55,7 @@ const createCustomHandlerFunction = (handler) => {
   }
 }
 
-const createHandlerFunction = (handler) => {
+const createHandlerFunction = (handler, { name, resourceName }) => {
   if (!!handler.default || typeof handler === 'function') {
     return createCustomHandlerFunction(handler.default || handler)
   }
@@ -67,20 +67,34 @@ const createHandlerFunction = (handler) => {
 
     const tasks = {
       isAuthorized: (done) => {
-        handler.isAuthorized(opt, (err, allowed) => {
-          if (err) return done(err, false)
-          if (!allowed) return done({ status: 401 }, false)
-          done(null, true)
-        })
+        try {
+          handler.isAuthorized(opt, (err, allowed) => {
+            if (err) return done(err, false)
+            if (typeof allowed !== 'boolean') {
+              return done(new Error(`${resourceName}.${name}.isAuthorized did not return a boolean!`))
+            }
+            if (!allowed) return done({ status: 401 }, false)
+            done(null, true)
+          })
+        } catch (err) {
+          return done(new Error(`${resourceName}.${name}.isAuthorized threw an error: ${err.stack || err.message || err}`))
+        }
       },
       query: [ 'isAuthorized', (done, res) => {
         if (!res.isAuthorized) return done()
-        handler.createQuery(opt, done)
+        try {
+          handler.createQuery(opt, (err, query) => {
+            if (err) return done(err)
+            if (!query) return done(new Error(`${resourceName}.${name}.createQuery did not return a query`))
+            if (!query.execute) return done(new Error(`${resourceName}.${name}.createQuery did not return a valid query`))
+            done(null, query)
+          })
+        } catch (err) {
+          return done(new Error(`${resourceName}.${name}.createQuery threw an error: ${err.stack || err.message || err}`))
+        }
       } ],
       rawResults: [ 'query', (done, res) => {
-        if (!res.query) return done(new Error('No query returned!'))
         if (opt.tail) return done()
-        if (!res.query.execute) return done(new Error('Invalid query returned!'))
         res.query.execute((err, res) => {
           // bad shit happened
           if (err) return done(err)
@@ -100,7 +114,11 @@ const createHandlerFunction = (handler) => {
       } ],
       formatResponse: [ 'rawResults', (done, res) => {
         if (!res.rawResults) return done()
-        done(null, handler.formatResponse(opt, res.rawResults))
+        try {
+          done(null, handler.formatResponse(opt, res.rawResults))
+        } catch (err) {
+          return done(new Error(`${resourceName}.${name}.formatResponse threw an error: ${err.stack || err.message || err}`))
+        }
       } ]
     }
 
@@ -113,8 +131,8 @@ const createHandlerFunction = (handler) => {
   }
 }
 
-export default ({ handler, successCode }) => {
-  const processor = createHandlerFunction(handler)
+export default ({ handler, name, successCode }, resourceName) => {
+  const processor = createHandlerFunction(handler, { name, resourceName })
   return (req, res) => {
     const opt = {
       id: req.params.id,
