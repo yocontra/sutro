@@ -6,8 +6,6 @@ import sort from 'lodash.sortby'
 import methods from './methods'
 
 const blacklist = [ 'model' ]
-const getDefaultFn = (m) => m.__esModule ? m.default : m
-
 export default (resources) => {
   const getPath = (resourceName, methodName, methodInfo) => {
     let path = `/${pluralize.plural(resourceName)}`
@@ -21,12 +19,10 @@ export default (resources) => {
     return path
   }
 
-  const getEndpoints = (handlers, resourceName) =>
-    sort(map(omit(handlers, blacklist), (handler, methodName) => {
-      let fn = getDefaultFn(handler)
-      if (typeof fn !== 'function') {
-        throw new Error(`"${resourceName}" handler "${methodName}" did not export a function`)
-      }
+  const getEndpoints = (handlers, resourceName) => {
+    const handlerNames = omit(handlers, blacklist)
+
+    const meta = map(handlerNames, (handler, methodName) => {
       let methodInfo = handler.http ? handler.http : methods[methodName]
       if (!methodInfo) {
         throw new Error(`"${resourceName}" handler "${methodName}" did not export a HTTP config object`)
@@ -44,12 +40,16 @@ export default (resources) => {
         successCode: methodInfo.successCode || 200,
         path: getPath(resourceName, methodName, methodInfo),
         instance: !!methodInfo.instance,
-        handler: fn,
+        handler: handler,
         custom: !methods[methodName],
         model: handlers.model
       }
 
-    }), (endpoint) => !endpoint.custom)
+    })
+
+    // float custom endpoints to the top, they take precedence
+    return sort(meta, (endpoint) => !endpoint.custom)
+  }
 
   return mapValues(resources, getEndpoints)
 }

@@ -23,51 +23,35 @@ let users = [ {
   name: 'baz'
 } ]
 
-const app = express()
-
-let config = {
-  resources: {
-    user: {
-      create: (opts, cb) => {
-        return cb(null, { created: true })
-        // TODO: sutro assumes body-parser?
-      },
-      find: (opts, cb) => {
-        return cb(null, JSON.stringify(users))
-      },
-      findById: (opts, cb) => {
-        return cb(null, users[opts.id - 1])
-      },
-      deleteById: (opts, cb) => {
-        return cb(null, { deleted: true })
-      },
-      updateById: (opts, cb) => {
-        return cb(null, { updated: true })
-      },
-      replaceById: (opts, cb) => {
-        return cb(null, { replaced: true })
-      },
-      me: (opts, cb) => {
-        return cb(null, { me: true })
-      }
-    }
-  }
-}
-
-config.resources.user.me.http = {
-  method: 'get',
-  instance: false
-}
-
-const api = sutro(config)
-app.use(api)
-
-
 describe('sutro', () => {
   it('should export a function', () => {
     should.exist(sutro)
     sutro.should.be.a.function
   })
+})
+
+describe('sutro - function handlers', () => {
+  const config = {
+    resources: {
+      user: {
+        create: (opts, cb) => cb(null, { created: true }),
+        find: (opts, cb) => cb(null, JSON.stringify(users)),
+        findById: (opts, cb) => cb(null, users[opts.id - 1]),
+        deleteById: (opts, cb) => cb(null, { deleted: true }),
+        updateById: (opts, cb) => cb(null, { updated: true }),
+        replaceById: (opts, cb) => cb(null, { replaced: true }),
+        me: {
+          default: (opts, cb) => cb(null, { me: true }),
+          http: {
+            method: 'get',
+            instance: false
+          }
+        }
+      }
+    }
+  }
+
+  const app = express().use(sutro(config))
 
   it('should register a resource query endpoint', (done) => {
     request(app).get('/users')

@@ -1,5 +1,8 @@
 import { screenDeep } from 'palisade'
+import async from 'async'
+import once from 'once'
 import mapValues from 'lodash.mapvalues'
+import changeStream from 'rethinkdb-change-stream'
 import pipeSSE from './pipeSSE'
 
 const getError = (err) => {
@@ -25,50 +28,117 @@ const sendError = (err, res) => {
   res.end()
 }
 
-export default ({ handler, successCode }) => (req, res) => {
-  let stream = null
-  let called = false
-  let formatter = screenDeep.bind(null, req.user)
-  let opt = {
-    id: req.params.id,
-    user: req.user,
-    data: req.body,
-    options: req.query,
-    tail: req.get('accept') === 'text/event-stream',
-    _req: req,
-    _res: res
-  }
+const extractChanged = (res) => {
+  if (!res.changes) return
+  if (!res.changes[0]) return
+  if (res.changes[0].new_val) return res.changes[0].new_val
+  if (res.changes[0].old_val) return res.changes[0].old_val
+}
 
-  // if returns a stream, pipe it through SSE
-  // otherwise assume its going to call the cb
-  try {
-    stream = handler(opt, sendResponse)
-  } catch (err) {
-    sendResponse(err)
-  }
-  if (opt.tail && stream && stream.on) {
-    pipeStream(stream)
-  }
-
-  // guts
-  function pipeStream(stream) {
-    if (called) return stream.end()
-    called = true
-    pipeSSE(stream, res, formatter)
-  }
-
-  function sendResponse(err, data) {
-    if (called) return
-    called = true
-    if (err) return sendError(err, res)
-    if (opt.tail) return sendError(new Error('Endpoint not capable of SSE'), res)
-    let transformedData = formatter(data)
-    if (transformedData) {
-      res.status(successCode)
-      res.json(transformedData)
-    } else {
-      res.status(204)
+const createCustomHandlerFunction = (handler) => {
+  return (opt, cb) => {
+    let stream
+    const done = once(cb)
+    try {
+      stream = handler(opt, (err, data) =>
+        done(err, {
+          result: screenDeep(opt.user, data)
+        })
+      )
+    } catch (err) {
+      return done(err)
     }
-    res.end()
+    if (opt.tail) {
+      if (stream && stream.pipe) return done(null, { stream: stream })
+      done(new Error('Endpoint did not return a stream'))
+    }
+  }
+}
+
+const createHandlerFunction = (handler) => {
+  if (!!handler.default || typeof handler === 'function') {
+    return createCustomHandlerFunction(handler.default || handler)
+  }
+
+  return (opt, cb) => {
+    if (opt.tail && !handler.tailable) {
+      cb(new Error('Endpoint not capable of SSE'))
+    }
+
+    const tasks = {
+      isAuthorized: (done) => {
+        handler.isAuthorized(opt, (err, allowed) => {
+          if (err) return done(err, false)
+          if (!allowed) return done({ status: 401 }, false)
+          done(null, true)
+        })
+      },
+      query: [ 'isAuthorized', (done, res) => {
+        if (!res.isAuthorized) return done()
+        handler.createQuery(opt, done)
+      } ],
+      rawResults: [ 'query', (done, res) => {
+        if (!res.query) return done(new Error('No query returned!'))
+        if (opt.tail) return done()
+        res.query.execute((err, res) => {
+          // bad shit happened
+          if (err) return done(err)
+
+          // no results
+          if (!res) return done()
+
+          // array of docs
+          if (Array.isArray(res)) return done(null, res)
+
+          // changes came back
+          if (res.changes) return done(null, extractChanged(res))
+
+          // one document instance
+          done(null, res)
+        })
+      } ],
+      formatResponse: [ 'rawResults', (done, res) => {
+        if (!res.rawResults) return done()
+        done(null, handler.formatResponse(opt, res.rawResults))
+      } ]
+    }
+
+    async.auto(tasks, (err, res) =>
+      cb(err, {
+        result: res.formatResponse,
+        stream: opt.tail && res.query ? changeStream(res.query) : null
+      })
+    )
+  }
+}
+
+export default ({ handler, successCode }) => {
+  const processor = createHandlerFunction(handler)
+  return (req, res) => {
+    const opt = {
+      id: req.params.id,
+      user: req.user,
+      data: req.body,
+      options: req.query,
+      tail: req.get('accept') === 'text/event-stream',
+      _req: req,
+      _res: res
+    }
+    const formatter = handler.formatResponse
+      ? handler.formatResponse.bind(null, opt)
+      : screenDeep.bind(null, opt.user)
+
+    processor(opt, (err, { result, stream }) => {
+      if (err) return sendError(err, res)
+      if (stream) return pipeSSE(stream, res, formatter)
+
+      if (result) {
+        res.status(successCode)
+        res.json(result)
+      } else {
+        res.status(204)
+      }
+      res.end()
+    })
   }
 }

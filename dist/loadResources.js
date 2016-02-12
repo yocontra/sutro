@@ -31,9 +31,6 @@ var _methods2 = _interopRequireDefault(_methods);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var blacklist = ['model'];
-var getDefaultFn = function getDefaultFn(m) {
-  return m.__esModule ? m.default : m;
-};
 
 exports.default = function (resources) {
   var getPath = function getPath(resourceName, methodName, methodInfo) {
@@ -49,11 +46,9 @@ exports.default = function (resources) {
   };
 
   var getEndpoints = function getEndpoints(handlers, resourceName) {
-    return (0, _lodash8.default)((0, _lodash4.default)((0, _lodash6.default)(handlers, blacklist), function (handler, methodName) {
-      var fn = getDefaultFn(handler);
-      if (typeof fn !== 'function') {
-        throw new Error('"' + resourceName + '" handler "' + methodName + '" did not export a function');
-      }
+    var handlerNames = (0, _lodash6.default)(handlers, blacklist);
+
+    var meta = (0, _lodash4.default)(handlerNames, function (handler, methodName) {
       var methodInfo = handler.http ? handler.http : _methods2.default[methodName];
       if (!methodInfo) {
         throw new Error('"' + resourceName + '" handler "' + methodName + '" did not export a HTTP config object');
@@ -71,11 +66,14 @@ exports.default = function (resources) {
         successCode: methodInfo.successCode || 200,
         path: getPath(resourceName, methodName, methodInfo),
         instance: !!methodInfo.instance,
-        handler: fn,
+        handler: handler,
         custom: !_methods2.default[methodName],
         model: handlers.model
       };
-    }), function (endpoint) {
+    });
+
+    // float custom endpoints to the top, they take precedence
+    return (0, _lodash8.default)(meta, function (endpoint) {
       return !endpoint.custom;
     });
   };
