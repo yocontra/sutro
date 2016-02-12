@@ -103,6 +103,7 @@ var createHandlerFunction = function createHandlerFunction(handler) {
       rawResults: ['query', function (done, res) {
         if (!res.query) return done(new Error('No query returned!'));
         if (opt.tail) return done();
+        if (!res.query.execute) return done(new Error('Invalid query returned!'));
         res.query.execute(function (err, res) {
           // bad shit happened
           if (err) return done(err);
