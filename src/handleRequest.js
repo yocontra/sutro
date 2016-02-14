@@ -112,7 +112,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
           done(null, res)
         })
       } ],
-      formatResponse: [ 'rawResults', (done, res) => {
+      formattedResults: [ 'rawResults', (done, res) => {
         if (!res.rawResults) return done()
         try {
           done(null, handler.formatResponse(opt, res.rawResults))
@@ -124,7 +124,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
 
     async.auto(tasks, (err, res) =>
       cb(err, {
-        result: res.formatResponse,
+        result: res.formattedResults,
         stream: opt.tail && res.query ? changeStream(res.query) : null
       })
     )
