@@ -139,6 +139,7 @@ export default ({ handler, name, successCode }, resourceName) => {
       user: req.user,
       data: req.body,
       options: req.query,
+      session: req.session,
       tail: req.get('accept') === 'text/event-stream',
       _req: req,
       _res: res
