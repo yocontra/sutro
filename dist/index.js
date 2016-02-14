@@ -35,17 +35,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var debug = (0, _debug3.default)('sutro:loader');
 
-var wireEndpoint = function wireEndpoint(router) {
-  return function (endpoint) {
-    debug('  - ' + endpoint.name + ' (' + endpoint.method.toUpperCase() + ' ' + endpoint.path + ')');
-    router[endpoint.method](endpoint.path, (0, _handleRequest2.default)(endpoint));
-  };
+var wireEndpoint = function wireEndpoint(router, endpoint, resourceName) {
+  debug('  - ' + endpoint.name + ' (' + endpoint.method.toUpperCase() + ' ' + endpoint.path + ')');
+  router[endpoint.method](endpoint.path, (0, _handleRequest2.default)(endpoint, resourceName));
 };
 
 var wireResource = function wireResource(router) {
   return function (endpoints, resourceName) {
     debug('Loaded ' + endpoints.length + ' endpoints for "' + resourceName + '"');
-    (0, _lodash2.default)(endpoints, wireEndpoint(router));
+    (0, _lodash2.default)(endpoints, function (endpoint) {
+      return wireEndpoint(router, endpoint, resourceName);
+    });
   };
 };
 

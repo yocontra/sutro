@@ -78,7 +78,10 @@ var createCustomHandlerFunction = function createCustomHandlerFunction(handler) 
   };
 };
 
-var createHandlerFunction = function createHandlerFunction(handler) {
+var createHandlerFunction = function createHandlerFunction(handler, _ref) {
+  var name = _ref.name;
+  var resourceName = _ref.resourceName;
+
   if (!!handler.default || typeof handler === 'function') {
     return createCustomHandlerFunction(handler.default || handler);
   }
@@ -90,20 +93,34 @@ var createHandlerFunction = function createHandlerFunction(handler) {
 
     var tasks = {
       isAuthorized: function isAuthorized(done) {
-        handler.isAuthorized(opt, function (err, allowed) {
-          if (err) return done(err, false);
-          if (!allowed) return done({ status: 401 }, false);
-          done(null, true);
-        });
+        try {
+          handler.isAuthorized(opt, function (err, allowed) {
+            if (err) return done(err, false);
+            if (typeof allowed !== 'boolean') {
+              return done(new Error(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
+            }
+            if (!allowed) return done({ status: 401 }, false);
+            done(null, true);
+          });
+        } catch (err) {
+          return done(new Error(resourceName + '.' + name + '.isAuthorized threw an error: ' + (err.stack || err.message || err)));
+        }
       },
       query: ['isAuthorized', function (done, res) {
         if (!res.isAuthorized) return done();
-        handler.createQuery(opt, done);
+        try {
+          handler.createQuery(opt, function (err, query) {
+            if (err) return done(err);
+            if (!query) return done(new Error(resourceName + '.' + name + '.createQuery did not return a query'));
+            if (!query.execute) return done(new Error(resourceName + '.' + name + '.createQuery did not return a valid query'));
+            done(null, query);
+          });
+        } catch (err) {
+          return done(new Error(resourceName + '.' + name + '.createQuery threw an error: ' + (err.stack || err.message || err)));
+        }
       }],
       rawResults: ['query', function (done, res) {
-        if (!res.query) return done(new Error('No query returned!'));
         if (opt.tail) return done();
-        if (!res.query.execute) return done(new Error('Invalid query returned!'));
         res.query.execute(function (err, res) {
           // bad shit happened
           if (err) return done(err);
@@ -123,7 +140,11 @@ var createHandlerFunction = function createHandlerFunction(handler) {
       }],
       formatResponse: ['rawResults', function (done, res) {
         if (!res.rawResults) return done();
-        done(null, handler.formatResponse(opt, res.rawResults));
+        try {
+          done(null, handler.formatResponse(opt, res.rawResults));
+        } catch (err) {
+          return done(new Error(resourceName + '.' + name + '.formatResponse threw an error: ' + (err.stack || err.message || err)));
+        }
       }]
     };
 
@@ -136,11 +157,12 @@ var createHandlerFunction = function createHandlerFunction(handler) {
   };
 };
 
-exports.default = function (_ref) {
-  var handler = _ref.handler;
-  var successCode = _ref.successCode;
+exports.default = function (_ref2, resourceName) {
+  var handler = _ref2.handler;
+  var name = _ref2.name;
+  var successCode = _ref2.successCode;
 
-  var processor = createHandlerFunction(handler);
+  var processor = createHandlerFunction(handler, { name: name, resourceName: resourceName });
   return function (req, res) {
     var opt = {
       id: req.params.id,
@@ -153,9 +175,11 @@ exports.default = function (_ref) {
     };
     var formatter = handler.formatResponse ? handler.formatResponse.bind(null, opt) : _palisade.screenDeep.bind(null, opt.user);
 
-    processor(opt, function (err, _ref2) {
-      var result = _ref2.result;
-      var stream = _ref2.stream;
+    processor(opt, function (err) {
+      var _ref3 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+      var result = _ref3.result;
+      var stream = _ref3.stream;
 
       if (err) return sendError(err, res);
       if (stream) return (0, _pipeSSE2.default)(stream, res, formatter);

@@ -147,7 +147,7 @@ export default ({ handler, name, successCode }, resourceName) => {
       ? handler.formatResponse.bind(null, opt)
       : screenDeep.bind(null, opt.user)
 
-    processor(opt, (err, { result, stream }) => {
+    processor(opt, (err, { result, stream } = {}) => {
       if (err) return sendError(err, res)
       if (stream) return pipeSSE(stream, res, formatter)
 
