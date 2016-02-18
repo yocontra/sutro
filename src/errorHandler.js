@@ -16,17 +16,15 @@ const getErrorFields = (err) => {
 }
 
 const sendError = (err, res) => {
-  const error = {
+  res.status(err.status || 500)
+  res.json({
     error: getError(err),
     fields: getErrorFields(err)
-  }
-  res.status(err.status || 500)
-  res.json(error)
+  })
   res.end()
-  return error
 }
 
 export default (err, req, res, next) => {
-  const error = sendError(err, res)
-  debug(error)
+  sendError(err, res)
+  debug(getError(err))
 }
