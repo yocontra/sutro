@@ -14,10 +14,6 @@ var _once = require('once');
 
 var _once2 = _interopRequireDefault(_once);
 
-var _lodash = require('lodash.mapvalues');
-
-var _lodash2 = _interopRequireDefault(_lodash);
-
 var _rethinkdbChangeStream = require('rethinkdb-change-stream');
 
 var _rethinkdbChangeStream2 = _interopRequireDefault(_rethinkdbChangeStream);
@@ -27,29 +23,6 @@ var _pipeSSE = require('./pipeSSE');
 var _pipeSSE2 = _interopRequireDefault(_pipeSSE);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var getError = function getError(err) {
-  if (err.message) return err.message;
-  if (err.error) {
-    if (err.error.message) return err.error.message;
-    return err.error;
-  }
-  return err;
-};
-
-var getErrorFields = function getErrorFields(err) {
-  if (!err.errors) return;
-  return (0, _lodash2.default)(err.errors, getError);
-};
-
-var sendError = function sendError(err, res) {
-  res.status(err.status || 500);
-  res.json({
-    error: getError(err),
-    fields: getErrorFields(err)
-  });
-  res.end();
-};
 
 var extractChanged = function extractChanged(res) {
   if (!res.changes) return;
@@ -138,7 +111,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
           done(null, res);
         });
       }],
-      formatResponse: ['rawResults', function (done, res) {
+      formattedResults: ['rawResults', function (done, res) {
         if (!res.rawResults) return done();
         try {
           done(null, handler.formatResponse(opt, res.rawResults));
@@ -150,7 +123,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
 
     _async2.default.auto(tasks, function (err, res) {
       return cb(err, {
-        result: res.formatResponse,
+        result: res.formattedResults,
         stream: opt.tail && res.query ? (0, _rethinkdbChangeStream2.default)(res.query) : null
       });
     });
@@ -163,7 +136,7 @@ exports.default = function (_ref2, resourceName) {
   var successCode = _ref2.successCode;
 
   var processor = createHandlerFunction(handler, { name: name, resourceName: resourceName });
-  return function (req, res) {
+  return function (req, res, next) {
     var opt = {
       id: req.params.id,
       user: req.user,
@@ -182,7 +155,7 @@ exports.default = function (_ref2, resourceName) {
       var result = _ref3.result;
       var stream = _ref3.stream;
 
-      if (err) return sendError(err, res);
+      if (err) return next(err);
       if (stream) return (0, _pipeSSE2.default)(stream, res, formatter);
 
       if (result) {

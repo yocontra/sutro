@@ -1,32 +1,8 @@
 import { screenDeep } from 'palisade'
 import async from 'async'
 import once from 'once'
-import mapValues from 'lodash.mapvalues'
 import changeStream from 'rethinkdb-change-stream'
 import pipeSSE from './pipeSSE'
-
-const getError = (err) => {
-  if (err.message) return err.message
-  if (err.error) {
-    if (err.error.message) return err.error.message
-    return err.error
-  }
-  return err
-}
-
-const getErrorFields = (err) => {
-  if (!err.errors) return
-  return mapValues(err.errors, getError)
-}
-
-const sendError = (err, res) => {
-  res.status(err.status || 500)
-  res.json({
-    error: getError(err),
-    fields: getErrorFields(err)
-  })
-  res.end()
-}
 
 const extractChanged = (res) => {
   if (!res.changes) return
@@ -133,7 +109,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
 
 export default ({ handler, name, successCode }, resourceName) => {
   const processor = createHandlerFunction(handler, { name, resourceName })
-  return (req, res) => {
+  return (req, res, next) => {
     const opt = {
       id: req.params.id,
       user: req.user,
@@ -149,7 +125,7 @@ export default ({ handler, name, successCode }, resourceName) => {
       : screenDeep.bind(null, opt.user)
 
     processor(opt, (err, { result, stream } = {}) => {
-      if (err) return sendError(err, res)
+      if (err) return next(err)
       if (stream) return pipeSSE(stream, res, formatter)
 
       if (result) {
