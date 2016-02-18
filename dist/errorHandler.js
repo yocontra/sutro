@@ -31,19 +31,17 @@ var getErrorFields = function getErrorFields(err) {
 };
 
 var sendError = function sendError(err, res) {
-  var error = {
+  res.status(err.status || 500);
+  res.json({
     error: getError(err),
     fields: getErrorFields(err)
-  };
-  res.status(err.status || 500);
-  res.json(error);
+  });
   res.end();
-  return error;
 };
 
 exports.default = function (err, req, res, next) {
-  var error = sendError(err, res);
-  debug(error);
+  sendError(err, res);
+  debug(getError(err));
 };
 
 module.exports = exports['default'];
