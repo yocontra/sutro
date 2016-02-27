@@ -122,7 +122,7 @@ export default ({ handler, name, successCode }, resourceName) => {
     }
     const formatter = handler.formatResponse
       ? handler.formatResponse.bind(null, opt)
-      : screenDeep.bind(null, opt.user)
+      : () => screenDeep(opt.user, ...arguments)
 
     processor(opt, (err, { result, stream } = {}) => {
       if (err) return next(err)
