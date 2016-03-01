@@ -75,7 +75,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
       } ],
       rawResults: [ 'query', (done, res) => {
         if (opt.tail) return done()
-        const run = res.query.execute ? res.query.execute : res.query
+        const run = res.query.execute ? res.query.execute.bind(res.query) : res.query
         run((err, res) => {
           // bad shit happened
           if (err) return done(err)

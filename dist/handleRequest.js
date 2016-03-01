@@ -99,7 +99,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
       }],
       rawResults: ['query', function (done, res) {
         if (opt.tail) return done();
-        var run = res.query.execute ? res.query.execute : res.query;
+        var run = res.query.execute ? res.query.execute.bind(res.query) : res.query;
         run(function (err, res) {
           // bad shit happened
           if (err) return done(err);
