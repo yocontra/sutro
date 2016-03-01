@@ -61,8 +61,12 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
         try {
           handler.createQuery(opt, (err, query) => {
             if (err) return done(err)
-            if (!query) return done(new Error(`${resourceName}.${name}.createQuery did not return a query`))
-            if (!query.execute) return done(new Error(`${resourceName}.${name}.createQuery did not return a valid query`))
+            if (!query) {
+              return done(new Error(`${resourceName}.${name}.createQuery did not return a query`))
+            }
+            if (!query.execute && typeof query !== 'function') {
+              return done(new Error(`${resourceName}.${name}.createQuery did not return a valid query`))
+            }
             done(null, query)
           })
         } catch (err) {
@@ -71,7 +75,8 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
       } ],
       rawResults: [ 'query', (done, res) => {
         if (opt.tail) return done()
-        res.query.execute((err, res) => {
+        const run = res.query.execute ? res.query.execute : res.query
+        run((err, res) => {
           // bad shit happened
           if (err) return done(err)
 
