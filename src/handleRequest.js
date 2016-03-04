@@ -31,6 +31,17 @@ const createCustomHandlerFunction = (handler) => {
   }
 }
 
+const handleAsync = (fn, cb) => {
+  const wrapped = once(cb)
+  let res
+  try {
+    res = fn(wrapped)
+  } catch (err) {
+    return wrapped(err, false)
+  }
+  if (typeof res !== 'undefined') wrapped(null, res)
+}
+
 const createHandlerFunction = (handler, { name, resourceName }) => {
   if (!!handler.default || typeof handler === 'function') {
     return createCustomHandlerFunction(handler.default || handler)
@@ -43,42 +54,25 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
 
     const tasks = {
       isAuthorized: (done) => {
-        try {
-          handler.isAuthorized(opt, (err, allowed) => {
-            if (err) return done(err, false)
-            if (typeof allowed !== 'boolean') {
-              return done(new Error(`${resourceName}.${name}.isAuthorized did not return a boolean!`))
-            }
-            if (!allowed) return done({ status: 401 }, false)
-            done(null, true)
-          })
-        } catch (err) {
-          return done(new Error(`${resourceName}.${name}.isAuthorized threw an error: ${err.stack || err.message || err}`))
+        const handleResult = (err, allowed) => {
+          if (err) {
+            return done(new Error(`${resourceName}.${name}.isAuthorized threw an error: ${err.stack || err.message || err}`), false)
+          }
+          if (typeof allowed !== 'boolean') {
+            return done(new Error(`${resourceName}.${name}.isAuthorized did not return a boolean!`))
+          }
+          if (!allowed) return done({ status: 401 }, false)
+          done(null, true)
         }
+
+        handleAsync(handler.isAuthorized.bind(null, opt), handleResult)
       },
-      query: [ 'isAuthorized', (done, res) => {
-        if (!res.isAuthorized) return done()
-        try {
-          handler.createQuery(opt, (err, query) => {
-            if (err) return done(err)
-            if (!query) {
-              return done(new Error(`${resourceName}.${name}.createQuery did not return a query`))
-            }
-            if (!query.execute && typeof query !== 'function') {
-              return done(new Error(`${resourceName}.${name}.createQuery did not return a valid query`))
-            }
-            done(null, query)
-          })
-        } catch (err) {
-          return done(new Error(`${resourceName}.${name}.createQuery threw an error: ${err.stack || err.message || err}`))
-        }
-      } ],
-      rawResults: [ 'query', (done, res) => {
-        if (opt.tail) return done()
-        const run = res.query.execute ? res.query.execute.bind(res.query) : res.query
-        run((err, res) => {
+      rawData: [ 'isAuthorized', (done, { isAuthorized }) => {
+        const handleResult = (err, res) => {
           // bad shit happened
-          if (err) return done(err)
+          if (err) {
+            return done(new Error(`${resourceName}.${name}.fetch threw an error: ${err.stack || err.message || err}`))
+          }
 
           // no results
           if (!res) return done()
@@ -91,22 +85,29 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
 
           // one document instance
           done(null, res)
-        })
-      } ],
-      formattedResults: [ 'rawResults', (done, res) => {
-        if (!res.rawResults) return done()
-        try {
-          done(null, handler.formatResponse(opt, res.rawResults))
-        } catch (err) {
-          return done(new Error(`${resourceName}.${name}.formatResponse threw an error: ${err.stack || err.message || err}`))
         }
+
+        if (!isAuthorized) return handleResult()
+        if (opt.tail) return handleResult()
+        handleAsync(handler.fetch.bind(null, opt), handleResult)
+      } ],
+      formattedData: [ 'rawData', (done, { rawData }) => {
+        const handleResult = (err, data) => {
+          if (err) {
+            return done(new Error(`${resourceName}.${name}.format threw an error: ${err.stack || err.message || err}`))
+          }
+          done(null, data)
+        }
+
+        if (typeof rawData === 'undefined') return handleResult()
+        handleAsync(handler.format.bind(null, opt, rawData), handleResult)
       } ]
     }
 
-    async.auto(tasks, (err, res) =>
+    async.auto(tasks, (err, { formattedData, rawData }) =>
       cb(err, {
-        result: res.formattedResults,
-        stream: opt.tail && res.query ? changeStream(res.query) : null
+        result: formattedData,
+        stream: opt.tail && rawData ? rawData : null
       })
     )
   }
