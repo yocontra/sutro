@@ -1,34 +1,12 @@
 import { screenDeep } from 'palisade'
 import async from 'async'
 import once from 'once'
-import changeStream from 'rethinkdb-change-stream'
 import pipeSSE from './pipeSSE'
 
 const extractChanged = (res) => {
-  if (!res.changes) return
   if (!res.changes[0]) return
   if (res.changes[0].new_val) return res.changes[0].new_val
   if (res.changes[0].old_val) return res.changes[0].old_val
-}
-
-const createCustomHandlerFunction = (handler) => {
-  return (opt, cb) => {
-    let stream
-    const done = once(cb)
-    try {
-      stream = handler(opt, (err, data) =>
-        done(err, {
-          result: screenDeep(opt.user, data)
-        })
-      )
-    } catch (err) {
-      return done(err)
-    }
-    if (opt.tail) {
-      if (stream && stream.pipe) return done(null, { stream: stream })
-      done(new Error('Endpoint did not return a stream'))
-    }
-  }
 }
 
 const handleAsync = (fn, cb) => {
@@ -37,15 +15,27 @@ const handleAsync = (fn, cb) => {
   try {
     res = fn(wrapped)
   } catch (err) {
-    return wrapped(err, false)
+    return wrapped(err)
   }
-  if (typeof res !== 'undefined') wrapped(null, res)
+
+  // using a callback
+  if (typeof res === 'undefined') return
+
+  // using a promise
+  if (typeof res.then === 'function') {
+    return res.then((data) => {
+      wrapped(null, data)
+    }, (err) => {
+      wrapped(err)
+    })
+  }
+
+  // returned a plain value
+  wrapped(null, res)
 }
 
 const createHandlerFunction = (handler, { name, resourceName }) => {
-  if (!!handler.default || typeof handler === 'function') {
-    return createCustomHandlerFunction(handler.default || handler)
-  }
+  if (!handler.process) throw new Error(`${resourceName}.${name} missing process function`)
 
   return (opt, cb) => {
     if (opt.tail && !handler.tailable) {
@@ -65,13 +55,14 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
           done(null, true)
         }
 
+        if (!handler.isAuthorized) return handleResult(null, true)
         handleAsync(handler.isAuthorized.bind(null, opt), handleResult)
       },
-      rawData: [ 'isAuthorized', (done, { isAuthorized }) => {
+      rawData: [ 'isAuthorized', (done) => {
         const handleResult = (err, res) => {
           // bad shit happened
           if (err) {
-            return done(new Error(`${resourceName}.${name}.fetch threw an error: ${err.stack || err.message || err}`))
+            return done(new Error(`${resourceName}.${name}.process threw an error: ${err.stack || err.message || err}`))
           }
 
           // no results
@@ -83,13 +74,11 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
           // changes came back
           if (res.changes) return done(null, extractChanged(res))
 
-          // one document instance
+          // one document instance, or stream
           done(null, res)
         }
 
-        if (!isAuthorized) return handleResult()
-        if (opt.tail) return handleResult()
-        handleAsync(handler.fetch.bind(null, opt), handleResult)
+        handleAsync(handler.process.bind(null, opt), handleResult)
       } ],
       formattedData: [ 'rawData', (done, { rawData }) => {
         const handleResult = (err, data) => {
@@ -100,16 +89,20 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
         }
 
         if (typeof rawData === 'undefined') return handleResult()
+        if (!handler.format) return handleResult(null, rawData)
         handleAsync(handler.format.bind(null, opt, rawData), handleResult)
       } ]
     }
 
-    async.auto(tasks, (err, { formattedData, rawData }) =>
+    async.auto(tasks, (err, { formattedData, rawData }) => {
+      if (opt.tail && rawData && !rawData.pipe) {
+        return cb(new Error(`${resourceName}.${name}.process didn't return a stream`))
+      }
       cb(err, {
         result: formattedData,
-        stream: opt.tail && rawData ? rawData : null
+        stream: opt.tail && rawData
       })
-    )
+    })
   }
 }
 
@@ -126,6 +119,8 @@ export default ({ handler, name, successCode }, resourceName) => {
       _req: req,
       _res: res
     }
+
+    // TODO: get rid of plain function syntax
     const formatter = handler.formatResponse
       ? handler.formatResponse.bind(null, opt)
       : () => screenDeep(opt.user, ...arguments)

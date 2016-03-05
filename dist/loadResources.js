@@ -35,11 +35,11 @@ var blacklist = ['model'];
 exports.default = function (resources) {
   var getPath = function getPath(resourceName, methodName, methodInfo) {
     var path = '/' + _pluralize2.default.plural(resourceName);
-    if (!_methods2.default[methodName]) {
-      path += '/' + methodName;
-    }
     if (methodInfo.instance) {
       path += '/:id';
+    }
+    if (!_methods2.default[methodName]) {
+      path += '/' + methodName;
     }
 
     return path;

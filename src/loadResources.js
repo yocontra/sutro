@@ -9,11 +9,11 @@ const blacklist = [ 'model' ]
 export default (resources) => {
   const getPath = (resourceName, methodName, methodInfo) => {
     let path = `/${pluralize.plural(resourceName)}`
-    if (!methods[methodName]) {
-      path += `/${methodName}`
-    }
     if (methodInfo.instance) {
       path += '/:id'
+    }
+    if (!methods[methodName]) {
+      path += `/${methodName}`
     }
 
     return path
