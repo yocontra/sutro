@@ -1,6 +1,5 @@
 'use strict';
 
-var _arguments = arguments;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -151,9 +150,8 @@ exports.default = function (_ref4, resourceName) {
     };
 
     // TODO: get rid of plain function syntax
-    var formatter = handler.formatResponse ? handler.formatResponse.bind(null, opt) : function () {
-      return _palisade.screenDeep.apply(undefined, [opt.user].concat(Array.prototype.slice.call(_arguments)));
-    };
+    // and handle this somewhere else!
+    var formatter = handler.format ? handler.format.bind(null, opt) : null;
 
     processor(opt, function (err) {
       var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];

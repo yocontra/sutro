@@ -121,9 +121,10 @@ export default ({ handler, name, successCode }, resourceName) => {
     }
 
     // TODO: get rid of plain function syntax
-    const formatter = handler.formatResponse
-      ? handler.formatResponse.bind(null, opt)
-      : () => screenDeep(opt.user, ...arguments)
+    // and handle this somewhere else!
+    const formatter = handler.format
+      ? handler.format.bind(null, opt)
+      : null
 
     processor(opt, (err, { result, stream } = {}) => {
       if (err) return next(err)
