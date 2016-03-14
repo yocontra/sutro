@@ -1,5 +1,9 @@
 'use strict';
 
+var _maxSafeInteger = require('babel-runtime/core-js/number/max-safe-integer');
+
+var _maxSafeInteger2 = _interopRequireDefault(_maxSafeInteger);
+
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
@@ -26,6 +30,8 @@ exports.default = function (stream, res, fmt) {
   res.set('Cache-control', 'no-cache');
   res.write('\n');
   res.flush();
+
+  res.setTimeout(_maxSafeInteger2.default);
 
   stream.pipe(_through2.default.obj(function (o, _, cb) {
     res.write(getEvent(o, fmt));

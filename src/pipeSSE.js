@@ -10,6 +10,8 @@ export default (stream, res, fmt) => {
   res.write('\n')
   res.flush()
 
+  res.setTimeout(Number.MAX_SAFE_INTEGER)
+
   stream.pipe(through.obj((o, _, cb) => {
     res.write(getEvent(o, fmt))
     res.flush()
