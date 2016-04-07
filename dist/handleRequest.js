@@ -4,15 +4,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _palisade = require('palisade');
-
 var _async = require('async');
 
 var _async2 = _interopRequireDefault(_async);
 
-var _once = require('once');
+var _handleAsync = require('./handleAsync');
 
-var _once2 = _interopRequireDefault(_once);
+var _handleAsync2 = _interopRequireDefault(_handleAsync);
 
 var _pipeSSE = require('./pipeSSE');
 
@@ -26,35 +24,15 @@ var extractChanged = function extractChanged(res) {
   if (res.changes[0].old_val) return res.changes[0].old_val;
 };
 
-var handleAsync = function handleAsync(fn, cb) {
-  var wrapped = (0, _once2.default)(cb);
-  var res = undefined;
-  try {
-    res = fn(wrapped);
-  } catch (err) {
-    return wrapped(err);
-  }
-
-  // using a callback
-  if (typeof res === 'undefined') return;
-
-  // using a promise
-  if (typeof res.then === 'function') {
-    return res.then(function (data) {
-      wrapped(null, data);
-    }, function (err) {
-      wrapped(err);
-    });
-  }
-
-  // returned a plain value
-  wrapped(null, res);
-};
-
 var createHandlerFunction = function createHandlerFunction(handler, _ref) {
   var name = _ref.name;
   var resourceName = _ref.resourceName;
 
+  if (typeof handler === 'function') {
+    handler = {
+      process: handler
+    };
+  }
   if (!handler.process) throw new Error(resourceName + '.' + name + ' missing process function');
 
   return function (opt, cb) {
@@ -76,7 +54,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
         };
 
         if (!handler.isAuthorized) return handleResult(null, true);
-        handleAsync(handler.isAuthorized.bind(null, opt), handleResult);
+        (0, _handleAsync2.default)(handler.isAuthorized.bind(null, opt), handleResult);
       },
       rawData: ['isAuthorized', function (done) {
         var handleResult = function handleResult(err, res) {
@@ -98,7 +76,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
           done(null, res);
         };
 
-        handleAsync(handler.process.bind(null, opt), handleResult);
+        (0, _handleAsync2.default)(handler.process.bind(null, opt), handleResult);
       }],
       formattedData: ['rawData', function (done, _ref2) {
         var rawData = _ref2.rawData;
@@ -112,7 +90,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
 
         if (typeof rawData === 'undefined') return handleResult();
         if (!handler.format) return handleResult(null, rawData);
-        handleAsync(handler.format.bind(null, opt, rawData), handleResult);
+        (0, _handleAsync2.default)(handler.format.bind(null, opt, rawData), handleResult);
       }]
     };
 

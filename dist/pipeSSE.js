@@ -1,5 +1,9 @@
 'use strict';
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 var _maxSafeInteger = require('babel-runtime/core-js/number/max-safe-integer');
 
 var _maxSafeInteger2 = _interopRequireDefault(_maxSafeInteger);
@@ -7,10 +11,6 @@ var _maxSafeInteger2 = _interopRequireDefault(_maxSafeInteger);
 var _stringify = require('babel-runtime/core-js/json/stringify');
 
 var _stringify2 = _interopRequireDefault(_stringify);
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
 var _through = require('through2');
 
