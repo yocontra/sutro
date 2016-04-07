@@ -1,6 +1,5 @@
-import { screenDeep } from 'palisade'
 import async from 'async'
-import once from 'once'
+import handleAsync from './handleAsync'
 import pipeSSE from './pipeSSE'
 
 const extractChanged = (res) => {
@@ -9,32 +8,12 @@ const extractChanged = (res) => {
   if (res.changes[0].old_val) return res.changes[0].old_val
 }
 
-const handleAsync = (fn, cb) => {
-  const wrapped = once(cb)
-  let res
-  try {
-    res = fn(wrapped)
-  } catch (err) {
-    return wrapped(err)
-  }
-
-  // using a callback
-  if (typeof res === 'undefined') return
-
-  // using a promise
-  if (typeof res.then === 'function') {
-    return res.then((data) => {
-      wrapped(null, data)
-    }, (err) => {
-      wrapped(err)
-    })
-  }
-
-  // returned a plain value
-  wrapped(null, res)
-}
-
 const createHandlerFunction = (handler, { name, resourceName }) => {
+  if (typeof handler === 'function') {
+    handler = {
+      process: handler
+    }
+  }
   if (!handler.process) throw new Error(`${resourceName}.${name} missing process function`)
 
   return (opt, cb) => {

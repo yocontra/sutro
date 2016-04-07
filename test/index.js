@@ -41,7 +41,7 @@ describe('sutro - function handlers', () => {
         updateById: (opts, cb) => cb(null, { updated: true }),
         replaceById: (opts, cb) => cb(null, { replaced: true }),
         me: {
-          default: (opts, cb) => cb(null, { me: true }),
+          process: (opts, cb) => cb(null, { me: true }),
           http: {
             method: 'get',
             instance: false
