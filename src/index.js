@@ -14,7 +14,8 @@ const wireEndpoint = (router, endpoint, resourceName) => {
 }
 
 const wireResource = (router) => (endpoints, resourceName) => {
-  debug(`Loaded ${endpoints.length} endpoints for "${resourceName}"`)
+  const number = endpoints.length > 1 ? 'endpoints' : 'endpoint'
+  debug(`Loaded ${endpoints.length} ${number} for "${resourceName}"`)
   each(endpoints, (endpoint) =>
     wireEndpoint(router, endpoint, resourceName)
   )
