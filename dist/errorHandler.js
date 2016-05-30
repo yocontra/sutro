@@ -20,7 +20,6 @@ var debug = (0, _debug3.default)('sutro:errors');
 
 var getError = function getError(err) {
   if (err.error) return getError(err.error);
-  if (err.stack) return err.stack;
   if (err.message) return err.message;
   return err;
 };
