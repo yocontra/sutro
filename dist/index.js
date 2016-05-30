@@ -46,7 +46,8 @@ var wireEndpoint = function wireEndpoint(router, endpoint, resourceName) {
 
 var wireResource = function wireResource(router) {
   return function (endpoints, resourceName) {
-    debug('Loaded ' + endpoints.length + ' endpoints for "' + resourceName + '"');
+    var number = endpoints.length > 1 ? 'endpoints' : 'endpoint';
+    debug('Loaded ' + endpoints.length + ' ' + number + ' for "' + resourceName + '"');
     (0, _lodash2.default)(endpoints, function (endpoint) {
       return wireEndpoint(router, endpoint, resourceName);
     });
