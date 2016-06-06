@@ -89,7 +89,7 @@ export default ({ handler, name, successCode }, resourceName) => {
   const processor = createHandlerFunction(handler, { name, resourceName })
   return (req, res, next) => {
     const opt = {
-      id: req.params.id,
+      ...req.params,
       user: req.user,
       data: req.body,
       options: req.query,

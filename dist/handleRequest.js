@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _async = require('async');
 
 var _async2 = _interopRequireDefault(_async);
@@ -116,8 +120,7 @@ exports.default = function (_ref4, resourceName) {
 
   var processor = createHandlerFunction(handler, { name: name, resourceName: resourceName });
   return function (req, res, next) {
-    var opt = {
-      id: req.params.id,
+    var opt = (0, _extends3.default)({}, req.params, {
       user: req.user,
       data: req.body,
       options: req.query,
@@ -125,7 +128,7 @@ exports.default = function (_ref4, resourceName) {
       tail: req.get('accept') === 'text/event-stream',
       _req: req,
       _res: res
-    };
+    });
 
     // TODO: get rid of plain function syntax
     // and handle this somewhere else!
