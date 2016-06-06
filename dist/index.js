@@ -67,6 +67,7 @@ exports.default = function (_ref) {
   var meta = (0, _displayResources2.default)(prefix, loadedResources);
   var router = (0, _express.Router)({ mergeParams: true });
   router.meta = meta;
+  router.prefix = prefix;
 
   (0, _lodash2.default)(loadedResources, wireResource(router));
   router.get('/_resources', function (req, res) {

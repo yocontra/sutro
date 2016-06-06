@@ -29,6 +29,7 @@ export default ({ prefix, resources }) => {
   let meta = displayResources(prefix, loadedResources)
   let router = Router({ mergeParams: true })
   router.meta = meta
+  router.prefix = prefix
 
   each(loadedResources, wireResource(router))
   router.get('/_resources', (req, res) => res.json(meta))
