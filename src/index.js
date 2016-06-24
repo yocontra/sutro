@@ -15,9 +15,10 @@ const wireEndpoint = (router, endpoint, resourceName) => {
 
 const wireResource = (router) => (endpoints, resourceName) => {
   const number = endpoints.length > 1 ? 'endpoints' : 'endpoint'
-  debug(`Loaded ${endpoints.length} ${number} for "${resourceName}"`)
+  const actualName = resourceName.toLowerCase()
+  debug(`Loaded ${endpoints.length} ${number} for "${actualName}"`)
   each(endpoints, (endpoint) =>
-    wireEndpoint(router, endpoint, resourceName)
+    wireEndpoint(router, endpoint, actualName)
   )
 }
 

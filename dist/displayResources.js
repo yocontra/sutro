@@ -26,7 +26,7 @@ exports.default = function () {
       model: endpoints[0] && endpoints[0].model ? (0, _thinkyExportSchema2.default)(endpoints[0].model) : undefined,
       endpoints: (0, _lodash4.default)(endpoints, function (endpoint) {
         return {
-          name: endpoint.name,
+          name: endpoint.name.toLowerCase(),
           method: endpoint.method.toUpperCase(),
           successCode: endpoint.successCode,
           path: prefix ? '' + prefix + endpoint.path : endpoint.path,
