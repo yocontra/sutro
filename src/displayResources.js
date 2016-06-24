@@ -8,7 +8,7 @@ export default (prefix = '', resources) =>
       ? exportSchema(endpoints[0].model)
       : undefined,
     endpoints: map(endpoints, (endpoint) => ({
-      name: endpoint.name.toLowerCase(),
+      name: endpoint.name,
       method: endpoint.method.toUpperCase(),
       successCode: endpoint.successCode,
       path: prefix ? `${prefix}${endpoint.path}` : endpoint.path,
