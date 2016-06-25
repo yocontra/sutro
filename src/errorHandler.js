@@ -18,7 +18,10 @@ const sendError = (err, res) => {
   res.end()
 }
 
-export default (err, req, res, next) => {
-  sendError(err, res)
-  debug(getErrorMessage(err, debug))
-}
+export const createHandler = (custom) =>
+  (err, req, res, next) => {
+    sendError(err, res)
+    custom(getErrorMessage(err, true))
+  }
+
+export default createHandler(debug)

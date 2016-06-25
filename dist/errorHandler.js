@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.createHandler = undefined;
 
 var _debug2 = require('debug');
 
@@ -35,9 +36,11 @@ var sendError = function sendError(err, res) {
   res.end();
 };
 
-exports.default = function (err, req, res, next) {
-  sendError(err, res);
-  debug((0, _getErrorMessage2.default)(err, debug));
+var createHandler = exports.createHandler = function createHandler(custom) {
+  return function (err, req, res, next) {
+    sendError(err, res);
+    custom((0, _getErrorMessage2.default)(err, true));
+  };
 };
 
-module.exports = exports['default'];
+exports.default = createHandler(debug);
