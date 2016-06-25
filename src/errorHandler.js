@@ -1,23 +1,18 @@
 /* eslint no-unused-vars:0 */
 import _debug from 'debug'
 import mapValues from 'lodash.mapvalues'
+import getErrorMessage from './getErrorMessage'
 const debug = _debug('sutro:errors')
-
-const getError = (err) => {
-  if (err.error) return getError(err.error)
-  if (err.message) return err.message
-  return err
-}
 
 const getErrorFields = (err) => {
   if (!err.errors) return
-  return mapValues(err.errors, getError)
+  return mapValues(err.errors, getErrorMessage)
 }
 
 const sendError = (err, res) => {
   res.status(err.status || 500)
   res.json({
-    error: getError(err),
+    error: getErrorMessage(err),
     fields: getErrorFields(err)
   })
   res.end()
@@ -25,5 +20,5 @@ const sendError = (err, res) => {
 
 export default (err, req, res, next) => {
   sendError(err, res)
-  debug(getError(err))
+  debug(getErrorMessage(err, debug))
 }
