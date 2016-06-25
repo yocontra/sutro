@@ -20,6 +20,10 @@ var _pipeSSE = require('./pipeSSE');
 
 var _pipeSSE2 = _interopRequireDefault(_pipeSSE);
 
+var _getErrorMessage = require('./getErrorMessage');
+
+var _getErrorMessage2 = _interopRequireDefault(_getErrorMessage);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var extractChanged = function extractChanged(res) {
@@ -48,7 +52,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
       isAuthorized: function isAuthorized(done) {
         var handleResult = function handleResult(err, allowed) {
           if (err) {
-            return done(new Error(resourceName + '.' + name + '.isAuthorized threw an error: ' + (err.stack || err.message || err)), false);
+            return done(new Error(resourceName + '.' + name + '.isAuthorized threw an error: ' + (0, _getErrorMessage2.default)(err)), false);
           }
           if (typeof allowed !== 'boolean') {
             return done(new Error(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
@@ -64,7 +68,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
         var handleResult = function handleResult(err, res) {
           // bad shit happened
           if (err) {
-            return done(new Error(resourceName + '.' + name + '.process threw an error: ' + (err.stack || err.message || err)));
+            return done(new Error(resourceName + '.' + name + '.process threw an error: ' + (0, _getErrorMessage2.default)(err)));
           }
 
           // no results
@@ -87,7 +91,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
 
         var handleResult = function handleResult(err, data) {
           if (err) {
-            return done(new Error(resourceName + '.' + name + '.format threw an error: ' + (err.stack || err.message || err)));
+            return done(new Error(resourceName + '.' + name + '.format threw an error: ' + (0, _getErrorMessage2.default)(err)));
           }
           done(null, data);
         };

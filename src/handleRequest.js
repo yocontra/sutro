@@ -1,6 +1,7 @@
 import async from 'async'
 import handleAsync from './handleAsync'
 import pipeSSE from './pipeSSE'
+import getErrorMessage from './getErrorMessage'
 
 const extractChanged = (res) => {
   if (!res.changes[0]) return
@@ -25,7 +26,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
       isAuthorized: (done) => {
         const handleResult = (err, allowed) => {
           if (err) {
-            return done(new Error(`${resourceName}.${name}.isAuthorized threw an error: ${err.stack || err.message || err}`), false)
+            return done(new Error(`${resourceName}.${name}.isAuthorized threw an error: ${getErrorMessage(err)}`), false)
           }
           if (typeof allowed !== 'boolean') {
             return done(new Error(`${resourceName}.${name}.isAuthorized did not return a boolean!`))
@@ -41,7 +42,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
         const handleResult = (err, res) => {
           // bad shit happened
           if (err) {
-            return done(new Error(`${resourceName}.${name}.process threw an error: ${err.stack || err.message || err}`))
+            return done(new Error(`${resourceName}.${name}.process threw an error: ${getErrorMessage(err)}`))
           }
 
           // no results
@@ -62,7 +63,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
       formattedData: [ 'rawData', (done, { rawData }) => {
         const handleResult = (err, data) => {
           if (err) {
-            return done(new Error(`${resourceName}.${name}.format threw an error: ${err.stack || err.message || err}`))
+            return done(new Error(`${resourceName}.${name}.format threw an error: ${getErrorMessage(err)}`))
           }
           done(null, data)
         }
