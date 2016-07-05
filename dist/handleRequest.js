@@ -20,17 +20,13 @@ var _pipeSSE = require('./pipeSSE');
 
 var _pipeSSE2 = _interopRequireDefault(_pipeSSE);
 
-var _getErrorMessage = require('./getErrorMessage');
+var _makeErrorCause = require('make-error-cause');
 
-var _getErrorMessage2 = _interopRequireDefault(_getErrorMessage);
+var _makeErrorCause2 = _interopRequireDefault(_makeErrorCause);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var extractChanged = function extractChanged(res) {
-  if (!res.changes[0]) return;
-  if (res.changes[0].new_val) return res.changes[0].new_val;
-  if (res.changes[0].old_val) return res.changes[0].old_val;
-};
+var EndpointError = (0, _makeErrorCause2.default)('EndpointError');
 
 var createHandlerFunction = function createHandlerFunction(handler, _ref) {
   var name = _ref.name;
@@ -41,23 +37,25 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
       process: handler
     };
   }
-  if (!handler.process) throw new Error(resourceName + '.' + name + ' missing process function');
+  if (!handler.process) throw new Error(resourceName + '.' + name + ' missing process function!');
 
   return function (opt, cb) {
     if (opt.tail && !handler.tailable) {
-      cb(new Error('Endpoint not capable of SSE'));
+      cb(new EndpointError('Endpoint not capable of SSE!'));
     }
 
     var tasks = {
       isAuthorized: function isAuthorized(done) {
         var handleResult = function handleResult(err, allowed) {
           if (err) {
-            return done(new Error(resourceName + '.' + name + '.isAuthorized threw an error: ' + (0, _getErrorMessage2.default)(err)), false);
+            return done(new EndpointError(resourceName + '.' + name + '.isAuthorized threw an error!', err));
           }
           if (typeof allowed !== 'boolean') {
-            return done(new Error(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
+            return done(new EndpointError(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
           }
-          if (!allowed) return done({ status: 401 }, false);
+          if (!allowed) {
+            return done({ status: 401 });
+          }
           done(null, true);
         };
 
@@ -68,19 +66,12 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
         var handleResult = function handleResult(err, res) {
           // bad shit happened
           if (err) {
-            return done(new Error(resourceName + '.' + name + '.process threw an error: ' + (0, _getErrorMessage2.default)(err)));
+            return done(new EndpointError(resourceName + '.' + name + '.process threw an error!', err));
           }
 
           // no results
           if (!res) return done();
 
-          // array of docs
-          if (Array.isArray(res)) return done(null, res);
-
-          // changes came back
-          if (res.changes) return done(null, extractChanged(res));
-
-          // one document instance, or stream
           done(null, res);
         };
 
@@ -91,7 +82,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
 
         var handleResult = function handleResult(err, data) {
           if (err) {
-            return done(new Error(resourceName + '.' + name + '.format threw an error: ' + (0, _getErrorMessage2.default)(err)));
+            return done(new EndpointError(resourceName + '.' + name + '.format threw an error!', err));
           }
           done(null, data);
         };
@@ -107,7 +98,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
       var rawData = _ref3.rawData;
 
       if (opt.tail && rawData && !rawData.pipe) {
-        return cb(new Error(resourceName + '.' + name + '.process didn\'t return a stream'));
+        return cb(new EndpointError(resourceName + '.' + name + '.process didn\'t return a stream!'));
       }
       cb(err, {
         result: formattedData,

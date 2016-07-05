@@ -4,7 +4,6 @@ import requireDir from 'require-dir'
 import loadResources from './loadResources'
 import handleRequest from './handleRequest'
 import displayResources from './displayResources'
-import errorHandler from './errorHandler'
 import _debug from 'debug'
 const debug = _debug('sutro:loader')
 
@@ -34,7 +33,6 @@ export default ({ prefix, resources }) => {
 
   each(loadedResources, wireResource(router))
   router.get('/_resources', (req, res) => res.json(meta))
-  router.use(errorHandler)
 
   return router
 }

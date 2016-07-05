@@ -27,10 +27,6 @@ var _displayResources = require('./displayResources');
 
 var _displayResources2 = _interopRequireDefault(_displayResources);
 
-var _errorHandler = require('./errorHandler');
-
-var _errorHandler2 = _interopRequireDefault(_errorHandler);
-
 var _debug2 = require('debug');
 
 var _debug3 = _interopRequireDefault(_debug2);
@@ -74,7 +70,6 @@ exports.default = function (_ref) {
   router.get('/_resources', function (req, res) {
     return res.json(meta);
   });
-  router.use(_errorHandler2.default);
 
   return router;
 };
