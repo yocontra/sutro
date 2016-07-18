@@ -4,9 +4,13 @@ import once from 'once'
 // if a fn, it must return a flat value, a promise, or pass something to a callback
 export default (fn, cb) => {
   const wrapped = once(cb)
+
+  // flat value
   if (typeof fn !== 'function') {
     return wrapped(null, fn)
   }
+
+  // call fn w callback
   let res
   try {
     res = fn(wrapped)
@@ -21,7 +25,7 @@ export default (fn, cb) => {
   if (typeof res.then === 'function') {
     return res.then((data) => {
       wrapped(null, data)
-    }, (err) => {
+    }).catch((err) => {
       wrapped(err)
     })
   }

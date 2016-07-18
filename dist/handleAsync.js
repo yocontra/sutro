@@ -15,9 +15,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = function (fn, cb) {
   var wrapped = (0, _once2.default)(cb);
+
+  // flat value
   if (typeof fn !== 'function') {
     return wrapped(null, fn);
   }
+
+  // call fn w callback
   var res = void 0;
   try {
     res = fn(wrapped);
@@ -32,7 +36,7 @@ exports.default = function (fn, cb) {
   if (typeof res.then === 'function') {
     return res.then(function (data) {
       wrapped(null, data);
-    }, function (err) {
+    }).catch(function (err) {
       wrapped(err);
     });
   }
