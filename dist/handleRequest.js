@@ -48,7 +48,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
       isAuthorized: function isAuthorized(done) {
         var handleResult = function handleResult(err, allowed) {
           if (err) {
-            return done(new EndpointError(resourceName + '.' + name + '.isAuthorized threw an error!', err));
+            return done(new EndpointError(resourceName + '.' + name + '.isAuthorized returned an error!', err));
           }
           if (typeof allowed !== 'boolean') {
             return done(new EndpointError(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
@@ -66,7 +66,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
         var handleResult = function handleResult(err, res) {
           // bad shit happened
           if (err) {
-            return done(new EndpointError(resourceName + '.' + name + '.process threw an error!', err));
+            return done(new EndpointError(resourceName + '.' + name + '.process returned an error!', err));
           }
 
           // no results
@@ -82,7 +82,7 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
 
         var handleResult = function handleResult(err, data) {
           if (err) {
-            return done(new EndpointError(resourceName + '.' + name + '.format threw an error!', err));
+            return done(new EndpointError(resourceName + '.' + name + '.format returned an error!', err));
           }
           done(null, data);
         };

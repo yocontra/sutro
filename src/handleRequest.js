@@ -22,7 +22,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
       isAuthorized: (done) => {
         const handleResult = (err, allowed) => {
           if (err) {
-            return done(new EndpointError(`${resourceName}.${name}.isAuthorized threw an error!`, err))
+            return done(new EndpointError(`${resourceName}.${name}.isAuthorized returned an error!`, err))
           }
           if (typeof allowed !== 'boolean') {
             return done(new EndpointError(`${resourceName}.${name}.isAuthorized did not return a boolean!`))
@@ -40,7 +40,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
         const handleResult = (err, res) => {
           // bad shit happened
           if (err) {
-            return done(new EndpointError(`${resourceName}.${name}.process threw an error!`, err))
+            return done(new EndpointError(`${resourceName}.${name}.process returned an error!`, err))
           }
 
           // no results
@@ -54,7 +54,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
       formattedData: [ 'rawData', (done, { rawData }) => {
         const handleResult = (err, data) => {
           if (err) {
-            return done(new EndpointError(`${resourceName}.${name}.format threw an error!`, err))
+            return done(new EndpointError(`${resourceName}.${name}.format returned an error!`, err))
           }
           done(null, data)
         }
