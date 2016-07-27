@@ -1,7 +1,7 @@
 import async from 'async'
+import makeError from 'make-error-cause'
 import handleAsync from './handleAsync'
 import pipeSSE from './pipeSSE'
-import makeError from 'make-error-cause'
 
 const EndpointError = makeError('EndpointError')
 
@@ -77,9 +77,9 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
   }
 }
 
-export default ({ handler, name, successCode }, resourceName) => {
+const getRequestHandler = ({ handler, name, successCode }, resourceName) => {
   const processor = createHandlerFunction(handler, { name, resourceName })
-  return (req, res, next) => {
+  const handleSutroRequest = (req, res, next) => {
     const opt = {
       ...req.params,
       user: req.user,
@@ -110,4 +110,9 @@ export default ({ handler, name, successCode }, resourceName) => {
       res.end()
     })
   }
+
+  return handleSutroRequest
 }
+
+
+export default getRequestHandler
