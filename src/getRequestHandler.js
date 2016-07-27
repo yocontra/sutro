@@ -77,7 +77,7 @@ const createHandlerFunction = (handler, { name, resourceName }) => {
   }
 }
 
-const getRequestHandler = ({ handler, name, successCode }, resourceName) => {
+const getRequestHandler = ({ handler, name, successCode, emptyCode }, resourceName) => {
   const processor = createHandlerFunction(handler, { name, resourceName })
   const handleSutroRequest = (req, res, next) => {
     const opt = {
@@ -105,7 +105,7 @@ const getRequestHandler = ({ handler, name, successCode }, resourceName) => {
         res.status(successCode)
         res.json(result)
       } else {
-        res.status(204)
+        res.status(emptyCode)
       }
       res.end()
     })

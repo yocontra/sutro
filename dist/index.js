@@ -19,9 +19,9 @@ var _loadResources = require('./loadResources');
 
 var _loadResources2 = _interopRequireDefault(_loadResources);
 
-var _handleRequest = require('./handleRequest');
+var _getRequestHandler = require('./getRequestHandler');
 
-var _handleRequest2 = _interopRequireDefault(_handleRequest);
+var _getRequestHandler2 = _interopRequireDefault(_getRequestHandler);
 
 var _displayResources = require('./displayResources');
 
@@ -37,7 +37,7 @@ var debug = (0, _debug3.default)('sutro:loader');
 
 var wireEndpoint = function wireEndpoint(router, endpoint, resourceName) {
   debug('  - ' + endpoint.name + ' (' + endpoint.method.toUpperCase() + ' ' + endpoint.path + ')');
-  router[endpoint.method](endpoint.path, (0, _handleRequest2.default)(endpoint, resourceName));
+  router[endpoint.method](endpoint.path, (0, _getRequestHandler2.default)(endpoint, resourceName));
 };
 
 var wireResource = function wireResource(router) {

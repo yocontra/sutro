@@ -38,6 +38,7 @@ export default (resources) => {
         name: methodName,
         method: methodInfo.method.toLowerCase(),
         successCode: methodInfo.successCode || 200,
+        emptyCode: methodInfo.emptyCode || 204,
         path: getPath(resourceName, methodName, methodInfo),
         instance: !!methodInfo.instance,
         handler: handler,

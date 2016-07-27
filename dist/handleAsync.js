@@ -12,15 +12,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // takes a function or a flat value and returns the resolved value to the callback
 // if a fn, it must return a flat value, a promise, or pass something to a callback
-
-exports.default = function (fn, cb) {
-  var wrapped = (0, _once2.default)(cb);
-
+var handleAsync = function handleAsync(fn, cb) {
   // flat value
   if (typeof fn !== 'function') {
-    return wrapped(null, fn);
+    return cb(null, fn);
   }
 
+  var wrapped = (0, _once2.default)(cb);
   // call fn w callback
   var res = void 0;
   try {
@@ -45,4 +43,5 @@ exports.default = function (fn, cb) {
   wrapped(null, res);
 };
 
+exports.default = handleAsync;
 module.exports = exports['default'];

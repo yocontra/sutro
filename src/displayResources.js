@@ -11,6 +11,7 @@ const displayResources = (prefix = '', resources) =>
       name: endpoint.name,
       method: endpoint.method.toUpperCase(),
       successCode: endpoint.successCode,
+      emptyCode: endpoint.emptyCode,
       path: prefix ? `${prefix}${endpoint.path}` : endpoint.path,
       instance: endpoint.instance
     }))
