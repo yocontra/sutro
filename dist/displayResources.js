@@ -19,7 +19,7 @@ var _lodash4 = _interopRequireDefault(_lodash3);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var displayResources = function displayResources() {
-  var prefix = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+  var prefix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
   var resources = arguments[1];
   return (0, _lodash2.default)(resources, function (endpoints) {
     return {

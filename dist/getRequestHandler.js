@@ -131,7 +131,7 @@ var getRequestHandler = function getRequestHandler(_ref4, resourceName) {
     var formatter = handler.format ? handler.format.bind(null, opt) : null;
 
     processor(opt, function (err) {
-      var _ref5 = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+      var _ref5 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
       var result = _ref5.result;
       var stream = _ref5.stream;
