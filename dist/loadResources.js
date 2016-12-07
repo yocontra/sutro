@@ -6,8 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _pluralize = require('pluralize');
 
-var _pluralize2 = _interopRequireDefault(_pluralize);
-
 var _lodash = require('lodash.mapvalues');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -34,7 +32,7 @@ var blacklist = ['model'];
 
 exports.default = function (resources) {
   var getPath = function getPath(resourceName, methodName, methodInfo) {
-    var path = '/' + _pluralize2.default.plural(resourceName);
+    var path = '/' + (0, _pluralize.plural)(resourceName);
     if (methodInfo.instance) {
       path += '/:id';
     }

@@ -1,4 +1,4 @@
-import pluralize from 'pluralize'
+import { plural } from 'pluralize'
 import mapValues from 'lodash.mapvalues'
 import map from 'lodash.map'
 import omit from 'lodash.omit'
@@ -8,7 +8,7 @@ import methods from './methods'
 const blacklist = [ 'model' ]
 export default (resources) => {
   const getPath = (resourceName, methodName, methodInfo) => {
-    let path = `/${pluralize.plural(resourceName)}`
+    let path = `/${plural(resourceName)}`
     if (methodInfo.instance) {
       path += '/:id'
     }

@@ -19,8 +19,8 @@ var _through2 = _interopRequireDefault(_through);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var getEvent = function getEvent(_ref, fmt) {
-  var type = _ref.type;
-  var data = _ref.data;
+  var type = _ref.type,
+      data = _ref.data;
   return 'event:' + type + '\ndata:' + (0, _stringify2.default)(fmt ? fmt(data) : data) + '\n\n';
 };
 

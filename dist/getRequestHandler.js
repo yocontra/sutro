@@ -10,8 +10,6 @@ var _extends3 = _interopRequireDefault(_extends2);
 
 var _async = require('async');
 
-var _async2 = _interopRequireDefault(_async);
-
 var _makeErrorCause = require('make-error-cause');
 
 var _makeErrorCause2 = _interopRequireDefault(_makeErrorCause);
@@ -26,47 +24,47 @@ var _pipeSSE2 = _interopRequireDefault(_pipeSSE);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var EndpointError = (0, _makeErrorCause2.default)('EndpointError');
+var EError = (0, _makeErrorCause2.default)('EndpointError');
+var CError = (0, _makeErrorCause2.default)('ConfigurationError');
 
-var createHandlerFunction = function createHandlerFunction(handler, _ref) {
-  var name = _ref.name;
-  var resourceName = _ref.resourceName;
+var createHandlerFunction = function createHandlerFunction(handler) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      name = _ref.name,
+      resourceName = _ref.resourceName;
 
-  if (typeof handler === 'function') {
-    handler = {
-      process: handler
-    };
-  }
-  if (!handler.process) throw new Error(resourceName + '.' + name + ' missing process function!');
+  if (typeof handler === 'function') handler = { process: handler };
+  if (!handler.process) throw new CError(resourceName + '.' + name + ' missing process function!');
+  if (!name) throw new CError(resourceName + '.' + name + ' missing name!');
+  if (!resourceName) throw new CError(resourceName + '.' + name + ' missing resourceName!');
 
   return function (opt, cb) {
-    if (opt.tail && !handler.tailable) {
-      cb(new EndpointError('Endpoint not capable of SSE!'));
+    if (!handler.tailable && opt.tail) {
+      return cb(new EError('Endpoint not capable of SSE!'));
     }
 
     var tasks = {
       isAuthorized: function isAuthorized(done) {
         var handleResult = function handleResult(err, allowed) {
           if (err) {
-            return done(new EndpointError(resourceName + '.' + name + '.isAuthorized returned an error!', err));
+            return done(new EError(resourceName + '.' + name + '.isAuthorized returned an error!', err));
           }
           if (typeof allowed !== 'boolean') {
-            return done(new EndpointError(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
+            return done(new EError(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
           }
-          if (!allowed) {
-            return done({ status: 401 });
-          }
+          if (!allowed) return done({ status: 401 });
           done(null, true);
         };
 
         if (!handler.isAuthorized) return handleResult(null, true);
         (0, _handleAsync2.default)(handler.isAuthorized.bind(null, opt), handleResult);
       },
-      rawData: ['isAuthorized', function (done) {
+      rawData: ['isAuthorized', function (_ref2, done) {
+        var isAuthorized = _ref2.isAuthorized;
+
         var handleResult = function handleResult(err, res) {
           // bad shit happened
           if (err) {
-            return done(new EndpointError(resourceName + '.' + name + '.process returned an error!', err));
+            return done(new EError(resourceName + '.' + name + '.process returned an error!', err));
           }
 
           // no results
@@ -77,12 +75,12 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
 
         (0, _handleAsync2.default)(handler.process.bind(null, opt), handleResult);
       }],
-      formattedData: ['rawData', function (done, _ref2) {
-        var rawData = _ref2.rawData;
+      formattedData: ['rawData', function (_ref3, done) {
+        var rawData = _ref3.rawData;
 
         var handleResult = function handleResult(err, data) {
           if (err) {
-            return done(new EndpointError(resourceName + '.' + name + '.format returned an error!', err));
+            return done(new EError(resourceName + '.' + name + '.format returned an error!', err));
           }
           done(null, data);
         };
@@ -93,12 +91,12 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
       }]
     };
 
-    _async2.default.auto(tasks, function (err, _ref3) {
-      var formattedData = _ref3.formattedData;
-      var rawData = _ref3.rawData;
+    (0, _async.auto)(tasks, function (err, _ref4) {
+      var formattedData = _ref4.formattedData,
+          rawData = _ref4.rawData;
 
       if (opt.tail && rawData && !rawData.pipe) {
-        return cb(new EndpointError(resourceName + '.' + name + '.process didn\'t return a stream!'));
+        return cb(new EError(resourceName + '.' + name + '.process didn\'t returned a non-stream for SSE!'));
       }
       cb(err, {
         result: formattedData,
@@ -108,11 +106,11 @@ var createHandlerFunction = function createHandlerFunction(handler, _ref) {
   };
 };
 
-var getRequestHandler = function getRequestHandler(_ref4, resourceName) {
-  var handler = _ref4.handler;
-  var name = _ref4.name;
-  var successCode = _ref4.successCode;
-  var emptyCode = _ref4.emptyCode;
+var getRequestHandler = function getRequestHandler(_ref5, resourceName) {
+  var handler = _ref5.handler,
+      name = _ref5.name,
+      successCode = _ref5.successCode,
+      emptyCode = _ref5.emptyCode;
 
   var processor = createHandlerFunction(handler, { name: name, resourceName: resourceName });
   var handleSutroRequest = function handleSutroRequest(req, res, next) {
@@ -126,15 +124,13 @@ var getRequestHandler = function getRequestHandler(_ref4, resourceName) {
       _res: res
     });
 
-    // TODO: get rid of plain function syntax
-    // and handle this somewhere else!
-    var formatter = handler.format ? handler.format.bind(null, opt) : null;
+    // TODO: get rid of plain function syntax and handle this somewhere else!
+    var formatter = handler.format && handler.format.bind(null, opt);
 
     processor(opt, function (err) {
-      var _ref5 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      var result = _ref5.result;
-      var stream = _ref5.stream;
+      var _ref6 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          result = _ref6.result,
+          stream = _ref6.stream;
 
       if (err) return next(err);
       if (stream) return (0, _pipeSSE2.default)(stream, res, formatter);

@@ -14,11 +14,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // if a fn, it must return a flat value, a promise, or pass something to a callback
 var handleAsync = function handleAsync(fn, cb) {
   // flat value
-  if (typeof fn !== 'function') {
-    return cb(null, fn);
-  }
+  if (typeof fn !== 'function') return cb(null, fn);
 
   var wrapped = (0, _once2.default)(cb);
+
   // call fn w callback
   var res = void 0;
   try {
@@ -27,16 +26,17 @@ var handleAsync = function handleAsync(fn, cb) {
     return wrapped(err);
   }
 
-  // using a callback
+  // using a callback, itll call with a response
   if (typeof res === 'undefined') return;
 
   // using a promise
   if (typeof res.then === 'function') {
-    return res.then(function (data) {
+    res.then(function (data) {
       wrapped(null, data);
     }).catch(function (err) {
       wrapped(err);
     });
+    return;
   }
 
   // returned a plain value

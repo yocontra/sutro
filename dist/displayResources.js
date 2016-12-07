@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _thinkyExportSchema = require('thinky-export-schema');
-
-var _thinkyExportSchema2 = _interopRequireDefault(_thinkyExportSchema);
-
 var _lodash = require('lodash.mapvalues');
 
 var _lodash2 = _interopRequireDefault(_lodash);
@@ -23,7 +19,7 @@ var displayResources = function displayResources() {
   var resources = arguments[1];
   return (0, _lodash2.default)(resources, function (endpoints) {
     return {
-      model: endpoints[0] && endpoints[0].model ? (0, _thinkyExportSchema2.default)(endpoints[0].model) : undefined,
+      model: endpoints[0] && endpoints[0].model,
       endpoints: (0, _lodash4.default)(endpoints, function (endpoint) {
         return {
           name: endpoint.name,

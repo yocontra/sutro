@@ -23,7 +23,7 @@ const wireResource = (router) => (endpoints, resourceName) => {
 
 export const load = (path) => requireDir(path, { recurse: true })
 
-export default ({ prefix, resources }) => {
+export default ({ prefix, resources }={}) => {
   if (!resources) throw new Error('Missing resources option')
   let loadedResources = loadResources(resources)
   let meta = displayResources(prefix, loadedResources)

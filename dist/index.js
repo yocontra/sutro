@@ -55,9 +55,10 @@ var load = exports.load = function load(path) {
   return (0, _requireDir2.default)(path, { recurse: true });
 };
 
-exports.default = function (_ref) {
-  var prefix = _ref.prefix;
-  var resources = _ref.resources;
+exports.default = function () {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      prefix = _ref.prefix,
+      resources = _ref.resources;
 
   if (!resources) throw new Error('Missing resources option');
   var loadedResources = (0, _loadResources2.default)(resources);

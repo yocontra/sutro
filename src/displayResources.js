@@ -1,12 +1,9 @@
-import exportSchema from 'thinky-export-schema'
 import mapValues from 'lodash.mapvalues'
 import map from 'lodash.map'
 
 const displayResources = (prefix = '', resources) =>
   mapValues(resources, (endpoints) => ({
-    model: endpoints[0] && endpoints[0].model
-      ? exportSchema(endpoints[0].model)
-      : undefined,
+    model: endpoints[0] && endpoints[0].model,
     endpoints: map(endpoints, (endpoint) => ({
       name: endpoint.name,
       method: endpoint.method.toUpperCase(),

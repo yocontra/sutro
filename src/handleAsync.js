@@ -4,11 +4,10 @@ import once from 'once'
 // if a fn, it must return a flat value, a promise, or pass something to a callback
 const handleAsync = (fn, cb) => {
   // flat value
-  if (typeof fn !== 'function') {
-    return cb(null, fn)
-  }
+  if (typeof fn !== 'function') return cb(null, fn)
 
   const wrapped = once(cb)
+
   // call fn w callback
   let res
   try {
@@ -17,16 +16,17 @@ const handleAsync = (fn, cb) => {
     return wrapped(err)
   }
 
-  // using a callback
+  // using a callback, itll call with a response
   if (typeof res === 'undefined') return
 
   // using a promise
   if (typeof res.then === 'function') {
-    return res.then((data) => {
+    res.then((data) => {
       wrapped(null, data)
     }).catch((err) => {
       wrapped(err)
     })
+    return
   }
 
   // returned a plain value
