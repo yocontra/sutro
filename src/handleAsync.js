@@ -23,6 +23,7 @@ const handleAsync = (fn, cb) => {
   if (typeof res.then === 'function') {
     res.then((data) => {
       wrapped(null, data)
+      return null
     }).catch((err) => {
       wrapped(err)
     })

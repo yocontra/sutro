@@ -33,6 +33,7 @@ var handleAsync = function handleAsync(fn, cb) {
   if (typeof res.then === 'function') {
     res.then(function (data) {
       wrapped(null, data);
+      return null;
     }).catch(function (err) {
       wrapped(err);
     });
