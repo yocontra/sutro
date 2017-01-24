@@ -17,7 +17,7 @@ const handleAsync = (fn, cb) => {
   }
 
   // using a callback, itll call with a response
-  if (typeof res === 'undefined') return
+  if (!res || typeof res === 'undefined') return
 
   // using a promise
   if (typeof res.then === 'function') {
