@@ -32,7 +32,7 @@
     "build": "babel src --out-dir dist",
     "clean": "rimraf dist",
     "lint": "eslint src test",
-    "test": "npm run-script lint && mocha --compilers js:babel-register --recursive --reporter spec",
+    "test": "mocha --compilers js:babel-register --recursive --reporter spec && npm run-script lint",
     "docs": "npm run docs:pre && npm run docs:build && npm run docs:publish",
     "docs:pre": "gitbook install && rimraf _book",
     "docs:build": "gitbook build -g shastajs/sutro",

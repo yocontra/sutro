@@ -34,7 +34,7 @@ var handleAsync = function handleAsync(fn, cb) {
   if (typeof res === 'undefined') return;
 
   // using a promise
-  if ((typeof res === 'undefined' ? 'undefined' : (0, _typeof3.default)(res)) === 'object' && typeof res.then === 'function') {
+  if (res != null && (typeof res === 'undefined' ? 'undefined' : (0, _typeof3.default)(res)) === 'object' && typeof res.then === 'function') {
     res.then(function (data) {
       wrapped(null, data);
       return null;

@@ -35,14 +35,9 @@ const createHandlerFunction = (handler, { name, resourceName }={}) => {
       },
       rawData: [ 'isAuthorized', ({ isAuthorized }, done) => {
         const handleResult = (err, res) => {
-          // bad shit happened
           if (err) {
             return done(new EError(`${resourceName}.${name}.process returned an error!`, err))
           }
-
-          // no results
-          if (!res) return done()
-
           done(null, res)
         }
 
@@ -56,7 +51,6 @@ const createHandlerFunction = (handler, { name, resourceName }={}) => {
           done(null, data)
         }
 
-        if (typeof rawData === 'undefined') return handleResult()
         if (!handler.format) return handleResult(null, rawData)
         handleAsync(handler.format.bind(null, opt, rawData), handleResult)
       } ]
@@ -95,12 +89,10 @@ const getRequestHandler = ({ handler, name, successCode, emptyCode }, resourceNa
       if (err) return next(err)
       if (stream) return pipeSSE(stream, res, formatter)
 
-      if (result) {
-        res.status(successCode)
-        res.json(result)
-      } else {
-        res.status(emptyCode)
-      }
+      if (result == null) return res.status(emptyCode).end()
+
+      res.status(successCode)
+      res.json(result)
       res.end()
     })
   }

@@ -196,6 +196,20 @@ describe('sutro - flat value handlers', () => {
             method: 'get',
             instance: false
           }
+        },
+        isCool: {
+          process: () => false,
+          http: {
+            method: 'get',
+            instance: true
+          }
+        },
+        nulled: {
+          process: () => null,
+          http: {
+            method: 'get',
+            instance: false
+          }
         }
       }
     }
@@ -251,5 +265,18 @@ describe('sutro - flat value handlers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, { me: true }, done)
+  })
+
+  it('should register a custom falsey resource', (done) => {
+    request(app).get('/users/123/isCool')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200, 'false', done)
+  })
+
+  it('should register a custom null resource', (done) => {
+    request(app).get('/users/nulled')
+      .set('Accept', 'application/json')
+      .expect(204, done)
   })
 })

@@ -62,14 +62,9 @@ var createHandlerFunction = function createHandlerFunction(handler) {
         var isAuthorized = _ref2.isAuthorized;
 
         var handleResult = function handleResult(err, res) {
-          // bad shit happened
           if (err) {
             return done(new EError(resourceName + '.' + name + '.process returned an error!', err));
           }
-
-          // no results
-          if (!res) return done();
-
           done(null, res);
         };
 
@@ -85,7 +80,6 @@ var createHandlerFunction = function createHandlerFunction(handler) {
           done(null, data);
         };
 
-        if (typeof rawData === 'undefined') return handleResult();
         if (!handler.format) return handleResult(null, rawData);
         (0, _handleAsync2.default)(handler.format.bind(null, opt, rawData), handleResult);
       }]
@@ -135,12 +129,10 @@ var getRequestHandler = function getRequestHandler(_ref5, resourceName) {
       if (err) return next(err);
       if (stream) return (0, _pipeSSE2.default)(stream, res, formatter);
 
-      if (result) {
-        res.status(successCode);
-        res.json(result);
-      } else {
-        res.status(emptyCode);
-      }
+      if (result == null) return res.status(emptyCode).end();
+
+      res.status(successCode);
+      res.json(result);
       res.end();
     });
   };
