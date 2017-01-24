@@ -4,7 +4,6 @@
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
-    "rethinkdb",
     "api",
     "realtime",
     "rest",

@@ -20,7 +20,7 @@ const handleAsync = (fn, cb) => {
   if (typeof res === 'undefined') return
 
   // using a promise
-  if (typeof res.then === 'function') {
+  if (typeof res === 'object' && typeof res.then === 'function') {
     res.then((data) => {
       wrapped(null, data)
       return null

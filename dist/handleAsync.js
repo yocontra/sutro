@@ -4,6 +4,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof2 = require('babel-runtime/helpers/typeof');
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 var _once = require('once');
 
 var _once2 = _interopRequireDefault(_once);
@@ -30,7 +34,7 @@ var handleAsync = function handleAsync(fn, cb) {
   if (typeof res === 'undefined') return;
 
   // using a promise
-  if (typeof res.then === 'function') {
+  if ((typeof res === 'undefined' ? 'undefined' : (0, _typeof3.default)(res)) === 'object' && typeof res.then === 'function') {
     res.then(function (data) {
       wrapped(null, data);
       return null;
