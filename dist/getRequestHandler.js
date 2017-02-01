@@ -109,6 +109,13 @@ var getRequestHandler = function getRequestHandler(_ref5, resourceName) {
   var processor = createHandlerFunction(handler, { name: name, resourceName: resourceName });
   var handleSutroRequest = function handleSutroRequest(req, res, next) {
     var opt = (0, _extends3.default)({}, req.params, {
+      ip: req.ip,
+      url: req.url,
+      protocol: req.protocol,
+      method: req.method,
+      subdomains: req.subdomains,
+      path: req.path,
+      cookies: req.cookies,
       user: req.user,
       data: req.body,
       options: req.query,

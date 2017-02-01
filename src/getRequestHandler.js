@@ -73,6 +73,13 @@ const getRequestHandler = ({ handler, name, successCode, emptyCode }, resourceNa
   const handleSutroRequest = (req, res, next) => {
     const opt = {
       ...req.params,
+      ip: req.ip,
+      url: req.url,
+      protocol: req.protocol,
+      method: req.method,
+      subdomains: req.subdomains,
+      path: req.path,
+      cookies: req.cookies,
       user: req.user,
       data: req.body,
       options: req.query,
