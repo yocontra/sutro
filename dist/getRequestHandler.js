@@ -14,9 +14,7 @@ var _makeErrorCause = require('make-error-cause');
 
 var _makeErrorCause2 = _interopRequireDefault(_makeErrorCause);
 
-var _handleAsync = require('./handleAsync');
-
-var _handleAsync2 = _interopRequireDefault(_handleAsync);
+var _handleAsync = require('handle-async');
 
 var _pipeSSE = require('./pipeSSE');
 
@@ -56,7 +54,7 @@ var createHandlerFunction = function createHandlerFunction(handler) {
         };
 
         if (!handler.isAuthorized) return handleResult(null, true);
-        (0, _handleAsync2.default)(handler.isAuthorized.bind(null, opt), handleResult);
+        (0, _handleAsync.callbackify)(handler.isAuthorized.bind(null, opt), handleResult);
       },
       rawData: ['isAuthorized', function (_ref2, done) {
         var isAuthorized = _ref2.isAuthorized;
@@ -68,7 +66,7 @@ var createHandlerFunction = function createHandlerFunction(handler) {
           done(null, res);
         };
 
-        (0, _handleAsync2.default)(handler.process.bind(null, opt), handleResult);
+        (0, _handleAsync.callbackify)(handler.process.bind(null, opt), handleResult);
       }],
       formattedData: ['rawData', function (_ref3, done) {
         var rawData = _ref3.rawData;
@@ -81,7 +79,7 @@ var createHandlerFunction = function createHandlerFunction(handler) {
         };
 
         if (!handler.format) return handleResult(null, rawData);
-        (0, _handleAsync2.default)(handler.format.bind(null, opt, rawData), handleResult);
+        (0, _handleAsync.callbackify)(handler.format.bind(null, opt, rawData), handleResult);
       }]
     };
 

@@ -1,6 +1,6 @@
 import { auto } from 'async'
 import makeError from 'make-error-cause'
-import handleAsync from './handleAsync'
+import { callbackify } from 'handle-async'
 import pipeSSE from './pipeSSE'
 
 const EError = makeError('EndpointError')
@@ -31,7 +31,7 @@ const createHandlerFunction = (handler, { name, resourceName }={}) => {
         }
 
         if (!handler.isAuthorized) return handleResult(null, true)
-        handleAsync(handler.isAuthorized.bind(null, opt), handleResult)
+        callbackify(handler.isAuthorized.bind(null, opt), handleResult)
       },
       rawData: [ 'isAuthorized', ({ isAuthorized }, done) => {
         const handleResult = (err, res) => {
@@ -41,7 +41,7 @@ const createHandlerFunction = (handler, { name, resourceName }={}) => {
           done(null, res)
         }
 
-        handleAsync(handler.process.bind(null, opt), handleResult)
+        callbackify(handler.process.bind(null, opt), handleResult)
       } ],
       formattedData: [ 'rawData', ({ rawData }, done) => {
         const handleResult = (err, data) => {
@@ -52,7 +52,7 @@ const createHandlerFunction = (handler, { name, resourceName }={}) => {
         }
 
         if (!handler.format) return handleResult(null, rawData)
-        handleAsync(handler.format.bind(null, opt, rawData), handleResult)
+        callbackify(handler.format.bind(null, opt, rawData), handleResult)
       } ]
     }
 
