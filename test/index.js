@@ -230,7 +230,7 @@ describe('sutro - function handlers', () => {
       .expect('Content-Type', /json/)
       .expect(200)
 
-    console.log(body)
+    console.log(JSON.stringify(body, null, 2))
   })
 })
 

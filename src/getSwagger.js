@@ -20,12 +20,12 @@ const getPaths = (resources) => {
       // TODO: replace path params w/ swagger params
       const swaggerMeta = endpoint.swagger || {}
       const descriptor = {
-        consumes: [ 'application/json' ],
+        consumes: methodInfo.method !== 'get' && [ 'application/json' ],
         produces: [ 'application/json' ],
         ...swaggerMeta
       }
-      // TODO: add path parameters
 
+      // TODO: add path parameters
       if (!out[path]) out[path] = {}
       out[path][methodInfo.method] = descriptor
     })
