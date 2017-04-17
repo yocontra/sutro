@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "0.0.9",
+  "version": "1.0.0",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -10,9 +10,7 @@
     "http",
     "express",
     "middleware",
-    "streaming",
-    "eventsource",
-    "sse"
+    "streaming"
   ],
   "repository": {
     "type": "git",
@@ -87,19 +85,9 @@
     }
   },
   "dependencies": {
-    "async": "^2.1.4",
-    "debug": "^2.3.3",
     "express": "^4.0.0",
     "handle-async": "^1.0.1",
-    "lodash.foreach": "^4.5.0",
-    "lodash.map": "^4.6.0",
-    "lodash.mapvalues": "^4.6.0",
-    "lodash.omit": "^4.5.0",
-    "lodash.sortby": "^4.7.0",
-    "make-error-cause": "^1.2.2",
-    "once": "^1.4.0",
-    "pluralize": "^3.0.0",
-    "require-dir": "^0.3.1",
-    "through2": "^2.0.3"
+    "pluralize": "^4.0.0",
+    "url-join": "^2.0.1"
   }
 }

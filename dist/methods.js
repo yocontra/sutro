@@ -6,39 +6,27 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   find: {
     method: 'get',
-    instance: false,
-    emptyCode: 204,
-    successCode: 200
+    instance: false
   },
   create: {
     method: 'post',
-    instance: false,
-    emptyCode: 204,
-    successCode: 201
+    instance: false
   },
   findById: {
     method: 'get',
-    instance: true,
-    emptyCode: 404,
-    successCode: 200
+    instance: true
   },
   replaceById: {
     method: 'put',
-    instance: true,
-    emptyCode: 204,
-    successCode: 200
+    instance: true
   },
   updateById: {
     method: 'patch',
-    instance: true,
-    emptyCode: 204,
-    successCode: 200
+    instance: true
   },
   deleteById: {
     method: 'delete',
-    instance: true,
-    emptyCode: 204,
-    successCode: 200
+    instance: true
   }
 };
 module.exports = exports['default'];

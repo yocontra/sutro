@@ -5,14 +5,39 @@
 
 ## Install
 
-One command and you're ready to secure your data:
-
+One command and you're ready to make some killer APIs:
 ```
 npm install sutro --save
 ```
 
 **Now**, check out the [documentation](http://shasta.tools/sutro/docs) to get started!
 
-## Example
 
-TODO
+## Examples
+
+### 10-LOC ES7 API
+
+```js
+const api = {
+  users: {
+    create: async ({ data }) => User.create(data),
+    find: async ({ options }) => User.findAll(options),
+    findById: async ({ userId }) => User.findById(userId),
+    updateById: async ({ userId, data }) => User.updateById(userId, data),
+    replaceById: async ({ userId, data }) => User.replaceById(userId, data),
+    deleteById: async ({ userId }) => User.deleteById(userId)
+  }
+}
+```
+
+Yields:
+
+```
+GET /swagger.json
+GET /users
+POST /users
+GET /users/:userId
+PATCH /users/:userId
+PUT /users/:userId
+DELETE /users/:userId
+```

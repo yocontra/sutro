@@ -4,146 +4,173 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _async = require('async');
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
-var _makeErrorCause = require('make-error-cause');
-
-var _makeErrorCause2 = _interopRequireDefault(_makeErrorCause);
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var _handleAsync = require('handle-async');
 
-var _pipeSSE = require('./pipeSSE');
-
-var _pipeSSE2 = _interopRequireDefault(_pipeSSE);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var EError = (0, _makeErrorCause2.default)('EndpointError');
-var CError = (0, _makeErrorCause2.default)('ConfigurationError');
+var process = function () {
+  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(endpoint, req, res) {
+    var authorized, err, opt, rawData, resultData;
+    return _regenerator2.default.wrap(function _callee$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            _context.t0 = !endpoint.isAuthorized;
 
-var createHandlerFunction = function createHandlerFunction(handler) {
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      name = _ref.name,
-      resourceName = _ref.resourceName;
+            if (_context.t0) {
+              _context.next = 5;
+              break;
+            }
 
-  if (typeof handler === 'function') handler = { process: handler };
-  if (!handler.process) throw new CError(resourceName + '.' + name + ' missing process function!');
-  if (!name) throw new CError(resourceName + '.' + name + ' missing name!');
-  if (!resourceName) throw new CError(resourceName + '.' + name + ' missing resourceName!');
+            _context.next = 4;
+            return (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, req));
 
-  return function (opt, cb) {
-    if (!handler.tailable && opt.tail) {
-      return cb(new EError('Endpoint not capable of SSE!'));
-    }
+          case 4:
+            _context.t0 = _context.sent;
 
-    var tasks = {
-      isAuthorized: function isAuthorized(done) {
-        var handleResult = function handleResult(err, allowed) {
-          if (err) {
-            return done(new EError(resourceName + '.' + name + '.isAuthorized returned an error!', err));
-          }
-          if (typeof allowed !== 'boolean') {
-            return done(new EError(resourceName + '.' + name + '.isAuthorized did not return a boolean!'));
-          }
-          if (!allowed) return done({ status: 401 });
-          done(null, true);
-        };
+          case 5:
+            authorized = _context.t0;
 
-        if (!handler.isAuthorized) return handleResult(null, true);
-        (0, _handleAsync.callbackify)(handler.isAuthorized.bind(null, opt), handleResult);
-      },
-      rawData: ['isAuthorized', function (_ref2, done) {
-        var isAuthorized = _ref2.isAuthorized;
+            if (!(authorized !== true)) {
+              _context.next = 10;
+              break;
+            }
 
-        var handleResult = function handleResult(err, res) {
-          if (err) {
-            return done(new EError(resourceName + '.' + name + '.process returned an error!', err));
-          }
-          done(null, res);
-        };
+            err = new Error('Unauthorized');
 
-        (0, _handleAsync.callbackify)(handler.process.bind(null, opt), handleResult);
-      }],
-      formattedData: ['rawData', function (_ref3, done) {
-        var rawData = _ref3.rawData;
+            err.status = 401;
+            throw err;
 
-        var handleResult = function handleResult(err, data) {
-          if (err) {
-            return done(new EError(resourceName + '.' + name + '.format returned an error!', err));
-          }
-          done(null, data);
-        };
+          case 10:
 
-        if (!handler.format) return handleResult(null, rawData);
-        (0, _handleAsync.callbackify)(handler.format.bind(null, opt, rawData), handleResult);
-      }]
-    };
+            // call process
+            opt = (0, _extends3.default)({}, req.params, {
+              ip: req.ip,
+              url: req.url,
+              protocol: req.protocol,
+              method: req.method,
+              subdomains: req.subdomains,
+              path: req.path,
+              cookies: req.cookies,
+              user: req.user,
+              data: req.body,
+              options: req.query,
+              session: req.session,
+              _req: req,
+              _res: res
+            });
 
-    (0, _async.auto)(tasks, function (err, _ref4) {
-      var formattedData = _ref4.formattedData,
-          rawData = _ref4.rawData;
+            if (!endpoint.process) {
+              _context.next = 17;
+              break;
+            }
 
-      if (opt.tail && rawData && !rawData.pipe) {
-        return cb(new EError(resourceName + '.' + name + '.process didn\'t returned a non-stream for SSE!'));
+            _context.next = 14;
+            return (0, _handleAsync.promisify)(endpoint.process.bind(null, opt));
+
+          case 14:
+            _context.t1 = _context.sent;
+            _context.next = 18;
+            break;
+
+          case 17:
+            _context.t1 = null;
+
+          case 18:
+            rawData = _context.t1;
+
+            if (!endpoint.format) {
+              _context.next = 25;
+              break;
+            }
+
+            _context.next = 22;
+            return (0, _handleAsync.promisify)(endpoint.format.bind(null, rawData));
+
+          case 22:
+            _context.t2 = _context.sent;
+            _context.next = 26;
+            break;
+
+          case 25:
+            _context.t2 = rawData;
+
+          case 26:
+            resultData = _context.t2;
+
+            if (!(resultData == null)) {
+              _context.next = 33;
+              break;
+            }
+
+            if (!(req.method === 'POST')) {
+              _context.next = 30;
+              break;
+            }
+
+            return _context.abrupt('return', res.status(201).end());
+
+          case 30:
+            if (!(req.method === 'GET')) {
+              _context.next = 32;
+              break;
+            }
+
+            return _context.abrupt('return', res.status(404).end());
+
+          case 32:
+            return _context.abrupt('return', res.status(204).end());
+
+          case 33:
+
+            // some data, status code for it
+            res.status(req.method === 'POST' ? 201 : 200);
+
+            // stream response
+
+            if (!(resultData.pipe && resultData.on)) {
+              _context.next = 37;
+              break;
+            }
+
+            resultData.pipe(res);
+            return _context.abrupt('return');
+
+          case 37:
+
+            // json obj response
+            res.json(resultData).end();
+
+          case 38:
+          case 'end':
+            return _context.stop();
+        }
       }
-      cb(err, {
-        result: formattedData,
-        stream: opt.tail && rawData
-      });
-    });
+    }, _callee, undefined);
+  }));
+
+  return function process(_x, _x2, _x3) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+exports.default = function (endpoint) {
+  if (typeof endpoint === 'function') endpoint = { process: endpoint };
+  return function (req, res, next) {
+    return process(endpoint, req, res).catch(next);
   };
 };
 
-var getRequestHandler = function getRequestHandler(_ref5, resourceName) {
-  var handler = _ref5.handler,
-      name = _ref5.name,
-      successCode = _ref5.successCode,
-      emptyCode = _ref5.emptyCode;
-
-  var processor = createHandlerFunction(handler, { name: name, resourceName: resourceName });
-  var handleSutroRequest = function handleSutroRequest(req, res, next) {
-    var opt = (0, _extends3.default)({}, req.params, {
-      ip: req.ip,
-      url: req.url,
-      protocol: req.protocol,
-      method: req.method,
-      subdomains: req.subdomains,
-      path: req.path,
-      cookies: req.cookies,
-      user: req.user,
-      data: req.body,
-      options: req.query,
-      session: req.session,
-      tail: req.get('accept') === 'text/event-stream',
-      _req: req,
-      _res: res
-    });
-
-    // TODO: get rid of plain function syntax and handle this somewhere else!
-    var formatter = handler.format && handler.format.bind(null, opt);
-
-    processor(opt, function (err) {
-      var _ref6 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-          result = _ref6.result,
-          stream = _ref6.stream;
-
-      if (err) return next(err);
-      if (stream) return (0, _pipeSSE2.default)(stream, res, formatter);
-
-      if (result == null) return res.status(emptyCode).end();
-
-      res.status(successCode);
-      res.json(result);
-      res.end();
-    });
-  };
-
-  return handleSutroRequest;
-};
-
-exports.default = getRequestHandler;
 module.exports = exports['default'];

@@ -1,38 +1,60 @@
 import { Router } from 'express'
-import each from 'lodash.foreach'
-import requireDir from 'require-dir'
-import loadResources from './loadResources'
+import join from 'url-join'
 import getRequestHandler from './getRequestHandler'
-import displayResources from './displayResources'
-import _debug from 'debug'
-const debug = _debug('sutro:loader')
+import getSwagger from './getSwagger'
+import methods from './methods'
+import getPath from './getPath'
 
-const wireEndpoint = (router, endpoint, resourceName) => {
-  debug(`  - ${endpoint.name} (${endpoint.method.toUpperCase()} ${endpoint.path})`)
-  router[endpoint.method](endpoint.path, getRequestHandler(endpoint, resourceName))
-}
-
-const wireResource = (router) => (endpoints, resourceName) => {
-  const number = endpoints.length > 1 ? 'endpoints' : 'endpoint'
-  const actualName = resourceName.toLowerCase()
-  debug(`Loaded ${endpoints.length} ${number} for "${actualName}"`)
-  each(endpoints, (endpoint) =>
-    wireEndpoint(router, endpoint, actualName)
+const wireResource = ({ base, name, resource, router }) => {
+  // sort custom stuff first
+  const endpointNames = []
+  Object.keys(resource).forEach((k) =>
+    methods[k] ? endpointNames.push(k) : endpointNames.unshift(k)
   )
+
+  endpointNames.forEach((endpointName) => {
+    const endpoint = resource[endpointName]
+    const methodInfo = endpoint.http || methods[endpointName]
+    if (!methodInfo) {
+      // TODO: error if still nothing found
+      const newBase = getPath({ resource: name, instance: true })
+      wireResource({
+        base: base ? join(base, newBase) : newBase,
+        name: endpointName,
+        resource: endpoint,
+        router
+      })
+      return
+    }
+    const path = endpoint.path || getPath({
+      resource: name,
+      endpoint: endpointName,
+      instance: methodInfo.instance
+    })
+    const fullPath = base ? join(base, path) : path
+    router[methodInfo.method](fullPath, getRequestHandler(endpoint))
+  })
 }
 
-export const load = (path) => requireDir(path, { recurse: true })
+const wireResources = (resources, router) => {
+  Object.keys(resources).forEach((resourceName) => {
+    wireResource({
+      name: resourceName,
+      resource: resources[resourceName],
+      router
+    })
+  })
+}
 
-export default ({ prefix, resources }={}) => {
+export default ({ swagger, path, resources }={}) => {
   if (!resources) throw new Error('Missing resources option')
-  let loadedResources = loadResources(resources)
-  let meta = displayResources(prefix, loadedResources)
-  let router = Router({ mergeParams: true })
-  router.meta = meta
-  router.prefix = prefix
+  const router = Router({ mergeParams: true })
+  router.swagger = getSwagger({ swagger, path, resources })
+  router.path = path
+  router.get('/swagger.json', (req, res) =>
+    res.status(200).json(router.swagger).end()
+  )
 
-  each(loadedResources, wireResource(router))
-  router.get('/_resources', (req, res) => res.json(meta))
-
+  wireResources(resources, router)
   return router
 }

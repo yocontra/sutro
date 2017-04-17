@@ -1,0 +1,3 @@
+# Endpoint Structure
+
+TODO
