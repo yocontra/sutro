@@ -1,57 +1,61 @@
-import join from 'url-join'
-import getPath from './getPath'
-import methods from './methods'
+import walkResources from './walkResources'
 
+const param = /:(\w+)/gi
 
-const wireResource = ({ base, name, resource, paths }) => {
-  // sort custom stuff first
-  const endpointNames = []
-  Object.keys(resource).forEach((k) =>
-    methods[k] ? endpointNames.push(k) : endpointNames.unshift(k)
-  )
-
-  endpointNames.forEach((endpointName) => {
-    const endpoint = resource[endpointName]
-    const methodInfo = endpoint.http || methods[endpointName]
-    if (!methodInfo) {
-      // TODO: error if still nothing found
-      const newBase = getPath({ resource: name, instance: true })
-      wireResource({
-        base: base ? join(base, newBase) : newBase,
-        name: endpointName,
-        resource: endpoint,
-        paths
-      })
-      return
+const getResponses = (method, endpoint) => {
+  const out = {
+    '404': {
+      description: 'Not found'
+    },
+    '500': {
+      description: 'Server error'
+    },
+    default: {
+      description: 'Unexpected error'
     }
-    const path = endpoint.path || getPath({
-      resource: name,
-      endpoint: endpointName,
-      instance: methodInfo.instance
-    })
-    // TODO: replace path params w/ swagger params
-    const fullPath = base ? join(base, path) : path
-    const swaggerMeta = endpoint.swagger || {}
-    const descriptor = {
-      consumes: methodInfo.method !== 'get' && [ 'application/json' ],
-      produces: [ 'application/json' ],
-      // TODO: add path parameters
-      ...swaggerMeta
-    }
+  }
 
-    if (!paths[fullPath]) paths[fullPath] = {}
-    paths[fullPath][methodInfo.method] = descriptor
-  })
+  if (method === 'post') {
+    out['201'] = {
+      description: 'Success, created'
+    }
+  } else {
+    out['200'] = {
+      description: 'Success'
+    }
+    out['204'] = {
+      description: 'Success, no data return necessary'
+    }
+  }
+
+  if (endpoint.isAuthorized) {
+    out['401'] = {
+      description: 'Unauthorized'
+    }
+  }
+  return out
 }
 
 const getPaths = (resources) => {
   const paths = {}
-  Object.keys(resources).forEach((resourceName) => {
-    wireResource({
-      name: resourceName,
-      resource: resources[resourceName],
-      paths
-    })
+  walkResources(resources, ({ path, method, endpoint }) => {
+    const swaggerMeta = endpoint.swagger || {}
+    const params = path.match(param)
+    const descriptor = {
+      consumes: method !== 'get' && [ 'application/json' ] || undefined,
+      produces: [ 'application/json' ],
+      parameters: params && params.map((name) => ({
+        name: name.slice(1),
+        in: 'path',
+        required: true
+      })) || undefined,
+      responses: getResponses(method, endpoint),
+      ...swaggerMeta
+    }
+
+    const fixedPath = path.replace(param, '{$1}')
+    if (!paths[fixedPath]) paths[fixedPath] = {}
+    paths[fixedPath][method] = descriptor
   })
   return paths
 }
@@ -59,11 +63,14 @@ const getPaths = (resources) => {
 export default ({ swagger={}, path, resources }) => {
   const out = {
     swagger: '2.0',
+    info: {
+      title: 'Sutro API',
+      version: '1.0.0'
+    },
     basePath: path,
     schemes: [ 'http' ],
     paths: getPaths(resources),
     ...swagger
   }
-
   return out
 }
