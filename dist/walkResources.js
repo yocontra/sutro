@@ -30,6 +30,7 @@ var walkResource = function walkResource(_ref) {
   var base = _ref.base,
       name = _ref.name,
       resource = _ref.resource,
+      hierarchy = _ref.hierarchy,
       handler = _ref.handler;
 
   // sort custom stuff first
@@ -48,6 +49,7 @@ var walkResource = function walkResource(_ref) {
         base: base ? (0, _urlJoin2.default)(base, newBase) : newBase,
         name: endpointName,
         resource: endpoint,
+        hierarchy: hierarchy ? hierarchy + '.' + name : name,
         handler: handler
       });
       return;
@@ -58,7 +60,11 @@ var walkResource = function walkResource(_ref) {
       instance: methodInfo.instance
     });
     var fullPath = base ? (0, _urlJoin2.default)(base, path) : path;
-    handler((0, _extends3.default)({ path: fullPath, endpoint: endpoint }, methodInfo));
+    handler((0, _extends3.default)({
+      hierarchy: hierarchy ? hierarchy + '.' + name + '.' + endpointName : name + '.' + endpointName,
+      path: fullPath,
+      endpoint: endpoint
+    }, methodInfo));
   });
 };
 

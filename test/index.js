@@ -239,7 +239,109 @@ describe('sutro - function handlers', () => {
       .expect('Content-Type', /json/)
       .expect(200)
 
-    console.log(JSON.stringify(body, null, 2))
+    should(body).eql({
+      'user': {
+        'me': {
+          'path': '/users/me',
+          'method': 'get',
+          'instance': false
+        },
+        'car': {
+          'passenger': {
+            'create': {
+              'path': '/users/:userId/cars/:carId/passengers',
+              'method': 'post',
+              'instance': false
+            },
+            'find': {
+              'path': '/users/:userId/cars/:carId/passengers',
+              'method': 'get',
+              'instance': false
+            },
+            'findById': {
+              'path': '/users/:userId/cars/:carId/passengers/:passengerId',
+              'method': 'get',
+              'instance': true
+            },
+            'deleteById': {
+              'path': '/users/:userId/cars/:carId/passengers/:passengerId',
+              'method': 'delete',
+              'instance': true
+            },
+            'updateById': {
+              'path': '/users/:userId/cars/:carId/passengers/:passengerId',
+              'method': 'patch',
+              'instance': true
+            },
+            'replaceById': {
+              'path': '/users/:userId/cars/:carId/passengers/:passengerId',
+              'method': 'put',
+              'instance': true
+            }
+          },
+          'create': {
+            'path': '/users/:userId/cars',
+            'method': 'post',
+            'instance': false
+          },
+          'find': {
+            'path': '/users/:userId/cars',
+            'method': 'get',
+            'instance': false
+          },
+          'findById': {
+            'path': '/users/:userId/cars/:carId',
+            'method': 'get',
+            'instance': true
+          },
+          'deleteById': {
+            'path': '/users/:userId/cars/:carId',
+            'method': 'delete',
+            'instance': true
+          },
+          'updateById': {
+            'path': '/users/:userId/cars/:carId',
+            'method': 'patch',
+            'instance': true
+          },
+          'replaceById': {
+            'path': '/users/:userId/cars/:carId',
+            'method': 'put',
+            'instance': true
+          }
+        },
+        'create': {
+          'path': '/users',
+          'method': 'post',
+          'instance': false
+        },
+        'find': {
+          'path': '/users',
+          'method': 'get',
+          'instance': false
+        },
+        'findById': {
+          'path': '/users/:userId',
+          'method': 'get',
+          'instance': true
+        },
+        'deleteById': {
+          'path': '/users/:userId',
+          'method': 'delete',
+          'instance': true
+        },
+        'updateById': {
+          'path': '/users/:userId',
+          'method': 'patch',
+          'instance': true
+        },
+        'replaceById': {
+          'path': '/users/:userId',
+          'method': 'put',
+          'instance': true
+        }
+      }
+    })
   })
 })
 

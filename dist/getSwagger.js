@@ -57,6 +57,7 @@ var getPaths = function getPaths(resources) {
         method = _ref.method,
         endpoint = _ref.endpoint;
 
+    if (endpoint.swagger === false) return; // skip if set to false
     var swaggerMeta = endpoint.swagger || {};
     var params = path.match(param);
     var descriptor = (0, _extends3.default)({
@@ -82,7 +83,7 @@ var getPaths = function getPaths(resources) {
 exports.default = function (_ref2) {
   var _ref2$swagger = _ref2.swagger,
       swagger = _ref2$swagger === undefined ? {} : _ref2$swagger,
-      path = _ref2.path,
+      base = _ref2.base,
       resources = _ref2.resources;
 
   var out = (0, _extends3.default)({
@@ -91,7 +92,7 @@ exports.default = function (_ref2) {
       title: 'Sutro API',
       version: '1.0.0'
     },
-    basePath: path,
+    basePath: base,
     schemes: ['http'],
     paths: getPaths(resources)
   }, swagger);
