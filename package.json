@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "1.0.0",
+  "version": "0.0.20",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -26,15 +26,11 @@
     "dist"
   ],
   "scripts": {
-    "preversion": "npm run clean && npm run build && npm docs",
+    "preversion": "npm run clean && npm run build",
     "build": "babel src --out-dir dist",
     "clean": "rimraf dist",
     "lint": "eslint src test",
-    "test": "mocha --compilers js:babel-register --recursive --reporter spec && npm run-script lint",
-    "docs": "npm run docs:pre && npm run docs:build && npm run docs:publish",
-    "docs:pre": "gitbook install && rimraf _book",
-    "docs:build": "gitbook build -g shastajs/sutro",
-    "docs:publish": "cd _book && git init && git commit --allow-empty -m 'update book' && git checkout -b gh-pages && touch .nojekyll && git add . && git commit -am 'update book' && git push git@github.com:shastajs/sutro gh-pages --force"
+    "test": "mocha --compilers js:babel-register --recursive --reporter spec && npm run-script lint"
   },
   "devDependencies": {
     "babel": "^6.5.2",
@@ -51,8 +47,6 @@
     "babelify": "^7.3.0",
     "eslint": "^3.11.1",
     "eslint-config-rackt": "^1.1.1",
-    "gitbook-cli": "^2.3.0",
-    "github-changes": "^1.0.4",
     "mocha": "^3.2.0",
     "rimraf": "^2.5.4",
     "should": "^11.1.1",
