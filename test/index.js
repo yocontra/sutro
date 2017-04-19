@@ -232,6 +232,15 @@ describe('sutro - function handlers', () => {
 
     console.log(JSON.stringify(body, null, 2))
   })
+
+  it('should have a meta.json', async () => {
+    const { body } = await request(app).get('/meta.json')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+
+    console.log(JSON.stringify(body, null, 2))
+  })
 })
 
 describe('sutro - async function handlers', () => {

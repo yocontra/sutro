@@ -2,7 +2,7 @@ import join from 'url-join'
 import getPath from './getPath'
 import methods from './methods'
 
-const walkResource = ({ base, name, resource, handler }) => {
+const walkResource = ({ base, name, resource, hierarchy, handler }) => {
   // sort custom stuff first
   const endpointNames = []
   Object.keys(resource).forEach((k) =>
@@ -19,6 +19,7 @@ const walkResource = ({ base, name, resource, handler }) => {
         base: base ? join(base, newBase) : newBase,
         name: endpointName,
         resource: endpoint,
+        hierarchy: hierarchy ? `${hierarchy}.${name}` : name,
         handler
       })
       return
@@ -29,7 +30,14 @@ const walkResource = ({ base, name, resource, handler }) => {
       instance: methodInfo.instance
     })
     const fullPath = base ? join(base, path) : path
-    handler({ path: fullPath, endpoint, ...methodInfo })
+    handler({
+      hierarchy: hierarchy
+        ? `${hierarchy}.${name}.${endpointName}`
+        : `${name}.${endpointName}`,
+      path: fullPath,
+      endpoint,
+      ...methodInfo
+    })
   })
 }
 

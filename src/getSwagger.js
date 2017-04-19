@@ -61,14 +61,14 @@ const getPaths = (resources) => {
   return paths
 }
 
-export default ({ swagger={}, path, resources }) => {
+export default ({ swagger={}, base, resources }) => {
   const out = {
     swagger: '2.0',
     info: {
       title: 'Sutro API',
       version: '1.0.0'
     },
-    basePath: path,
+    basePath: base,
     schemes: [ 'http' ],
     paths: getPaths(resources),
     ...swagger

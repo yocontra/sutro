@@ -85,6 +85,7 @@
     }
   },
   "dependencies": {
+    "dot-prop": "^4.1.1",
     "express": "^4.0.0",
     "handle-async": "^1.0.1",
     "pluralize": "^4.0.0",
