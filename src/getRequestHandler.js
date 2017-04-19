@@ -27,7 +27,7 @@ const process = async (endpoint, req, res) => {
     _res: res
   }
   const rawData = endpoint.process ? await promisify(endpoint.process.bind(null, opt)) : null
-  const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, rawData)) : rawData
+  const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
 
   // no response
   if (resultData == null) {

@@ -97,7 +97,7 @@ var process = function () {
             }
 
             _context.next = 22;
-            return (0, _handleAsync.promisify)(endpoint.format.bind(null, rawData));
+            return (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData));
 
           case 22:
             _context.t2 = _context.sent;
