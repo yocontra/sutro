@@ -22,40 +22,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var process = function () {
   var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(endpoint, req, res) {
-    var authorized, err, opt, rawData, resultData;
+    var opt, authorized, err, rawData, resultData;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.t0 = !endpoint.isAuthorized;
-
-            if (_context.t0) {
-              _context.next = 5;
-              break;
-            }
-
-            _context.next = 4;
-            return (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, req));
-
-          case 4:
-            _context.t0 = _context.sent;
-
-          case 5:
-            authorized = _context.t0;
-
-            if (!(authorized !== true)) {
-              _context.next = 10;
-              break;
-            }
-
-            err = new Error('Unauthorized');
-
-            err.status = 401;
-            throw err;
-
-          case 10:
-
-            // call process
             opt = (0, _extends3.default)({}, req.params, {
               ip: req.ip,
               url: req.url,
@@ -72,6 +43,35 @@ var process = function () {
               _res: res
             });
 
+            // check isAuthorized
+
+            _context.t0 = !endpoint.isAuthorized;
+
+            if (_context.t0) {
+              _context.next = 6;
+              break;
+            }
+
+            _context.next = 5;
+            return (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt));
+
+          case 5:
+            _context.t0 = _context.sent;
+
+          case 6:
+            authorized = _context.t0;
+
+            if (!(authorized !== true)) {
+              _context.next = 11;
+              break;
+            }
+
+            err = new Error('Unauthorized');
+
+            err.status = 401;
+            throw err;
+
+          case 11:
             if (!endpoint.process) {
               _context.next = 17;
               break;

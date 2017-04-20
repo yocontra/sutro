@@ -1,15 +1,6 @@
 import { promisify } from 'handle-async'
 
 const process = async (endpoint, req, res) => {
-  // check isAuthorized
-  const authorized = !endpoint.isAuthorized || await promisify(endpoint.isAuthorized.bind(null, req))
-  if (authorized !== true) {
-    const err = new Error('Unauthorized')
-    err.status = 401
-    throw err
-  }
-
-  // call process
   const opt = {
     ...req.params,
     ip: req.ip,
@@ -26,7 +17,19 @@ const process = async (endpoint, req, res) => {
     _req: req,
     _res: res
   }
+
+  // check isAuthorized
+  const authorized = !endpoint.isAuthorized || await promisify(endpoint.isAuthorized.bind(null, opt))
+  if (authorized !== true) {
+    const err = new Error('Unauthorized')
+    err.status = 401
+    throw err
+  }
+
+  // call process
   const rawData = endpoint.process ? await promisify(endpoint.process.bind(null, opt)) : null
+
+  // call format on process result
   const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
 
   // no response
