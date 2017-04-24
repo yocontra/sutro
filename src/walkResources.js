@@ -10,7 +10,7 @@ const walkResource = ({ base, name, resource, hierarchy, handler }) => {
   )
 
   endpointNames.forEach((endpointName) => {
-    const endpoint = resource[endpointName]
+    const endpoint = resource[endpointName].index || resource[endpointName]
     const methodInfo = endpoint.http || methods[endpointName]
     if (!methodInfo) {
       // TODO: error if still nothing found

@@ -40,7 +40,7 @@ var walkResource = function walkResource(_ref) {
   });
 
   endpointNames.forEach(function (endpointName) {
-    var endpoint = resource[endpointName];
+    var endpoint = resource[endpointName].index || resource[endpointName];
     var methodInfo = endpoint.http || _methods2.default[endpointName];
     if (!methodInfo) {
       // TODO: error if still nothing found
