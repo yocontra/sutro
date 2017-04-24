@@ -2,15 +2,19 @@ import join from 'url-join'
 import getPath from './getPath'
 import methods from './methods'
 
+const idxd = (o) => o.index || o
+
 const walkResource = ({ base, name, resource, hierarchy, handler }) => {
+  const res = idxd(resource)
+
   // sort custom stuff first
   const endpointNames = []
-  Object.keys(resource).forEach((k) =>
+  Object.keys(res).forEach((k) =>
     methods[k] ? endpointNames.push(k) : endpointNames.unshift(k)
   )
 
   endpointNames.forEach((endpointName) => {
-    const endpoint = resource[endpointName].index || resource[endpointName]
+    const endpoint = res[endpointName]
     const methodInfo = endpoint.http || methods[endpointName]
     if (!methodInfo) {
       // TODO: error if still nothing found
@@ -42,7 +46,7 @@ const walkResource = ({ base, name, resource, hierarchy, handler }) => {
 }
 
 export default (resources, handler) => {
-  Object.keys(resources).forEach((resourceName) => {
+  Object.keys(idxd(resources)).forEach((resourceName) => {
     walkResource({
       name: resourceName,
       resource: resources[resourceName],

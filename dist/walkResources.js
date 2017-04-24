@@ -26,6 +26,10 @@ var _methods2 = _interopRequireDefault(_methods);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var idxd = function idxd(o) {
+  return o.index || o;
+};
+
 var walkResource = function walkResource(_ref) {
   var base = _ref.base,
       name = _ref.name,
@@ -33,14 +37,16 @@ var walkResource = function walkResource(_ref) {
       hierarchy = _ref.hierarchy,
       handler = _ref.handler;
 
+  var res = idxd(resource);
+
   // sort custom stuff first
   var endpointNames = [];
-  (0, _keys2.default)(resource).forEach(function (k) {
+  (0, _keys2.default)(res).forEach(function (k) {
     return _methods2.default[k] ? endpointNames.push(k) : endpointNames.unshift(k);
   });
 
   endpointNames.forEach(function (endpointName) {
-    var endpoint = resource[endpointName].index || resource[endpointName];
+    var endpoint = res[endpointName];
     var methodInfo = endpoint.http || _methods2.default[endpointName];
     if (!methodInfo) {
       // TODO: error if still nothing found
@@ -69,7 +75,7 @@ var walkResource = function walkResource(_ref) {
 };
 
 exports.default = function (resources, handler) {
-  (0, _keys2.default)(resources).forEach(function (resourceName) {
+  (0, _keys2.default)(idxd(resources)).forEach(function (resourceName) {
     walkResource({
       name: resourceName,
       resource: resources[resourceName],
