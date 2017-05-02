@@ -28,8 +28,10 @@ exports.default = function (_ref) {
     var hierarchy = _ref2.hierarchy,
         path = _ref2.path,
         method = _ref2.method,
-        instance = _ref2.instance;
+        instance = _ref2.instance,
+        endpoint = _ref2.endpoint;
 
+    if (endpoint.hidden) return; // skip
     var descriptor = {
       path: base ? (0, _urlJoin2.default)(base, path) : path,
       method: method,

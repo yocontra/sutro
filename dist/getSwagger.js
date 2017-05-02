@@ -57,7 +57,7 @@ var getPaths = function getPaths(resources) {
         method = _ref.method,
         endpoint = _ref.endpoint;
 
-    if (endpoint.swagger === false) return; // skip if set to false
+    if (endpoint.hidden || endpoint.swagger === false) return; // skip
     var swaggerMeta = endpoint.swagger || {};
     var params = path.match(param);
     var descriptor = (0, _extends3.default)({

@@ -39,7 +39,7 @@ const getResponses = (method, endpoint) => {
 const getPaths = (resources) => {
   const paths = {}
   walkResources(resources, ({ path, method, endpoint }) => {
-    if (endpoint.swagger === false) return // skip if set to false
+    if (endpoint.hidden || endpoint.swagger === false) return // skip
     const swaggerMeta = endpoint.swagger || {}
     const params = path.match(param)
     const descriptor = {
