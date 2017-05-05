@@ -7,17 +7,17 @@ export const codes = {
 }
 
 export class BadRequestError extends Error {
-  constructor(message, status) {
+  constructor(message='Bad Request', status=codes.badRequest) {
     super(message)
     this.message = message
-    this.status = status || codes.badRequest
+    this.status = status
   }
 }
 
 export class NotFoundError extends Error {
-  constructor(message, status) {
+  constructor(message='Not Found', status=codes.notFound) {
     super(message)
     this.message = message
-    this.status = status || codes.notFound
+    this.status = status
   }
 }
