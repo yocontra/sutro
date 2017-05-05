@@ -18,6 +18,8 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var _handleAsync = require('handle-async');
 
+var _errors = require('./errors');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var process = function () {
@@ -128,7 +130,7 @@ var process = function () {
               break;
             }
 
-            return _context.abrupt('return', res.status(404).end());
+            throw new _errors.NotFoundError();
 
           case 32:
             return _context.abrupt('return', res.status(204).end());

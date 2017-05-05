@@ -1,4 +1,5 @@
 import { promisify } from 'handle-async'
+import { NotFoundError } from './errors'
 
 const process = async (endpoint, req, res) => {
   const opt = {
@@ -35,7 +36,7 @@ const process = async (endpoint, req, res) => {
   // no response
   if (resultData == null) {
     if (req.method === 'POST') return res.status(201).end()
-    if (req.method === 'GET') return res.status(404).end()
+    if (req.method === 'GET') throw new NotFoundError()
     return res.status(204).end()
   }
 
