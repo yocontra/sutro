@@ -1,7 +1,7 @@
 import { promisify } from 'handle-async'
 import { NotFoundError } from './errors'
 
-const process = async (endpoint, req, res) => {
+const process = async ({ endpoint, successCode }, req, res) => {
   const opt = {
     ...req.params,
     ip: req.ip,
@@ -28,20 +28,20 @@ const process = async (endpoint, req, res) => {
   }
 
   // call process
-  const rawData = endpoint.process ? await promisify(endpoint.process.bind(null, opt)) : null
+  const processFn = typeof endpoint === 'function' ? endpoint : endpoint.process
+  const rawData = processFn ? await promisify(processFn.bind(null, opt)) : null
 
   // call format on process result
   const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
 
   // no response
   if (resultData == null) {
-    if (req.method === 'POST') return res.status(201).end()
     if (req.method === 'GET') throw new NotFoundError()
-    return res.status(204).end()
+    return res.status(successCode || 204).end()
   }
 
   // some data, status code for it
-  res.status(req.method === 'POST' ? 201 : 200)
+  res.status(successCode || 200)
 
   // stream response
   if (resultData.pipe && resultData.on) {
@@ -53,8 +53,5 @@ const process = async (endpoint, req, res) => {
   res.json(resultData).end()
 }
 
-export default (endpoint) => {
-  if (typeof endpoint === 'function') endpoint = { process: endpoint }
-  return (req, res, next) =>
-    process(endpoint, req, res).catch(next)
-}
+export default (o) => (req, res, next) =>
+  process(o, req, res).catch(next)

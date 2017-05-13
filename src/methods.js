@@ -5,7 +5,8 @@ export default {
   },
   create: {
     method: 'post',
-    instance: false
+    instance: false,
+    successCode: 201
   },
   findById: {
     method: 'get',

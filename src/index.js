@@ -17,8 +17,8 @@ export default ({ swagger, base, resources }={}) => {
     res.status(200).json(router.meta).end()
   )
 
-  walkResources(resources, ({ path, method, endpoint }) => {
-    router[method](path, getRequestHandler(endpoint))
+  walkResources(resources, (o) => {
+    router[o.method](o.path, getRequestHandler(o))
   })
   return router
 }
