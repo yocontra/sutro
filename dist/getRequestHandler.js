@@ -23,8 +23,10 @@ var _errors = require('./errors');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var process = function () {
-  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(endpoint, req, res) {
-    var opt, authorized, err, rawData, resultData;
+  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(_ref2, req, res) {
+    var endpoint = _ref2.endpoint,
+        successCode = _ref2.successCode;
+    var opt, authorized, err, processFn, rawData, resultData;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -74,88 +76,84 @@ var process = function () {
             throw err;
 
           case 11:
-            if (!endpoint.process) {
-              _context.next = 17;
+
+            // call process
+            processFn = typeof endpoint === 'function' ? endpoint : endpoint.process;
+
+            if (!processFn) {
+              _context.next = 18;
               break;
             }
 
-            _context.next = 14;
-            return (0, _handleAsync.promisify)(endpoint.process.bind(null, opt));
+            _context.next = 15;
+            return (0, _handleAsync.promisify)(processFn.bind(null, opt));
 
-          case 14:
+          case 15:
             _context.t1 = _context.sent;
-            _context.next = 18;
+            _context.next = 19;
             break;
 
-          case 17:
+          case 18:
             _context.t1 = null;
 
-          case 18:
+          case 19:
             rawData = _context.t1;
 
             if (!endpoint.format) {
-              _context.next = 25;
+              _context.next = 26;
               break;
             }
 
-            _context.next = 22;
+            _context.next = 23;
             return (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData));
 
-          case 22:
+          case 23:
             _context.t2 = _context.sent;
-            _context.next = 26;
+            _context.next = 27;
             break;
 
-          case 25:
+          case 26:
             _context.t2 = rawData;
 
-          case 26:
+          case 27:
             resultData = _context.t2;
 
             if (!(resultData == null)) {
-              _context.next = 33;
-              break;
-            }
-
-            if (!(req.method === 'POST')) {
-              _context.next = 30;
-              break;
-            }
-
-            return _context.abrupt('return', res.status(201).end());
-
-          case 30:
-            if (!(req.method === 'GET')) {
               _context.next = 32;
+              break;
+            }
+
+            if (!(req.method === 'GET')) {
+              _context.next = 31;
               break;
             }
 
             throw new _errors.NotFoundError();
 
-          case 32:
-            return _context.abrupt('return', res.status(204).end());
+          case 31:
+            return _context.abrupt('return', res.status(successCode || 204).end());
 
-          case 33:
+          case 32:
 
             // some data, status code for it
-            res.status(req.method === 'POST' ? 201 : 200);
+            res.status(successCode || 200);
 
             // stream response
 
             if (!(resultData.pipe && resultData.on)) {
-              _context.next = 37;
+              _context.next = 36;
               break;
             }
 
             resultData.pipe(res);
             return _context.abrupt('return');
 
-          case 37:
+          case 36:
 
             // json obj response
             res.json(resultData).end();
 
-          case 38:
+          case 37:
           case 'end':
             return _context.stop();
         }
@@ -168,10 +166,9 @@ var process = function () {
   };
 }();
 
-exports.default = function (endpoint) {
-  if (typeof endpoint === 'function') endpoint = { process: endpoint };
+exports.default = function (o) {
   return function (req, res, next) {
-    return process(endpoint, req, res).catch(next);
+    return process(o, req, res).catch(next);
   };
 };
 

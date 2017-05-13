@@ -42,12 +42,8 @@ exports.default = function () {
     return res.status(200).json(router.meta).end();
   });
 
-  (0, _walkResources2.default)(resources, function (_ref2) {
-    var path = _ref2.path,
-        method = _ref2.method,
-        endpoint = _ref2.endpoint;
-
-    router[method](path, (0, _getRequestHandler2.default)(endpoint));
+  (0, _walkResources2.default)(resources, function (o) {
+    router[o.method](o.path, (0, _getRequestHandler2.default)(o));
   });
   return router;
 };
