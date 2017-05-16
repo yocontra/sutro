@@ -48,7 +48,8 @@ const getPaths = (resources) => {
       parameters: params && params.map((name) => ({
         name: name.slice(1),
         in: 'path',
-        required: true
+        required: true,
+        type: 'string'
       })) || undefined,
       responses: getResponses(method, endpoint),
       ...swaggerMeta
