@@ -67,7 +67,8 @@ var getPaths = function getPaths(resources) {
         return {
           name: name.slice(1),
           in: 'path',
-          required: true
+          required: true,
+          type: 'string'
         };
       }) || undefined,
       responses: getResponses(method, endpoint)

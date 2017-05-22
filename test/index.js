@@ -4,18 +4,20 @@ import should from 'should'
 import sutro from '../src'
 import request from 'supertest'
 import express from 'express'
+import Parser from 'swagger-parser'
 
-let users = [
+const parser = new Parser()
+const users = [
   { id: 0, name: 'foo' },
   { id: 1, name: 'bar' },
   { id: 2, name: 'baz' }
 ]
 
-let passengers = [
+const passengers = [
   { name: 'todd' },
   { name: 'rob' }
 ]
-let cars = [
+const cars = [
   [
     { id: 0, name: 'foo', passengers },
     { id: 1, name: 'bar', passengers },
@@ -224,13 +226,13 @@ describe('sutro - function handlers', () => {
       .expect(200, { updated: true })
   )
 
-  it('should have a swagger.json', async () => {
+  it('should have a valid swagger.json', async () => {
     const { body } = await request(app).get('/swagger.json')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
 
-    console.log(JSON.stringify(body, null, 2))
+    await parser.validate(body)
   })
 
   it('should have a meta.json', async () => {
