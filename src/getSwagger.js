@@ -1,3 +1,4 @@
+import omit from 'lodash.omit'
 import walkResources from './walkResources'
 
 const param = /:(\w+)/gi
@@ -36,13 +37,30 @@ const getResponses = (method, endpoint) => {
   return out
 }
 
+const flattenConfig = (base, override={}) => {
+  const filtered = omit(override, [
+    'consumes', 'produces', 'responses', 'parameters'
+  ])
+  return {
+    consumes: override.consumes || base.consumes,
+    produces: override.produces || base.produces,
+    responses: override.responses ? {
+      ...base.responses,
+      ...override.responses
+    } : base.responses,
+    parameters: override.parameters
+      ? [ ...(base.parameters || []), ...override.parameters ]
+      : base.parameters,
+    ...filtered
+  }
+}
+
 const getPaths = (resources) => {
   const paths = {}
   walkResources(resources, ({ path, method, endpoint }) => {
     if (endpoint.hidden || endpoint.swagger === false) return // skip
-    const swaggerMeta = endpoint.swagger || {}
     const params = path.match(param)
-    const descriptor = {
+    const base = {
       consumes: method !== 'get' && [ 'application/json' ] || undefined,
       produces: [ 'application/json' ],
       parameters: params && params.map((name) => ({
@@ -51,13 +69,11 @@ const getPaths = (resources) => {
         required: true,
         type: 'string'
       })) || undefined,
-      responses: getResponses(method, endpoint),
-      ...swaggerMeta
+      responses: getResponses(method, endpoint)
     }
-
     const fixedPath = path.replace(param, '{$1}')
     if (!paths[fixedPath]) paths[fixedPath] = {}
-    paths[fixedPath][method] = descriptor
+    paths[fixedPath][method] = flattenConfig(base, endpoint.swagger)
   })
   return paths
 }
