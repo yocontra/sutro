@@ -4,9 +4,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
+
+var _lodash = require('lodash.omit');
+
+var _lodash2 = _interopRequireDefault(_lodash);
 
 var _walkResources = require('./walkResources');
 
@@ -50,6 +58,18 @@ var getResponses = function getResponses(method, endpoint) {
   return out;
 };
 
+var flattenConfig = function flattenConfig(base) {
+  var override = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  var filtered = (0, _lodash2.default)(override, ['consumes', 'produces', 'responses', 'parameters']);
+  return (0, _extends3.default)({
+    consumes: override.consumes || base.consumes,
+    produces: override.produces || base.produces,
+    responses: override.responses ? (0, _extends3.default)({}, base.responses, override.responses) : base.responses,
+    parameters: override.parameters ? [].concat((0, _toConsumableArray3.default)(base.parameters || []), (0, _toConsumableArray3.default)(override.parameters)) : base.parameters
+  }, filtered);
+};
+
 var getPaths = function getPaths(resources) {
   var paths = {};
   (0, _walkResources2.default)(resources, function (_ref) {
@@ -58,9 +78,8 @@ var getPaths = function getPaths(resources) {
         endpoint = _ref.endpoint;
 
     if (endpoint.hidden || endpoint.swagger === false) return; // skip
-    var swaggerMeta = endpoint.swagger || {};
     var params = path.match(param);
-    var descriptor = (0, _extends3.default)({
+    var base = {
       consumes: method !== 'get' && ['application/json'] || undefined,
       produces: ['application/json'],
       parameters: params && params.map(function (name) {
@@ -72,11 +91,10 @@ var getPaths = function getPaths(resources) {
         };
       }) || undefined,
       responses: getResponses(method, endpoint)
-    }, swaggerMeta);
-
+    };
     var fixedPath = path.replace(param, '{$1}');
     if (!paths[fixedPath]) paths[fixedPath] = {};
-    paths[fixedPath][method] = descriptor;
+    paths[fixedPath][method] = flattenConfig(base, endpoint.swagger);
   });
   return paths;
 };
