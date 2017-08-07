@@ -35,11 +35,12 @@ exports.default = function () {
   router.swagger = (0, _getSwagger2.default)({ swagger: swagger, base: base, resources: resources });
   router.meta = (0, _getMeta2.default)({ base: base, resources: resources });
   router.base = base;
-  router.get('/swagger.json', function (req, res) {
-    return res.status(200).json(router.swagger).end();
-  });
-  router.get('/meta.json', function (req, res) {
+
+  router.get('/', function (req, res) {
     return res.status(200).json(router.meta).end();
+  });
+  router.get('/swagger', function (req, res) {
+    return res.status(200).json(router.swagger).end();
   });
 
   (0, _walkResources2.default)(resources, function (o) {

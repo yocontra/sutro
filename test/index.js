@@ -226,8 +226,8 @@ describe('sutro - function handlers', () => {
       .expect(200, { updated: true })
   )
 
-  it('should have a valid swagger.json', async () => {
-    const { body } = await request(app).get('/swagger.json')
+  it('should have a valid swagger file', async () => {
+    const { body } = await request(app).get('/swagger')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -235,8 +235,8 @@ describe('sutro - function handlers', () => {
     await parser.validate(body)
   })
 
-  it('should have a meta.json', async () => {
-    const { body } = await request(app).get('/meta.json')
+  it('should have a meta index', async () => {
+    const { body } = await request(app).get('/')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)

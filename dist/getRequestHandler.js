@@ -45,10 +45,9 @@ var process = function () {
               session: req.session,
               _req: req,
               _res: res
+
+              // check isAuthorized
             });
-
-            // check isAuthorized
-
             _context.t0 = !endpoint.isAuthorized;
 
             if (_context.t0) {

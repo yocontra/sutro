@@ -10,11 +10,12 @@ export default ({ swagger, base, resources }={}) => {
   router.swagger = getSwagger({ swagger, base, resources })
   router.meta = getMeta({ base, resources })
   router.base = base
-  router.get('/swagger.json', (req, res) =>
-    res.status(200).json(router.swagger).end()
-  )
-  router.get('/meta.json', (req, res) =>
+
+  router.get('/', (req, res) =>
     res.status(200).json(router.meta).end()
+  )
+  router.get('/swagger', (req, res) =>
+    res.status(200).json(router.swagger).end()
   )
 
   walkResources(resources, (o) => {
