@@ -166,9 +166,11 @@ var process = function () {
 }();
 
 exports.default = function (o) {
-  return function (req, res, next) {
+  // wrap it so it has a name
+  var handleAPIRequest = function handleAPIRequest(req, res, next) {
     return process(o, req, res).catch(next);
   };
+  return handleAPIRequest;
 };
 
 module.exports = exports['default'];

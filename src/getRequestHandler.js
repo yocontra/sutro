@@ -53,5 +53,8 @@ const process = async ({ endpoint, successCode }, req, res) => {
   res.json(resultData).end()
 }
 
-export default (o) => (req, res, next) =>
-  process(o, req, res).catch(next)
+export default (o) => {
+  // wrap it so it has a name
+  const handleAPIRequest = (req, res, next) => process(o, req, res).catch(next)
+  return handleAPIRequest
+}
