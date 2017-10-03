@@ -31,6 +31,12 @@ const process = async ({ endpoint, successCode }, req, res) => {
   const processFn = typeof endpoint === 'function' ? endpoint : endpoint.process
   const rawData = processFn ? await promisify(processFn.bind(null, opt)) : null
 
+  // no data
+  if (rawData == null || rawData.length === 0) {
+    if (req.method === 'GET') throw new NotFoundError()
+    return res.status(successCode || 204).end()
+  }
+
   // call format on process result
   const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
 
