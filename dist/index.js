@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _express = require('express');
 
+var _handleAsync = require('handle-async');
+
 var _getRequestHandler = require('./getRequestHandler');
 
 var _getRequestHandler2 = _interopRequireDefault(_getRequestHandler);
@@ -28,7 +30,8 @@ exports.default = function () {
   var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
       swagger = _ref.swagger,
       base = _ref.base,
-      resources = _ref.resources;
+      resources = _ref.resources,
+      pre = _ref.pre;
 
   if (!resources) throw new Error('Missing resources option');
   var router = (0, _express.Router)({ mergeParams: true });
@@ -44,7 +47,15 @@ exports.default = function () {
   });
 
   (0, _walkResources2.default)(resources, function (o) {
-    router[o.method](o.path, (0, _getRequestHandler2.default)(o));
+    var handlers = [(0, _getRequestHandler2.default)(o)];
+    if (pre) {
+      handlers.unshift(function (req, res, next) {
+        (0, _handleAsync.promisify)(pre.bind(null, o, req, res)).catch(next).then(function () {
+          return next();
+        });
+      });
+    }
+    router[o.method].apply(router, [o.path].concat(handlers));
   });
   return router;
 };

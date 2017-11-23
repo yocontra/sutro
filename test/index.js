@@ -53,6 +53,13 @@ describe('sutro', () => {
 
 describe('sutro - function handlers', () => {
   const config = {
+    pre: (o, req, res, next) => {
+      should.exist(o)
+      should.exist(req)
+      should.exist(res)
+      should.exist(next)
+      next()
+    },
     resources: {
       user: {
         create: (opts, cb) => cb(null, { created: true }),
@@ -423,6 +430,11 @@ describe('sutro - async function handlers', () => {
 
 describe('sutro - flat value handlers', () => {
   const config = {
+    pre: async (o, req, res) => {
+      should.exist(o)
+      should.exist(req)
+      should.exist(res)
+    },
     resources: {
       user: {
         create: () => ({ created: true }),
