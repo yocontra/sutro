@@ -23,7 +23,11 @@ const process = async ({ endpoint, successCode }, req, res) => {
     _res: res
   }
 
-  newrelic.addCustomParameters(opt)
+  newrelic.addCustomParameters({
+    ...opt,
+    _req: undefined,
+    _res: undefined
+  })
 
   // check isAuthorized
   const authorized = !endpoint.isAuthorized || await wrap('isAuthorized', endpoint.isAuthorized.bind(null, opt))
