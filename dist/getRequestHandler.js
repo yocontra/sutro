@@ -58,7 +58,10 @@ var process = function () {
             });
 
 
-            _newrelic2.default.addCustomParameters(opt);
+            _newrelic2.default.addCustomParameters((0, _extends3.default)({}, opt, {
+              _req: undefined,
+              _res: undefined
+            }));
 
             // check isAuthorized
             _context.t0 = !endpoint.isAuthorized;
