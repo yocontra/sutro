@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.NotFoundError = exports.BadRequestError = exports.codes = undefined;
+exports.NotFoundError = exports.BadRequestError = exports.UnauthorizedError = exports.codes = undefined;
 
 var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
@@ -31,37 +31,55 @@ var codes = exports.codes = {
   serverError: 500
 };
 
-var BadRequestError = exports.BadRequestError = function (_Error) {
-  (0, _inherits3.default)(BadRequestError, _Error);
+var UnauthorizedError = exports.UnauthorizedError = function (_Error) {
+  (0, _inherits3.default)(UnauthorizedError, _Error);
 
-  function BadRequestError() {
-    var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Bad Request';
-    var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : codes.badRequest;
-    (0, _classCallCheck3.default)(this, BadRequestError);
+  function UnauthorizedError() {
+    var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Unauthorized';
+    var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : codes.unauthorized;
+    (0, _classCallCheck3.default)(this, UnauthorizedError);
 
-    var _this = (0, _possibleConstructorReturn3.default)(this, (BadRequestError.__proto__ || (0, _getPrototypeOf2.default)(BadRequestError)).call(this, message));
+    var _this = (0, _possibleConstructorReturn3.default)(this, (UnauthorizedError.__proto__ || (0, _getPrototypeOf2.default)(UnauthorizedError)).call(this, message));
 
     _this.message = message;
     _this.status = status;
     return _this;
   }
 
+  return UnauthorizedError;
+}(Error);
+
+var BadRequestError = exports.BadRequestError = function (_Error2) {
+  (0, _inherits3.default)(BadRequestError, _Error2);
+
+  function BadRequestError() {
+    var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Bad Request';
+    var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : codes.badRequest;
+    (0, _classCallCheck3.default)(this, BadRequestError);
+
+    var _this2 = (0, _possibleConstructorReturn3.default)(this, (BadRequestError.__proto__ || (0, _getPrototypeOf2.default)(BadRequestError)).call(this, message));
+
+    _this2.message = message;
+    _this2.status = status;
+    return _this2;
+  }
+
   return BadRequestError;
 }(Error);
 
-var NotFoundError = exports.NotFoundError = function (_Error2) {
-  (0, _inherits3.default)(NotFoundError, _Error2);
+var NotFoundError = exports.NotFoundError = function (_Error3) {
+  (0, _inherits3.default)(NotFoundError, _Error3);
 
   function NotFoundError() {
     var message = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'Not Found';
     var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : codes.notFound;
     (0, _classCallCheck3.default)(this, NotFoundError);
 
-    var _this2 = (0, _possibleConstructorReturn3.default)(this, (NotFoundError.__proto__ || (0, _getPrototypeOf2.default)(NotFoundError)).call(this, message));
+    var _this3 = (0, _possibleConstructorReturn3.default)(this, (NotFoundError.__proto__ || (0, _getPrototypeOf2.default)(NotFoundError)).call(this, message));
 
-    _this2.message = message;
-    _this2.status = status;
-    return _this2;
+    _this3.message = message;
+    _this3.status = status;
+    return _this3;
   }
 
   return NotFoundError;

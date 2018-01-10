@@ -18,15 +18,25 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var _handleAsync = require('handle-async');
 
+var _newrelic = require('newrelic');
+
+var _newrelic2 = _interopRequireDefault(_newrelic);
+
 var _errors = require('./errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var wrap = function wrap(name, fn) {
+  return _newrelic2.default.createTracer(name, function () {
+    return (0, _handleAsync.promisify)(fn);
+  })();
+};
+
 var process = function () {
-  var _ref = (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee(_ref2, req, res) {
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, req, res) {
     var endpoint = _ref2.endpoint,
         successCode = _ref2.successCode;
-    var opt, authorized, err, processFn, rawData, resultData;
+    var opt, authorized, processFn, rawData, resultData;
     return _regenerator2.default.wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
@@ -45,94 +55,94 @@ var process = function () {
               session: req.session,
               _req: req,
               _res: res
-
-              // check isAuthorized
             });
+
+
+            _newrelic2.default.addCustomParameters(opt);
+
+            // check isAuthorized
             _context.t0 = !endpoint.isAuthorized;
 
             if (_context.t0) {
-              _context.next = 6;
+              _context.next = 7;
               break;
             }
 
-            _context.next = 5;
-            return (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt));
-
-          case 5:
-            _context.t0 = _context.sent;
+            _context.next = 6;
+            return wrap('isAuthorized', endpoint.isAuthorized.bind(null, opt));
 
           case 6:
+            _context.t0 = _context.sent;
+
+          case 7:
             authorized = _context.t0;
 
             if (!(authorized !== true)) {
-              _context.next = 11;
+              _context.next = 10;
               break;
             }
 
-            err = new Error('Unauthorized');
+            throw new _errors.UnauthorizedError();
 
-            err.status = 401;
-            throw err;
-
-          case 11:
+          case 10:
 
             // call process
             processFn = typeof endpoint === 'function' ? endpoint : endpoint.process;
 
             if (!processFn) {
-              _context.next = 18;
+              _context.next = 17;
               break;
             }
 
-            _context.next = 15;
-            return (0, _handleAsync.promisify)(processFn.bind(null, opt));
+            _context.next = 14;
+            return wrap('process', processFn.bind(null, opt));
 
-          case 15:
+          case 14:
             _context.t1 = _context.sent;
-            _context.next = 19;
+            _context.next = 18;
             break;
 
-          case 18:
+          case 17:
             _context.t1 = null;
 
-          case 19:
+          case 18:
             rawData = _context.t1;
 
             if (!endpoint.format) {
-              _context.next = 26;
+              _context.next = 25;
               break;
             }
 
-            _context.next = 23;
-            return (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData));
+            _context.next = 22;
+            return wrap('format', endpoint.format.bind(null, opt, rawData));
 
-          case 23:
+          case 22:
             _context.t2 = _context.sent;
-            _context.next = 27;
+            _context.next = 26;
             break;
 
-          case 26:
+          case 25:
             _context.t2 = rawData;
 
-          case 27:
+          case 26:
             resultData = _context.t2;
 
             if (!(resultData == null)) {
-              _context.next = 32;
+              _context.next = 31;
               break;
             }
 
             if (!(req.method === 'GET')) {
-              _context.next = 31;
+              _context.next = 30;
               break;
             }
 
             throw new _errors.NotFoundError();
 
-          case 31:
+          case 30:
             return _context.abrupt('return', res.status(successCode || 204).end());
 
-          case 32:
+          case 31:
 
             // some data, status code for it
             res.status(successCode || 200);
@@ -140,19 +150,19 @@ var process = function () {
             // stream response
 
             if (!(resultData.pipe && resultData.on)) {
-              _context.next = 36;
+              _context.next = 35;
               break;
             }
 
             resultData.pipe(res);
             return _context.abrupt('return');
 
-          case 36:
+          case 35:
 
             // json obj response
             res.json(resultData).end();
 
-          case 37:
+          case 36:
           case 'end':
             return _context.stop();
         }
@@ -168,7 +178,9 @@ var process = function () {
 exports.default = function (o) {
   // wrap it so it has a name
   var handleAPIRequest = function handleAPIRequest(req, res, next) {
-    return process(o, req, res).catch(next);
+    _newrelic2.default.startWebTransaction(o.hierarchy, function () {
+      return process(o, req, res).catch(next);
+    });
   };
   return handleAPIRequest;
 };

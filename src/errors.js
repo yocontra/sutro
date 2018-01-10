@@ -6,6 +6,14 @@ export const codes = {
   serverError: 500
 }
 
+export class UnauthorizedError extends Error {
+  constructor(message='Unauthorized', status=codes.unauthorized) {
+    super(message)
+    this.message = message
+    this.status = status
+  }
+}
+
 export class BadRequestError extends Error {
   constructor(message='Bad Request', status=codes.badRequest) {
     super(message)

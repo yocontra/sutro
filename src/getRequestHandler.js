@@ -1,5 +1,9 @@
 import { promisify } from 'handle-async'
-import { NotFoundError } from './errors'
+import newrelic from 'newrelic'
+import { NotFoundError, UnauthorizedError } from './errors'
+
+const wrap = (name, fn) =>
+  newrelic.createTracer(name, () => promisify(fn))()
 
 const process = async ({ endpoint, successCode }, req, res) => {
   const opt = {
@@ -19,20 +23,18 @@ const process = async ({ endpoint, successCode }, req, res) => {
     _res: res
   }
 
+  newrelic.addCustomParameters(opt)
+
   // check isAuthorized
-  const authorized = !endpoint.isAuthorized || await promisify(endpoint.isAuthorized.bind(null, opt))
-  if (authorized !== true) {
-    const err = new Error('Unauthorized')
-    err.status = 401
-    throw err
-  }
+  const authorized = !endpoint.isAuthorized || await wrap('isAuthorized', endpoint.isAuthorized.bind(null, opt))
+  if (authorized !== true) throw new UnauthorizedError()
 
   // call process
   const processFn = typeof endpoint === 'function' ? endpoint : endpoint.process
-  const rawData = processFn ? await promisify(processFn.bind(null, opt)) : null
+  const rawData = processFn ? await wrap('process', processFn.bind(null, opt)) : null
 
   // call format on process result
-  const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
+  const resultData = endpoint.format ? await wrap('format', endpoint.format.bind(null, opt, rawData)) : rawData
 
   // no response
   if (resultData == null) {
@@ -55,6 +57,8 @@ const process = async ({ endpoint, successCode }, req, res) => {
 
 export default (o) => {
   // wrap it so it has a name
-  const handleAPIRequest = (req, res, next) => process(o, req, res).catch(next)
+  const handleAPIRequest = (req, res, next) => {
+    newrelic.startWebTransaction(o.hierarchy, () => process(o, req, res).catch(next))
+  }
   return handleAPIRequest
 }

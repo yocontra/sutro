@@ -79,6 +79,7 @@
     "express": "^4.16.2",
     "handle-async": "^1.0.1",
     "lodash.omit": "^4.5.0",
+    "newrelic": "^2.5.0",
     "pluralize": "^7.0.0",
     "url-join": "2.0.2"
   }
