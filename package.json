@@ -81,6 +81,6 @@
     "lodash.omit": "^4.5.0",
     "newrelic": "^2.5.0",
     "pluralize": "^7.0.0",
-    "url-join": "2.0.2"
+    "url-join": "^2.0.5"
   }
 }
