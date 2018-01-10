@@ -35,7 +35,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
-    "babel-eslint": "^8.0.0",
+    "babel-eslint": "^8.2.1",
     "babel-loader": "^7.1.2",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-runtime": "^6.15.0",
@@ -43,14 +43,13 @@
     "babel-preset-es2015-loose": "^8.0.0",
     "babel-preset-stage-0": "^6.16.0",
     "babel-register": "^6.26.0",
-    "babelify": "^7.3.0",
-    "eslint": "^4.6.1",
+    "eslint": "^4.15.0",
     "eslint-config-rackt": "^1.1.1",
-    "mocha": "^3.5.3",
+    "mocha": "^4.1.0",
     "rimraf": "^2.6.2",
-    "should": "^13.0.0",
+    "should": "^13.2.0",
     "supertest": "^3.0.0",
-    "swagger-parser": "^3.4.2"
+    "swagger-parser": "^4.0.1"
   },
   "babel": {
     "presets": [
@@ -80,10 +79,10 @@
   },
   "dependencies": {
     "dot-prop": "^4.2.0",
-    "express": "^4.15.4",
+    "express": "^4.16.2",
     "handle-async": "^1.0.1",
     "lodash.omit": "^4.5.0",
     "pluralize": "^7.0.0",
-    "url-join": "^2.0.1"
+    "url-join": "^2.0.4"
   }
 }
