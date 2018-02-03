@@ -58,7 +58,7 @@ var process = function () {
             });
 
 
-            _newrelic2.default.addCustomParameters((0, _extends3.default)({}, opt, {
+            _newrelic2.default.addCustomAttributes((0, _extends3.default)({}, opt, {
               _req: undefined,
               _res: undefined
             }));

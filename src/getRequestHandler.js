@@ -23,7 +23,7 @@ const process = async ({ endpoint, successCode }, req, res) => {
     _res: res
   }
 
-  newrelic.addCustomParameters({
+  newrelic.addCustomAttributes({
     ...opt,
     _req: undefined,
     _res: undefined
