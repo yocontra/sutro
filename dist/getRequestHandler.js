@@ -88,64 +88,88 @@ var process = function () {
             throw new _errors.UnauthorizedError();
 
           case 10:
+            if (!req.timedout) {
+              _context.next = 12;
+              break;
+            }
+
+            return _context.abrupt('return');
+
+          case 12:
 
             // call process
             processFn = typeof endpoint === 'function' ? endpoint : endpoint.process;
 
             if (!processFn) {
-              _context.next = 17;
+              _context.next = 19;
               break;
             }
 
-            _context.next = 14;
+            _context.next = 16;
             return wrap('process', processFn.bind(null, opt));
 
-          case 14:
+          case 16:
             _context.t1 = _context.sent;
-            _context.next = 18;
+            _context.next = 20;
             break;
 
-          case 17:
+          case 19:
             _context.t1 = null;
 
-          case 18:
+          case 20:
             rawData = _context.t1;
 
-            if (!endpoint.format) {
-              _context.next = 25;
+            if (!req.timedout) {
+              _context.next = 23;
               break;
             }
 
-            _context.next = 22;
+            return _context.abrupt('return');
+
+          case 23:
+            if (!endpoint.format) {
+              _context.next = 29;
+              break;
+            }
+
+            _context.next = 26;
             return wrap('format', endpoint.format.bind(null, opt, rawData));
 
-          case 22:
+          case 26:
             _context.t2 = _context.sent;
-            _context.next = 26;
+            _context.next = 30;
             break;
 
-          case 25:
+          case 29:
             _context.t2 = rawData;
 
-          case 26:
+          case 30:
             resultData = _context.t2;
 
+            if (!req.timedout) {
+              _context.next = 33;
+              break;
+            }
+
+            return _context.abrupt('return');
+
+          case 33:
             if (!(resultData == null)) {
-              _context.next = 31;
+              _context.next = 37;
               break;
             }
 
             if (!(req.method === 'GET')) {
-              _context.next = 30;
+              _context.next = 36;
               break;
             }
 
             throw new _errors.NotFoundError();
 
-          case 30:
+          case 36:
             return _context.abrupt('return', res.status(successCode || 204).end());
 
-          case 31:
+          case 37:
 
             // some data, status code for it
             res.status(successCode || 200);
@@ -153,19 +177,19 @@ var process = function () {
             // stream response
 
             if (!(resultData.pipe && resultData.on)) {
-              _context.next = 35;
+              _context.next = 41;
               break;
             }
 
             resultData.pipe(res);
             return _context.abrupt('return');
 
-          case 35:
+          case 41:
 
             // json obj response
             res.json(resultData).end();
 
-          case 36:
+          case 42:
           case 'end':
             return _context.stop();
         }
@@ -181,6 +205,7 @@ var process = function () {
 exports.default = function (o) {
   // wrap it so it has a name
   var handleAPIRequest = function handleAPIRequest(req, res, next) {
+    if (req.timedout) return;
     _newrelic2.default.startWebTransaction(o.hierarchy, function () {
       return process(o, req, res).catch(next);
     });

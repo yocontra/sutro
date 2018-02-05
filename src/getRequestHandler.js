@@ -32,13 +32,16 @@ const process = async ({ endpoint, successCode }, req, res) => {
   // check isAuthorized
   const authorized = !endpoint.isAuthorized || await wrap('isAuthorized', endpoint.isAuthorized.bind(null, opt))
   if (authorized !== true) throw new UnauthorizedError()
+  if (req.timedout) return
 
   // call process
   const processFn = typeof endpoint === 'function' ? endpoint : endpoint.process
   const rawData = processFn ? await wrap('process', processFn.bind(null, opt)) : null
+  if (req.timedout) return
 
   // call format on process result
   const resultData = endpoint.format ? await wrap('format', endpoint.format.bind(null, opt, rawData)) : rawData
+  if (req.timedout) return
 
   // no response
   if (resultData == null) {
@@ -62,6 +65,7 @@ const process = async ({ endpoint, successCode }, req, res) => {
 export default (o) => {
   // wrap it so it has a name
   const handleAPIRequest = (req, res, next) => {
+    if (req.timedout) return
     newrelic.startWebTransaction(o.hierarchy, () => process(o, req, res).catch(next))
   }
   return handleAPIRequest
