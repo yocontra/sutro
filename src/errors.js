@@ -23,9 +23,15 @@ export class BadRequestError extends Error {
 }
 
 export class ValidationError extends BadRequestError {
-  constructor(fields) {
+  constructor(message, fields) {
     super()
-    this.fields = fields
+    if (message && fields) {
+      this.message = message
+      this.fields = fields
+    }
+    if (message && !fields) {
+      this.fields = message
+    }
   }
 }
 
