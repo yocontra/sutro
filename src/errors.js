@@ -22,6 +22,13 @@ export class BadRequestError extends Error {
   }
 }
 
+export class ValidationError extends BadRequestError {
+  constructor(fields) {
+    super()
+    this.fields = fields
+  }
+}
+
 export class NotFoundError extends Error {
   constructor(message='Not Found', status=codes.notFound) {
     super(message)
