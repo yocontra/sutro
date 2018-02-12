@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.NotFoundError = exports.BadRequestError = exports.UnauthorizedError = exports.codes = undefined;
+exports.NotFoundError = exports.ValidationError = exports.BadRequestError = exports.UnauthorizedError = exports.codes = undefined;
 
 var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
@@ -67,6 +67,27 @@ var BadRequestError = exports.BadRequestError = function (_Error2) {
   return BadRequestError;
 }(Error);
 
+var ValidationError = exports.ValidationError = function (_BadRequestError) {
+  (0, _inherits3.default)(ValidationError, _BadRequestError);
+
+  function ValidationError(message, fields) {
+    (0, _classCallCheck3.default)(this, ValidationError);
+
+    var _this3 = (0, _possibleConstructorReturn3.default)(this, (ValidationError.__proto__ || (0, _getPrototypeOf2.default)(ValidationError)).call(this));
+
+    if (message && fields) {
+      _this3.message = message;
+      _this3.fields = fields;
+    }
+    if (message && !fields) {
+      _this3.fields = message;
+    }
+    return _this3;
+  }
+
+  return ValidationError;
+}(BadRequestError);
+
 var NotFoundError = exports.NotFoundError = function (_Error3) {
   (0, _inherits3.default)(NotFoundError, _Error3);
 
@@ -75,11 +96,11 @@ var NotFoundError = exports.NotFoundError = function (_Error3) {
     var status = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : codes.notFound;
     (0, _classCallCheck3.default)(this, NotFoundError);
 
-    var _this3 = (0, _possibleConstructorReturn3.default)(this, (NotFoundError.__proto__ || (0, _getPrototypeOf2.default)(NotFoundError)).call(this, message));
+    var _this4 = (0, _possibleConstructorReturn3.default)(this, (NotFoundError.__proto__ || (0, _getPrototypeOf2.default)(NotFoundError)).call(this, message));
 
-    _this3.message = message;
-    _this3.status = status;
-    return _this3;
+    _this4.message = message;
+    _this4.status = status;
+    return _this4;
   }
 
   return NotFoundError;

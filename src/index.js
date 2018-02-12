@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { promisify } from 'handle-async'
+import { NotFoundError } from './errors'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'
 import getMeta from './getMeta'
@@ -30,5 +31,8 @@ export default ({ swagger, base, resources, pre }={}) => {
     }
     router[o.method](o.path, ...handlers)
   })
+
+  // handle 404s
+  router.use((req, res, next) => next(new NotFoundError()))
   return router
 }
