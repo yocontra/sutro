@@ -8,6 +8,8 @@ var _express = require('express');
 
 var _handleAsync = require('handle-async');
 
+var _errors = require('./errors');
+
 var _getRequestHandler = require('./getRequestHandler');
 
 var _getRequestHandler2 = _interopRequireDefault(_getRequestHandler);
@@ -56,6 +58,11 @@ exports.default = function () {
       });
     }
     router[o.method].apply(router, [o.path].concat(handlers));
+  });
+
+  // handle 404s
+  router.use(function (req, res, next) {
+    return next(new _errors.NotFoundError());
   });
   return router;
 };
