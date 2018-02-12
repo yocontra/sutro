@@ -19,6 +19,7 @@ const process = async ({ endpoint, successCode }, req, res) => {
     data: req.body,
     options: req.query,
     session: req.session,
+    noResponse: req.query.response === 'false',
     _req: req,
     _res: res
   }
@@ -46,6 +47,11 @@ const process = async ({ endpoint, successCode }, req, res) => {
   // no response
   if (resultData == null) {
     if (req.method === 'GET') throw new NotFoundError()
+    return res.status(successCode || 204).end()
+  }
+
+  // user asked for no body (low bandwidth)
+  if (opt.noResponse) {
     return res.status(successCode || 204).end()
   }
 

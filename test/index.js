@@ -120,6 +120,14 @@ describe('sutro - function handlers', () => {
       .expect(201, { created: true })
   )
 
+  it('should register a resource create endpoint that works with response=false', async () =>
+    request(app).post('/users')
+      .set('Accept', 'application/json')
+      .query({ response: false })
+      .expect(201)
+      .expect(({ body }) => !body)
+  )
+
   it('should register a resource delete endpoint', async () =>
     request(app).delete('/users/1')
       .set('Accept', 'application/json')
