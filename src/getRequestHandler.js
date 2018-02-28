@@ -1,5 +1,6 @@
 import { promisify } from 'handle-async'
 import newrelic from 'newrelic'
+import pump from 'pump'
 import { NotFoundError, UnauthorizedError } from './errors'
 
 const wrap = (name, fn) =>
@@ -60,7 +61,10 @@ const process = async ({ endpoint, successCode }, req, res) => {
 
   // stream response
   if (resultData.pipe && resultData.on) {
-    resultData.pipe(res)
+    pump(resultData, res, (err) => {
+      if (err) throw err
+      res.end()
+    })
     return
   }
 

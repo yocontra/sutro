@@ -22,6 +22,10 @@ var _newrelic = require('newrelic');
 
 var _newrelic2 = _interopRequireDefault(_newrelic);
 
+var _pump = require('pump');
+
+var _pump2 = _interopRequireDefault(_pump);
+
 var _errors = require('./errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -53,6 +57,7 @@ var process = function () {
               data: req.body,
               options: req.query,
               session: req.session,
+              noResponse: req.query.response === 'false',
               _req: req,
               _res: res
             });
@@ -170,6 +175,14 @@ var process = function () {
             return _context.abrupt('return', res.status(successCode || 204).end());
 
           case 37:
+            if (!opt.noResponse) {
+              _context.next = 39;
+              break;
+            }
+
+            return _context.abrupt('return', res.status(successCode || 204).end());
+
+          case 39:
 
             // some data, status code for it
             res.status(successCode || 200);
@@ -177,19 +190,22 @@ var process = function () {
             // stream response
 
             if (!(resultData.pipe && resultData.on)) {
-              _context.next = 41;
+              _context.next = 43;
               break;
             }
 
-            resultData.pipe(res);
+            (0, _pump2.default)(resultData, res, function (err) {
+              if (err) throw err;
+              res.end();
+            });
             return _context.abrupt('return');
 
-          case 41:
+          case 43:
 
             // json obj response
             res.json(resultData).end();
 
-          case 42:
+          case 44:
           case 'end':
             return _context.stop();
         }
