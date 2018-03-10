@@ -18,10 +18,6 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 var _handleAsync = require('handle-async');
 
-var _newrelic = require('newrelic');
-
-var _newrelic2 = _interopRequireDefault(_newrelic);
-
 var _pump = require('pump');
 
 var _pump2 = _interopRequireDefault(_pump);
@@ -29,12 +25,6 @@ var _pump2 = _interopRequireDefault(_pump);
 var _errors = require('./errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var wrap = function wrap(name, fn) {
-  return _newrelic2.default.createTracer(name, function () {
-    return (0, _handleAsync.promisify)(fn);
-  })();
-};
 
 var process = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(_ref2, req, res) {
@@ -60,129 +50,122 @@ var process = function () {
               noResponse: req.query.response === 'false',
               _req: req,
               _res: res
+              // check isAuthorized
             });
-
-
-            _newrelic2.default.addCustomAttributes((0, _extends3.default)({}, opt, {
-              _req: undefined,
-              _res: undefined
-            }));
-
-            // check isAuthorized
             _context.t0 = !endpoint.isAuthorized;
 
             if (_context.t0) {
-              _context.next = 7;
+              _context.next = 6;
               break;
             }
 
-            _context.next = 6;
-            return wrap('isAuthorized', endpoint.isAuthorized.bind(null, opt));
+            _context.next = 5;
+            return (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt));
 
-          case 6:
+          case 5:
             _context.t0 = _context.sent;
 
-          case 7:
+          case 6:
             authorized = _context.t0;
 
             if (!(authorized !== true)) {
-              _context.next = 10;
+              _context.next = 9;
               break;
             }
 
             throw new _errors.UnauthorizedError();
 
-          case 10:
+          case 9:
             if (!req.timedout) {
-              _context.next = 12;
+              _context.next = 11;
               break;
             }
 
             return _context.abrupt('return');
 
-          case 12:
+          case 11:
 
             // call process
             processFn = typeof endpoint === 'function' ? endpoint : endpoint.process;
 
             if (!processFn) {
-              _context.next = 19;
+              _context.next = 18;
               break;
             }
 
-            _context.next = 16;
-            return wrap('process', processFn.bind(null, opt));
+            _context.next = 15;
+            return (0, _handleAsync.promisify)(processFn.bind(null, opt));
 
-          case 16:
+          case 15:
             _context.t1 = _context.sent;
-            _context.next = 20;
+            _context.next = 19;
             break;
 
-          case 19:
+          case 18:
             _context.t1 = null;
 
-          case 20:
+          case 19:
             rawData = _context.t1;
 
             if (!req.timedout) {
-              _context.next = 23;
+              _context.next = 22;
               break;
             }
 
             return _context.abrupt('return');
 
-          case 23:
+          case 22:
             if (!endpoint.format) {
-              _context.next = 29;
+              _context.next = 28;
               break;
             }
 
-            _context.next = 26;
-            return wrap('format', endpoint.format.bind(null, opt, rawData));
+            _context.next = 25;
+            return (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData));
 
-          case 26:
+          case 25:
             _context.t2 = _context.sent;
-            _context.next = 30;
+            _context.next = 29;
             break;
 
-          case 29:
+          case 28:
             _context.t2 = rawData;
 
-          case 30:
+          case 29:
             resultData = _context.t2;
 
             if (!req.timedout) {
-              _context.next = 33;
+              _context.next = 32;
               break;
             }
 
             return _context.abrupt('return');
 
-          case 33:
+          case 32:
             if (!(resultData == null)) {
-              _context.next = 37;
+              _context.next = 36;
               break;
             }
 
             if (!(req.method === 'GET')) {
-              _context.next = 36;
+              _context.next = 35;
               break;
             }
 
             throw new _errors.NotFoundError();
 
-          case 36:
+          case 35:
             return _context.abrupt('return', res.status(successCode || 204).end());
 
-          case 37:
+          case 36:
             if (!opt.noResponse) {
-              _context.next = 39;
+              _context.next = 38;
               break;
             }
 
             return _context.abrupt('return', res.status(successCode || 204).end());
 
-          case 39:
+          case 38:
 
             // some data, status code for it
             res.status(successCode || 200);
@@ -190,7 +173,7 @@ var process = function () {
             // stream response
 
             if (!(resultData.pipe && resultData.on)) {
-              _context.next = 43;
+              _context.next = 42;
               break;
             }
 
@@ -200,12 +183,12 @@ var process = function () {
             });
             return _context.abrupt('return');
 
-          case 43:
+          case 42:
 
             // json obj response
             res.json(resultData).end();
 
-          case 44:
+          case 43:
           case 'end':
             return _context.stop();
         }
@@ -222,9 +205,7 @@ exports.default = function (o) {
   // wrap it so it has a name
   var handleAPIRequest = function handleAPIRequest(req, res, next) {
     if (req.timedout) return;
-    _newrelic2.default.startWebTransaction(o.hierarchy, function () {
-      return process(o, req, res).catch(next);
-    });
+    process(o, req, res).catch(next);
   };
   return handleAPIRequest;
 };
