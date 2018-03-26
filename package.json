@@ -51,16 +51,24 @@
   "babel": {
     "plugins": [
       "add-module-exports",
-      [ "transform-object-rest-spread", { "useBuiltIns": true } ]
+      [
+        "transform-object-rest-spread",
+        {
+          "useBuiltIns": true
+        }
+      ]
     ],
     "presets": [
-      [ "env", {
-        "targets": {
-          "node": "current"
-        },
-        "loose": true,
-        "useBuiltIns": "usage"
-      } ]
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          },
+          "loose": true,
+          "useBuiltIns": "usage"
+        }
+      ]
     ]
   },
   "eslintConfig": {
