@@ -51,6 +51,7 @@ const process = async ({ endpoint, successCode }, req, res) => {
   // stream response
   if (resultData.pipe && resultData.on) {
     pump(resultData, res, (err) => {
+      if (req.timedout) return
       if (err) throw err
       res.end()
     })
@@ -65,7 +66,11 @@ export default (o) => {
   // wrap it so it has a name
   const handleAPIRequest = (req, res, next) => {
     if (req.timedout) return
-    process(o, req, res).catch(next)
+    try {
+      process(o, req, res).catch(next)
+    } catch (err) {
+      next(err)
+    }
   }
   return handleAPIRequest
 }

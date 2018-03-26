@@ -1,8 +1,6 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.__esModule = true;
 
 var _urlJoin = require('url-join');
 
@@ -19,23 +17,14 @@ var _walkResources2 = _interopRequireDefault(_walkResources);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // TODO: handle nesting correctly
-exports.default = function (_ref) {
-  var base = _ref.base,
-      resources = _ref.resources;
-
-  var paths = {};
-  (0, _walkResources2.default)(resources, function (_ref2) {
-    var hierarchy = _ref2.hierarchy,
-        path = _ref2.path,
-        method = _ref2.method,
-        instance = _ref2.instance,
-        endpoint = _ref2.endpoint;
-
+exports.default = ({ base, resources }) => {
+  const paths = {};
+  (0, _walkResources2.default)(resources, ({ hierarchy, path, method, instance, endpoint }) => {
     if (endpoint.hidden) return; // skip
-    var descriptor = {
+    const descriptor = {
       path: base ? (0, _urlJoin2.default)(base, path) : path,
-      method: method,
-      instance: instance
+      method,
+      instance
     };
     _dotProp2.default.set(paths, hierarchy, descriptor);
   });
