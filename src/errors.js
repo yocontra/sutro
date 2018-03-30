@@ -1,3 +1,13 @@
+import { inspect } from 'util'
+
+const inspectOptions = {
+  depth: 100,
+  breakLength: Infinity
+}
+
+const serializeIssues = (fields) =>
+  fields.map((f) => `\n - ${inspect(f, inspectOptions)}`)
+
 export const codes = {
   badRequest: 400,
   unauthorized: 401,
@@ -12,6 +22,9 @@ export class UnauthorizedError extends Error {
     this.message = message
     this.status = status
   }
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`
+  }
 }
 
 export class BadRequestError extends Error {
@@ -19,6 +32,9 @@ export class BadRequestError extends Error {
     super(message)
     this.message = message
     this.status = status
+  }
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`
   }
 }
 
@@ -33,6 +49,11 @@ export class ValidationError extends BadRequestError {
       this.fields = message
     }
   }
+  toString() {
+    const original = super.toString()
+    if (!this.fields) return original // no custom validation
+    return `${original}\nIssues:${serializeIssues(this.fields)}`
+  }
 }
 
 export class NotFoundError extends Error {
@@ -40,5 +61,8 @@ export class NotFoundError extends Error {
     super(message)
     this.message = message
     this.status = status
+  }
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`
   }
 }

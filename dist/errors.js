@@ -1,6 +1,17 @@
 'use strict';
 
 exports.__esModule = true;
+exports.NotFoundError = exports.ValidationError = exports.BadRequestError = exports.UnauthorizedError = exports.codes = undefined;
+
+var _util = require('util');
+
+const inspectOptions = {
+  depth: 100,
+  breakLength: Infinity
+};
+
+const serializeIssues = fields => fields.map(f => `\n - ${(0, _util.inspect)(f, inspectOptions)}`);
+
 const codes = exports.codes = {
   badRequest: 400,
   unauthorized: 401,
@@ -15,6 +26,9 @@ class UnauthorizedError extends Error {
     this.message = message;
     this.status = status;
   }
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`;
+  }
 }
 
 exports.UnauthorizedError = UnauthorizedError;
@@ -23,6 +37,9 @@ class BadRequestError extends Error {
     super(message);
     this.message = message;
     this.status = status;
+  }
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`;
   }
 }
 
@@ -38,6 +55,11 @@ class ValidationError extends BadRequestError {
       this.fields = message;
     }
   }
+  toString() {
+    const original = super.toString();
+    if (!this.fields) return original; // no custom validation
+    return `${original}\nIssues:${serializeIssues(this.fields)}`;
+  }
 }
 
 exports.ValidationError = ValidationError;
@@ -46,6 +68,9 @@ class NotFoundError extends Error {
     super(message);
     this.message = message;
     this.status = status;
+  }
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`;
   }
 }
 exports.NotFoundError = NotFoundError;
