@@ -86,7 +86,7 @@ describe('sutro - function handlers', () => {
           }
         },
         me: {
-          process: (opts, cb) => cb(null, { me: true }),
+          execute: (opts, cb) => cb(null, { me: true }),
           http: {
             method: 'get',
             instance: false
@@ -373,7 +373,7 @@ describe('sutro - async function handlers', () => {
         updateById: async () => await { updated: true },
         replaceById: async () => await { replaced: true },
         me: {
-          process: async () => await { me: true },
+          execute: async () => await { me: true },
           http: {
             method: 'get',
             instance: false
@@ -452,21 +452,21 @@ describe('sutro - flat value handlers', () => {
         updateById: () => ({ updated: true }),
         replaceById: () => ({ replaced: true }),
         me: {
-          process: () => ({ me: true }),
+          execute: () => ({ me: true }),
           http: {
             method: 'get',
             instance: false
           }
         },
         isCool: {
-          process: () => false,
+          execute: () => false,
           http: {
             method: 'get',
             instance: true
           }
         },
         nulled: {
-          process: () => null,
+          execute: () => null,
           http: {
             method: 'get',
             instance: false

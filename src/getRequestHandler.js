@@ -26,7 +26,7 @@ const process = async ({ endpoint, successCode }, req, res) => {
   if (req.timedout) return
 
   // call process
-  const processFn = typeof endpoint === 'function' ? endpoint : endpoint.process
+  const processFn = typeof endpoint === 'function' ? endpoint : endpoint.execute
   const rawData = processFn ? await promisify(processFn.bind(null, opt)) : null
   if (req.timedout) return
 

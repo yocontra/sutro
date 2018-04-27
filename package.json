@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -34,19 +34,19 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.2",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.26.0",
     "eslint": "^4.19.1",
     "eslint-config-rackt": "^1.1.1",
-    "mocha": "^5.0.5",
+    "mocha": "^5.1.1",
     "rimraf": "^2.6.2",
     "should": "^13.2.1",
     "supertest": "^3.0.0",
-    "swagger-parser": "^4.0.2"
+    "swagger-parser": "^4.1.0"
   },
   "babel": {
     "plugins": [
