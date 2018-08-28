@@ -12,7 +12,7 @@ var _errors = require('./errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const process = async ({ endpoint, successCode }, req, res) => {
+const pipeline = async ({ endpoint, successCode }, req, res) => {
   const opt = Object.assign({}, req.params, {
     ip: req.ip,
     url: req.url,
@@ -33,12 +33,12 @@ const process = async ({ endpoint, successCode }, req, res) => {
   if (authorized !== true) throw new _errors.UnauthorizedError();
   if (req.timedout) return;
 
-  // call process
-  const processFn = typeof endpoint === 'function' ? endpoint : endpoint.execute;
-  const rawData = processFn ? await (0, _handleAsync.promisify)(processFn.bind(null, opt)) : null;
+  // call execute
+  const executeFn = typeof endpoint === 'function' ? endpoint : endpoint.execute;
+  const rawData = executeFn ? await (0, _handleAsync.promisify)(executeFn.bind(null, opt)) : null;
   if (req.timedout) return;
 
-  // call format on process result
+  // call format on execute result
   const resultData = endpoint.format ? await (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData)) : rawData;
   if (req.timedout) return;
 
@@ -61,7 +61,6 @@ const process = async ({ endpoint, successCode }, req, res) => {
     (0, _pump2.default)(resultData, res, err => {
       if (req.timedout) return;
       if (err) throw err;
-      res.end();
     });
     return;
   }
@@ -75,7 +74,7 @@ exports.default = o => {
   const handleAPIRequest = (req, res, next) => {
     if (req.timedout) return;
     try {
-      process(o, req, res).catch(next);
+      pipeline(o, req, res).catch(next);
     } catch (err) {
       next(err);
     }

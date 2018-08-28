@@ -2,7 +2,7 @@ import { promisify } from 'handle-async'
 import pump from 'pump'
 import { NotFoundError, UnauthorizedError } from './errors'
 
-const process = async ({ endpoint, successCode }, req, res) => {
+const pipeline = async ({ endpoint, successCode }, req, res) => {
   const opt = {
     ...req.params,
     ip: req.ip,
@@ -25,12 +25,12 @@ const process = async ({ endpoint, successCode }, req, res) => {
   if (authorized !== true) throw new UnauthorizedError()
   if (req.timedout) return
 
-  // call process
-  const processFn = typeof endpoint === 'function' ? endpoint : endpoint.execute
-  const rawData = processFn ? await promisify(processFn.bind(null, opt)) : null
+  // call execute
+  const executeFn = typeof endpoint === 'function' ? endpoint : endpoint.execute
+  const rawData = executeFn ? await promisify(executeFn.bind(null, opt)) : null
   if (req.timedout) return
 
-  // call format on process result
+  // call format on execute result
   const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
   if (req.timedout) return
 
@@ -53,7 +53,6 @@ const process = async ({ endpoint, successCode }, req, res) => {
     pump(resultData, res, (err) => {
       if (req.timedout) return
       if (err) throw err
-      res.end()
     })
     return
   }
@@ -67,7 +66,7 @@ export default (o) => {
   const handleAPIRequest = (req, res, next) => {
     if (req.timedout) return
     try {
-      process(o, req, res).catch(next)
+      pipeline(o, req, res).catch(next)
     } catch (err) {
       next(err)
     }
