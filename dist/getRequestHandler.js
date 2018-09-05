@@ -20,6 +20,7 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
     method: req.method,
     subdomains: req.subdomains,
     path: req.path,
+    headers: req.headers,
     cookies: req.cookies,
     user: req.user,
     data: req.body,
