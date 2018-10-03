@@ -95,4 +95,4 @@ exports.default = ({ swagger = {}, base, resources }) => {
   return out;
 };
 
-module.exports = exports['default'];
+module.exports = exports.default;

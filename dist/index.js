@@ -51,4 +51,4 @@ exports.default = ({ swagger, base, resources, pre } = {}) => {
   return router;
 };
 
-module.exports = exports['default'];
+module.exports = exports.default;

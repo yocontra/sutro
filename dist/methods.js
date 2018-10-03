@@ -28,4 +28,4 @@ exports.default = {
     instance: true
   }
 };
-module.exports = exports['default'];
+module.exports = exports.default;

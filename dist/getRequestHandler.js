@@ -83,4 +83,4 @@ exports.default = o => {
   return handleAPIRequest;
 };
 
-module.exports = exports['default'];
+module.exports = exports.default;

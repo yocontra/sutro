@@ -20,4 +20,4 @@ exports.default = ({ resource, endpoint, instance }) => {
   return path;
 };
 
-module.exports = exports['default'];
+module.exports = exports.default;
