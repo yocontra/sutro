@@ -69,7 +69,7 @@ export default (o) => {
     try {
       pipeline(o, req, res).catch(next)
     } catch (err) {
-      next(err)
+      return next(err)
     }
   }
   return handleAPIRequest

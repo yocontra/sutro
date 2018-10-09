@@ -49,7 +49,7 @@ const flattenConfig = (base, override={}) => {
       ...override.responses
     } : base.responses,
     parameters: override.parameters
-      ? [ ...(base.parameters || []), ...override.parameters ]
+      ? [ ...base.parameters || [], ...override.parameters ]
       : base.parameters,
     ...filtered
   }

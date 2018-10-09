@@ -150,7 +150,7 @@ describe('sutro - function handlers', () => {
   )
 
   it('should register a custom resource', async () =>
-    await request(app).get('/users/me')
+    request(app).get('/users/me')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, { me: true })
@@ -366,14 +366,14 @@ describe('sutro - async function handlers', () => {
   const config = {
     resources: {
       user: {
-        create: async () => await { created: true },
-        find: async () => await users,
-        findById: async (opts) => await users[opts.userId],
-        deleteById: async () => await { deleted: true },
-        updateById: async () => await { updated: true },
-        replaceById: async () => await { replaced: true },
+        create: async () => ({ created: true }),
+        find: async () => users,
+        findById: async (opts) => users[opts.userId],
+        deleteById: async () => ({ deleted: true }),
+        updateById: async () => ({ updated: true }),
+        replaceById: async () => ({ replaced: true }),
         me: {
-          execute: async () => await { me: true },
+          execute: async () => ({ me: true }),
           http: {
             method: 'get',
             instance: false
