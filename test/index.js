@@ -1,5 +1,6 @@
 /*global it: true, describe: true */
 /*eslint no-console: 0*/
+import pick from 'lodash.pick'
 import should from 'should'
 import sutro from '../src'
 import request from 'supertest'
@@ -447,7 +448,17 @@ describe('sutro - flat value handlers', () => {
       user: {
         create: () => ({ created: true }),
         find: () => users,
-        findById: (opts) => users[opts.userId],
+        findById: (opts) => {
+          const out = users[opts.userId]
+          opts.includes.forEach((i) => {
+            if (i.resource !== 'car') return
+            const ls = cars[opts.userId]
+            out.cars = i.attributes
+              ? ls.map((c) => pick(c, i.attributes))
+              : ls
+          })
+          return out
+        },
         deleteById: () => ({ deleted: true }),
         updateById: () => ({ updated: true }),
         replaceById: () => ({ replaced: true }),
@@ -483,6 +494,32 @@ describe('sutro - flat value handlers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, users)
+  )
+
+  it('should work with includes queries', async () =>
+    request(app).get('/users/1')
+      .set('Accept', 'application/json')
+      .query({ includes: [ 'car.*' ] })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect(({ body }) => {
+        should.exist(body.cars)
+      })
+  )
+
+  it('should work with nested includes queries', async () =>
+    request(app).get('/users/1')
+      .set('Accept', 'application/json')
+      .query({ includes: [ 'car.name', 'car.id' ] })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .expect(({ body }) => {
+        body.cars.forEach((c) => {
+          should.equal(Object.keys(c).length, 2)
+          should.exist(c.name)
+          should.exist(c.id)
+        })
+      })
   )
 
   it('should register a resource findById endpoint', async () =>

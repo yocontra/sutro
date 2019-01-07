@@ -2,6 +2,28 @@ import { promisify } from 'handle-async'
 import pump from 'pump'
 import { NotFoundError, UnauthorizedError } from './errors'
 
+const parseIncludes = (include) => {
+  const out = include.reduce((prev, key) => {
+    const [ relation, ...keys ] = key.split('.')
+    if (!prev[relation]) prev[relation] = {}
+    const nKey = keys.join('.')
+    prev[relation].attributes = [
+      ...prev[relation].attributes || [],
+      nKey
+    ]
+    if (nKey === '*') delete prev[relation].attributes
+    return prev
+  }, {})
+
+  return Object.entries(out).map(([ k, v ]) => ({ resource: k, attributes: v.attributes }))
+}
+
+const toArray = (i) => {
+  if (!i) return []
+  if (Array.isArray(i)) return i.map((i) => String(i))
+  return [ String(i) ]
+}
+
 const pipeline = async ({ endpoint, successCode }, req, res) => {
   const opt = {
     ...req.params,
@@ -17,6 +39,7 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
     data: req.body,
     options: req.query,
     session: req.session,
+    includes: parseIncludes(toArray(req.query.includes)),
     noResponse: req.query.response === 'false',
     _req: req,
     _res: res
