@@ -12,6 +12,26 @@ var _errors = require('./errors');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+const parseIncludes = include => {
+  const out = include.reduce((prev, key) => {
+    const [relation, ...keys] = key.split('.');
+    if (keys.length === 0) return prev; // no sub-attrs specified, just ignore it
+    if (!prev[relation]) prev[relation] = {};
+    const nKey = keys.join('.');
+    prev[relation].attributes = [...(prev[relation].attributes || []), nKey];
+    if (nKey === '*') delete prev[relation].attributes;
+    return prev;
+  }, {});
+
+  return Object.entries(out).map(([k, v]) => ({ resource: k, attributes: v.attributes }));
+};
+
+const toArray = i => {
+  if (!i) return [];
+  if (Array.isArray(i)) return i.map(i => String(i));
+  return [String(i)];
+};
+
 const pipeline = async ({ endpoint, successCode }, req, res) => {
   const opt = Object.assign({}, req.params, {
     ip: req.ip,
@@ -26,6 +46,7 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
     data: req.body,
     options: req.query,
     session: req.session,
+    includes: parseIncludes(toArray(req.query.includes)),
     noResponse: req.query.response === 'false',
     _req: req,
     _res: res
