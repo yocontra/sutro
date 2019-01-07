@@ -507,6 +507,14 @@ describe('sutro - flat value handlers', () => {
       })
   )
 
+  it('should work with includes queries and ignore bad ones', async () =>
+    request(app).get('/users/1')
+      .set('Accept', 'application/json')
+      .query({ includes: [ 'car' ] })
+      .expect('Content-Type', /json/)
+      .expect(200, users[1])
+  )
+
   it('should work with nested includes queries', async () =>
     request(app).get('/users/1')
       .set('Accept', 'application/json')

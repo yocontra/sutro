@@ -5,6 +5,7 @@ import { NotFoundError, UnauthorizedError } from './errors'
 const parseIncludes = (include) => {
   const out = include.reduce((prev, key) => {
     const [ relation, ...keys ] = key.split('.')
+    if (keys.length === 0) return prev // no sub-attrs specified, just ignore it
     if (!prev[relation]) prev[relation] = {}
     const nKey = keys.join('.')
     prev[relation].attributes = [
