@@ -1,24 +1,22 @@
 const toArray = (i) => {
   if (!i) return []
-  if (Array.isArray(i)) return i.map((i) => String(i))
-  return [ String(i) ]
+  if (Array.isArray(i)) return i
+  return [ i ]
 }
 
-
-export default (include) => {
+const parseIncludes = (include) => {
   const inp = toArray(include)
-  const out = inp.reduce((prev, key) => {
-    const [ relation, ...keys ] = key.split('.')
-    if (keys.length === 0) return prev // no sub-attrs specified, just ignore it
-    if (!prev[relation]) prev[relation] = {}
-    const nKey = keys.join('.')
-    prev[relation].attributes = [
-      ...prev[relation].attributes || [],
-      nKey
-    ]
-    if (nKey === '*') delete prev[relation].attributes
-    return prev
-  }, {})
+  return inp.map((i, idx) => {
+    if (typeof i === 'string') i = { resource: i }
+    if (!i || typeof i !== 'object') throw new Error(`Invalid include: ${idx}`)
 
-  return Object.entries(out).map(([ k, v ]) => ({ resource: k, attributes: v.attributes }))
+    return {
+      resource: i.resource,
+      includes: i.includes && parseIncludes(i.includes),
+      attributes: i.attributes && toArray(i.attributes),
+      limit: parseInt(i.limit)
+    }
+  })
 }
+
+export default parseIncludes

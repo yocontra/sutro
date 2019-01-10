@@ -451,7 +451,7 @@ describe('sutro - flat value handlers', () => {
         findById: (opts) => {
           const out = users[opts.userId]
           opts.includes.forEach((i) => {
-            if (i.resource !== 'car') return
+            if (i.resource !== 'cars') return
             const ls = cars[opts.userId]
             out.cars = i.attributes
               ? ls.map((c) => pick(c, i.attributes))
@@ -496,10 +496,10 @@ describe('sutro - flat value handlers', () => {
       .expect(200, users)
   )
 
-  it('should work with includes queries', async () =>
+  it('should work with plain includes queries', async () =>
     request(app).get('/users/1')
       .set('Accept', 'application/json')
-      .query({ includes: [ 'car.*' ] })
+      .query({ includes: [ 'cars' ] })
       .expect('Content-Type', /json/)
       .expect(200)
       .expect(({ body }) => {
@@ -510,15 +510,15 @@ describe('sutro - flat value handlers', () => {
   it('should work with includes queries and ignore bad ones', async () =>
     request(app).get('/users/1')
       .set('Accept', 'application/json')
-      .query({ includes: [ 'car' ] })
+      .query({ includes: [ 'zzz' ] })
       .expect('Content-Type', /json/)
       .expect(200, users[1])
   )
 
-  it('should work with nested includes queries', async () =>
+  it('should work with attributes includes queries', async () =>
     request(app).get('/users/1')
       .set('Accept', 'application/json')
-      .query({ includes: [ 'car.name', 'car.id' ] })
+      .query({ includes: [ { resource: 'cars', attributes: [ 'name', 'id' ] } ] })
       .expect('Content-Type', /json/)
       .expect(200)
       .expect(({ body }) => {
