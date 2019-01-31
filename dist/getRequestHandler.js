@@ -72,7 +72,13 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
   }
 
   // json obj response
-  res.json(resultData).end();
+  if (typeof resultData === 'string') {
+    res.send(resultData);
+  } else {
+    res.json(resultData);
+  }
+
+  res.end();
 };
 
 exports.default = o => {
