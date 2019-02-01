@@ -74,7 +74,7 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
 
   // json obj response
   if (typeof resultData === 'string') {
-    res.type('json').send(resultData);
+    res.type('json').write(resultData);
   } else {
     res.json(resultData);
   }
