@@ -64,6 +64,7 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
 
   // stream response
   if (resultData.pipe && resultData.on) {
+    if (resultData.contentType) res.type(resultData.contentType);
     (0, _pump2.default)(resultData, res, err => {
       if (req.timedout) return;
       if (err) throw err;
@@ -72,9 +73,8 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
   }
 
   // json obj response
-  res.type('json');
   if (typeof resultData === 'string') {
-    res.send(resultData);
+    res.type('json').send(resultData);
   } else {
     res.json(resultData);
   }
