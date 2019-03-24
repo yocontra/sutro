@@ -16,7 +16,20 @@ var _parseIncludes2 = _interopRequireDefault(_parseIncludes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-const pipeline = async ({ endpoint, successCode }, req, res) => {
+const traceAsync = async (trace, name, promise) => {
+  if (!trace) return promise; // no tracing, just return
+  const ourTrace = trace.start(name);
+  try {
+    const res = await promise;
+    ourTrace.end();
+    return res;
+  } catch (err) {
+    ourTrace.end();
+    throw err;
+  }
+};
+
+const pipeline = async (req, res, { endpoint, successCode, trace }) => {
   const opt = Object.assign({}, req.params, {
     ip: req.ip,
     url: req.url,
@@ -35,17 +48,17 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
     _req: req,
     _res: res
     // check isAuthorized
-  });const authorized = !endpoint.isAuthorized || (await (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt)));
+  });const authorized = !endpoint.isAuthorized || (await traceAsync(trace, 'sutro/isAuthorized', (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt))));
   if (authorized !== true) throw new _errors.UnauthorizedError();
   if (req.timedout) return;
 
   // call execute
   const executeFn = typeof endpoint === 'function' ? endpoint : endpoint.execute;
-  const rawData = executeFn ? await (0, _handleAsync.promisify)(executeFn.bind(null, opt)) : null;
+  const rawData = executeFn ? await traceAsync(trace, 'sutro/execute', (0, _handleAsync.promisify)(executeFn.bind(null, opt))) : null;
   if (req.timedout) return;
 
   // call format on execute result
-  const resultData = endpoint.format ? await (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData)) : rawData;
+  const resultData = endpoint.format ? await traceAsync(trace, 'sutro/format', (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData))) : rawData;
   if (req.timedout) return;
 
   // no response
@@ -85,12 +98,12 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
   res.end();
 };
 
-exports.default = o => {
+exports.default = (resource, { trace } = {}) => {
   // wrap it so it has a name
-  const handleAPIRequest = (req, res, next) => {
+  const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return;
     try {
-      pipeline(o, req, res).catch(next);
+      await traceAsync(trace, 'sutro/handleAPIRequest', pipeline(req, res, Object.assign({}, resource, { trace })));
     } catch (err) {
       return next(err);
     }

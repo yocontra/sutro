@@ -6,7 +6,7 @@ import getSwagger from './getSwagger'
 import getMeta from './getMeta'
 import walkResources from './walkResources'
 
-export default ({ swagger, base, resources, pre }={}) => {
+export default ({ swagger, base, resources, pre, trace }={}) => {
   if (!resources) throw new Error('Missing resources option')
   const router = Router({ mergeParams: true })
   router.swagger = getSwagger({ swagger, base, resources })
@@ -20,16 +20,22 @@ export default ({ swagger, base, resources, pre }={}) => {
     res.status(200).json(router.swagger).end()
   )
 
-  walkResources(resources, (o) => {
-    const handlers = [ getRequestHandler(o) ]
+  walkResources(resources, (resource) => {
+    const handlers = [ getRequestHandler(resource, { trace }) ]
     if (pre) {
-      handlers.unshift((req, res, next) => {
-        promisify(pre.bind(null, o, req, res))
-          .catch(next)
-          .then(() => next())
+      handlers.unshift(async (req, res, next) => {
+        const ourTrace = trace && trace.start('sutro/pre')
+        try {
+          await promisify(pre.bind(null, resource, req, res))
+        } catch (err) {
+          if (ourTrace) ourTrace.end()
+          return next(err)
+        }
+        if (ourTrace) ourTrace.end()
+        next()
       })
     }
-    router[o.method](o.path, ...handlers)
+    router[resource.method](resource.path, ...handlers)
   })
 
   // handle 404s

@@ -3,7 +3,20 @@ import pump from 'pump'
 import { NotFoundError, UnauthorizedError } from './errors'
 import parseIncludes from './parseIncludes'
 
-const pipeline = async ({ endpoint, successCode }, req, res) => {
+const traceAsync = async (trace, name, promise) => {
+  if (!trace) return promise // no tracing, just return
+  const ourTrace = trace.start(name)
+  try {
+    const res = await promise
+    ourTrace.end()
+    return res
+  } catch (err) {
+    ourTrace.end()
+    throw err
+  }
+}
+
+const pipeline = async (req, res, { endpoint, successCode, trace }) => {
   const opt = {
     ...req.params,
     ip: req.ip,
@@ -24,17 +37,21 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
     _res: res
   }
   // check isAuthorized
-  const authorized = !endpoint.isAuthorized || await promisify(endpoint.isAuthorized.bind(null, opt))
+  const authorized = !endpoint.isAuthorized || await traceAsync(trace, 'sutro/isAuthorized', promisify(endpoint.isAuthorized.bind(null, opt)))
   if (authorized !== true) throw new UnauthorizedError()
   if (req.timedout) return
 
   // call execute
   const executeFn = typeof endpoint === 'function' ? endpoint : endpoint.execute
-  const rawData = executeFn ? await promisify(executeFn.bind(null, opt)) : null
+  const rawData = executeFn
+    ? await traceAsync(trace, 'sutro/execute', promisify(executeFn.bind(null, opt)))
+    : null
   if (req.timedout) return
 
   // call format on execute result
-  const resultData = endpoint.format ? await promisify(endpoint.format.bind(null, opt, rawData)) : rawData
+  const resultData = endpoint.format
+    ? await traceAsync(trace, 'sutro/format', promisify(endpoint.format.bind(null, opt, rawData)))
+    : rawData
   if (req.timedout) return
 
   // no response
@@ -74,12 +91,12 @@ const pipeline = async ({ endpoint, successCode }, req, res) => {
   res.end()
 }
 
-export default (o) => {
+export default (resource, { trace } = {}) => {
   // wrap it so it has a name
-  const handleAPIRequest = (req, res, next) => {
+  const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return
     try {
-      pipeline(o, req, res).catch(next)
+      await traceAsync(trace, 'sutro/handleAPIRequest', pipeline(req, res, { ...resource, trace }))
     } catch (err) {
       return next(err)
     }

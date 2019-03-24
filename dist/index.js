@@ -26,7 +26,7 @@ var _walkResources2 = _interopRequireDefault(_walkResources);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ({ swagger, base, resources, pre } = {}) => {
+exports.default = ({ swagger, base, resources, pre, trace } = {}) => {
   if (!resources) throw new Error('Missing resources option');
   const router = (0, _express.Router)({ mergeParams: true });
   router.swagger = (0, _getSwagger2.default)({ swagger, base, resources });
@@ -36,14 +36,22 @@ exports.default = ({ swagger, base, resources, pre } = {}) => {
   router.get('/', (req, res) => res.status(200).json(router.meta).end());
   router.get('/swagger', (req, res) => res.status(200).json(router.swagger).end());
 
-  (0, _walkResources2.default)(resources, o => {
-    const handlers = [(0, _getRequestHandler2.default)(o)];
+  (0, _walkResources2.default)(resources, resource => {
+    const handlers = [(0, _getRequestHandler2.default)(resource, { trace })];
     if (pre) {
-      handlers.unshift((req, res, next) => {
-        (0, _handleAsync.promisify)(pre.bind(null, o, req, res)).catch(next).then(() => next());
+      handlers.unshift(async (req, res, next) => {
+        const ourTrace = trace && trace.start('sutro/pre');
+        try {
+          await (0, _handleAsync.promisify)(pre.bind(null, resource, req, res));
+        } catch (err) {
+          if (ourTrace) ourTrace.end();
+          return next(err);
+        }
+        if (ourTrace) ourTrace.end();
+        next();
       });
     }
-    router[o.method](o.path, ...handlers);
+    router[resource.method](resource.path, ...handlers);
   });
 
   // handle 404s
