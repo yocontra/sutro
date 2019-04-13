@@ -71,6 +71,7 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
   // stream response
   if (resultData.pipe && resultData.on) {
     if (resultData.contentType) res.type(resultData.contentType)
+    res.once('close', () => resultData.destroy()) // pump does not handle close properly!
     pump(resultData, res, (err) => {
       if (req.timedout) return
       if (err) throw err
