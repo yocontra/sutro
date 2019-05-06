@@ -586,3 +586,78 @@ describe('sutro - flat value handlers', () => {
       .expect(404)
   )
 })
+
+describe('sutro - caching', () => {
+  let meCache
+  let findByIdCache = {}
+  const config = {
+    resources: {
+      user: {
+        findById: {
+          execute: async (opt) => users[opt.userId],
+          cache: {
+            header: () => ({ public: true }),
+            get: async (opt) => findByIdCache[opt.userId],
+            set: async (opt, data) => findByIdCache[opt.userId] = data
+          }
+        },
+        me: {
+          execute: async () => ({ me: true }),
+          cache: {
+            header: { private: true },
+            get: async () => meCache,
+            set: async (opt, data) => meCache = data
+          },
+          http: {
+            method: 'get',
+            instance: false
+          }
+        }
+      }
+    }
+  }
+
+  const app = express().use(sutro(config))
+
+  it('should cache a findById endpoint', async () => {
+    await request(app).get('/users/1')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect('Cache-Control', 'public')
+      .expect(200, users[1])
+
+    await request(app).get('/users/2')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect('Cache-Control', 'public')
+      .expect(200, users[2])
+
+    await request(app).get('/users/1')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect('Cache-Control', 'public')
+      .expect(200, users[1])
+
+    await request(app).get('/users/2')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect('Cache-Control', 'public')
+      .expect(200, users[2])
+
+    should.exist(findByIdCache)
+    findByIdCache.should.eql({
+      1: users[1],
+      2: users[2]
+    })
+  })
+  it('should cache a custom resource', async () => {
+    await request(app).get('/users/me')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect('Cache-Control', 'private')
+      .expect(200, { me: true })
+
+    should.exist(meCache)
+    meCache.should.eql({ me: true })
+  })
+})
