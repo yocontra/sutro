@@ -17,7 +17,7 @@ exports.default = opt => {
   if (opt.staleWhileRevalidate) stack.push(`stale-while-revalidate=${opt.staleWhileRevalidate}`);
   if (Number.isInteger(opt.maxAge)) stack.push(`max-age=${opt.maxAge}`);
   if (Number.isInteger(opt.sMaxAge)) stack.push(`s-maxage=${opt.sMaxAge}`);
-  return stack.join(',');
+  return stack.join(', ');
 };
 
 module.exports = exports.default;

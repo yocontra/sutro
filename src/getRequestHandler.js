@@ -91,7 +91,10 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
   let resultData
 
   // check cache
-  const cachedData = endpoint.cache && endpoint.cache.get && await traceAsync(trace, 'sutro/cache.get', promisify(endpoint.cache.get.bind(null, opt)))
+  const cacheKey = endpoint.cache && endpoint.cache.key && await traceAsync(trace, 'sutro/cache.key', promisify(endpoint.cache.key.bind(null, opt)))
+  if (req.timedout) return
+
+  const cachedData = endpoint.cache && endpoint.cache.get && await traceAsync(trace, 'sutro/cache.get', promisify(endpoint.cache.get.bind(null, opt, cacheKey)))
   if (req.timedout) return
 
   // call execute
@@ -125,7 +128,7 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
 
   // write to cache if we got a fresh response
   if (!cachedData && endpoint.cache && endpoint.cache.set) {
-    await traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, resultData)))
+    await traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, resultData, cacheKey)))
   }
 }
 

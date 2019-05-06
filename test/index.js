@@ -590,9 +590,19 @@ describe('sutro - flat value handlers', () => {
 describe('sutro - caching', () => {
   let meCache
   let findByIdCache = {}
+  let keyedCache = {}
   const config = {
     resources: {
       user: {
+        find: {
+          execute: async () => users,
+          cache: {
+            header: () => ({ public: true, maxAge: 3600 }),
+            key: () => 'yo',
+            get: async (opt, key) => keyedCache[key],
+            set: async (opt, data, key) => keyedCache[key] = data
+          }
+        },
         findById: {
           execute: async (opt) => users[opt.userId],
           cache: {
@@ -659,5 +669,15 @@ describe('sutro - caching', () => {
 
     should.exist(meCache)
     meCache.should.eql({ me: true })
+  })
+  it('should cache with a key function', async () => {
+    await request(app).get('/users')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect('Cache-Control', 'public, max-age=3600')
+      .expect(200, users)
+
+    should.exist(keyedCache.yo)
+    keyedCache.yo.should.eql(users)
   })
 })
