@@ -2,6 +2,18 @@
 
 exports.__esModule = true;
 
+var _parseDuration = require('parse-duration');
+
+var _parseDuration2 = _interopRequireDefault(_parseDuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const parseNumber = v => {
+  const n = typeof v === 'number' ? v : (0, _parseDuration2.default)(v);
+  if (isNaN(n)) throw new Error(`Invalid number: ${v}`);
+  return n / 1000;
+};
+
 exports.default = opt => {
   if (typeof opt === 'string') return opt; // already formatted
   const stack = [];
@@ -13,10 +25,10 @@ exports.default = opt => {
   if (opt.noTransform) stack.push('no-transform');
   if (opt.proxyRevalidate) stack.push('proxy-revalidate');
   if (opt.mustRevalidate) stack.push('proxy-revalidate');
-  if (opt.staleIfError) stack.push(`stale-if-error=${opt.staleIfError}`);
-  if (opt.staleWhileRevalidate) stack.push(`stale-while-revalidate=${opt.staleWhileRevalidate}`);
-  if (Number.isInteger(opt.maxAge)) stack.push(`max-age=${opt.maxAge}`);
-  if (Number.isInteger(opt.sMaxAge)) stack.push(`s-maxage=${opt.sMaxAge}`);
+  if (opt.staleIfError) stack.push(`stale-if-error=${parseNumber(opt.staleIfError)}`);
+  if (opt.staleWhileRevalidate) stack.push(`stale-while-revalidate=${parseNumber(opt.staleWhileRevalidate)}`);
+  if (opt.maxAge) stack.push(`max-age=${parseNumber(opt.maxAge)}`);
+  if (opt.sMaxAge) stack.push(`s-maxage=${parseNumber(opt.sMaxAge)}`);
   return stack.join(', ');
 };
 

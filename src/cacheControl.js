@@ -1,3 +1,13 @@
+import parseDuration from 'parse-duration'
+
+const parseNumber = (v) => {
+  const n = typeof v === 'number'
+    ? v
+    : parseDuration(v)
+  if (isNaN(n)) throw new Error(`Invalid number: ${v}`)
+  return n / 1000
+}
+
 export default (opt) => {
   if (typeof opt === 'string') return opt // already formatted
   const stack = []
@@ -9,9 +19,9 @@ export default (opt) => {
   if (opt.noTransform) stack.push('no-transform')
   if (opt.proxyRevalidate) stack.push('proxy-revalidate')
   if (opt.mustRevalidate) stack.push('proxy-revalidate')
-  if (opt.staleIfError) stack.push(`stale-if-error=${opt.staleIfError}`)
-  if (opt.staleWhileRevalidate) stack.push(`stale-while-revalidate=${opt.staleWhileRevalidate}`)
-  if (Number.isInteger(opt.maxAge)) stack.push(`max-age=${opt.maxAge}`)
-  if (Number.isInteger(opt.sMaxAge)) stack.push(`s-maxage=${opt.sMaxAge}`)
+  if (opt.staleIfError) stack.push(`stale-if-error=${parseNumber(opt.staleIfError)}`)
+  if (opt.staleWhileRevalidate) stack.push(`stale-while-revalidate=${parseNumber(opt.staleWhileRevalidate)}`)
+  if (opt.maxAge) stack.push(`max-age=${parseNumber(opt.maxAge)}`)
+  if (opt.sMaxAge) stack.push(`s-maxage=${parseNumber(opt.sMaxAge)}`)
   return stack.join(', ')
 }

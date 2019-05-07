@@ -597,7 +597,7 @@ describe('sutro - caching', () => {
         find: {
           execute: async () => users,
           cache: {
-            header: () => ({ public: true, maxAge: 3600 }),
+            header: () => ({ public: true, maxAge: '1hr' }),
             key: () => 'yo',
             get: async (opt, key) => keyedCache[key],
             set: async (opt, data, key) => keyedCache[key] = data
