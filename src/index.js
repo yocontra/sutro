@@ -1,12 +1,13 @@
 import { Router } from 'express'
 import { promisify } from 'handle-async'
+import { finished } from 'stream'
 import { NotFoundError } from './errors'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'
 import getMeta from './getMeta'
 import walkResources from './walkResources'
 
-export default ({ swagger, base, resources, pre, trace }={}) => {
+export default ({ swagger, base, resources, pre, post, trace }={}) => {
   if (!resources) throw new Error('Missing resources option')
   const router = Router({ mergeParams: true })
   router.swagger = getSwagger({ swagger, base, resources })
@@ -32,6 +33,20 @@ export default ({ swagger, base, resources, pre, trace }={}) => {
           return next(err)
         }
         if (ourTrace) ourTrace.end()
+        next()
+      })
+    }
+    if (post) {
+      handlers.unshift(async (req, res, next) => {
+        finished(res, async (err) => {
+          const ourTrace = trace && trace.start('sutro/post')
+          try {
+            await promisify(post.bind(null, resource, req, res, err))
+          } catch (err) {
+            if (ourTrace) ourTrace.end()
+          }
+          if (ourTrace) ourTrace.end()
+        })
         next()
       })
     }

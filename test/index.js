@@ -444,6 +444,12 @@ describe('sutro - flat value handlers', () => {
       should.exist(req)
       should.exist(res)
     },
+    post: async (o, req, res, err) => {
+      should.exist(o)
+      should.exist(req)
+      should.exist(res)
+      should.not.exist(err)
+    },
     resources: {
       user: {
         create: () => ({ created: true }),

@@ -6,6 +6,8 @@ var _express = require('express');
 
 var _handleAsync = require('handle-async');
 
+var _stream = require('stream');
+
 var _errors = require('./errors');
 
 var _getRequestHandler = require('./getRequestHandler');
@@ -26,7 +28,7 @@ var _walkResources2 = _interopRequireDefault(_walkResources);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ({ swagger, base, resources, pre, trace } = {}) => {
+exports.default = ({ swagger, base, resources, pre, post, trace } = {}) => {
   if (!resources) throw new Error('Missing resources option');
   const router = (0, _express.Router)({ mergeParams: true });
   router.swagger = (0, _getSwagger2.default)({ swagger, base, resources });
@@ -48,6 +50,20 @@ exports.default = ({ swagger, base, resources, pre, trace } = {}) => {
           return next(err);
         }
         if (ourTrace) ourTrace.end();
+        next();
+      });
+    }
+    if (post) {
+      handlers.unshift(async (req, res, next) => {
+        (0, _stream.finished)(req, async err => {
+          const ourTrace = trace && trace.start('sutro/post');
+          try {
+            await (0, _handleAsync.promisify)(post.bind(null, resource, req, res, err));
+          } catch (err) {
+            if (ourTrace) ourTrace.end();
+          }
+          if (ourTrace) ourTrace.end();
+        });
         next();
       });
     }
