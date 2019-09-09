@@ -25,6 +25,7 @@ class UnauthorizedError extends Error {
     super(message);
     this.message = message;
     this.status = status;
+    Error.captureStackTrace(this, UnauthorizedError);
   }
   toString() {
     return `${super.toString()} (HTTP ${this.status})`;
@@ -37,6 +38,7 @@ class BadRequestError extends Error {
     super(message);
     this.message = message;
     this.status = status;
+    Error.captureStackTrace(this, BadRequestError);
   }
   toString() {
     return `${super.toString()} (HTTP ${this.status})`;
@@ -54,6 +56,7 @@ class ValidationError extends BadRequestError {
     if (message && !fields) {
       this.fields = message;
     }
+    Error.captureStackTrace(this, ValidationError);
   }
   toString() {
     const original = super.toString();
@@ -68,6 +71,7 @@ class NotFoundError extends Error {
     super(message);
     this.message = message;
     this.status = status;
+    Error.captureStackTrace(this, NotFoundError);
   }
   toString() {
     return `${super.toString()} (HTTP ${this.status})`;
