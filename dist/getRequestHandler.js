@@ -114,7 +114,7 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
   // call execute
   if (!cachedData) {
     const executeFn = typeof endpoint === 'function' ? endpoint : endpoint.execute;
-    const rawData = executeFn ? await traceAsync(trace, 'sutro/execute', (0, _handleAsync.promisify)(executeFn.bind(null, opt))) : null;
+    const rawData = typeof executeFn === 'function' ? await traceAsync(trace, 'sutro/execute', (0, _handleAsync.promisify)(executeFn.bind(null, opt))) : executeFn || null;
     if (req.timedout) return;
 
     // call format on execute result
