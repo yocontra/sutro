@@ -95,10 +95,10 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
     includes: (0, _parseIncludes2.default)(req.query.includes),
     noResponse: req.query.response === 'false',
     onFinish: fn => {
-      res.once('finish', () => fn(res));
+      res.once('finish', fn.bind(null, res, req));
     },
     withMutation: fn => {
-      fn(res);
+      fn(res, req);
     },
     _req: req,
     _res: res

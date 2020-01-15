@@ -79,8 +79,8 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
     session: req.session,
     includes: parseIncludes(req.query.includes),
     noResponse: req.query.response === 'false',
-    onFinish: (fn) => { res.once('finish', fn.bind(null, res)) },
-    withMutation: (fn) => { fn(res) },
+    onFinish: (fn) => { res.once('finish', fn.bind(null, res, req)) },
+    withMutation: (fn) => { fn(res, req) },
     _req: req,
     _res: res
   }
