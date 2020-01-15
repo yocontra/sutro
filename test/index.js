@@ -1,4 +1,3 @@
-/*global it: true, describe: true */
 /*eslint no-console: 0*/
 import pick from 'lodash.pick'
 import should from 'should'
