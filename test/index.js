@@ -1,7 +1,7 @@
 /*eslint no-console: 0*/
 import pick from 'lodash.pick'
 import should from 'should'
-import sutro from '../src'
+import sutro, { rewriteLargeRequests } from '../src'
 import request from 'supertest'
 import express from 'express'
 import Parser from 'swagger-parser'
@@ -685,4 +685,35 @@ describe('sutro - caching', () => {
     should.exist(keyedCache.yo)
     keyedCache.yo.should.eql(users)
   })
+})
+
+
+describe('sutro - rewriting requests', () => {
+  const config = {
+    resources: {
+      user: {
+        find: () => [ { a: 1 } ],
+        findById: () => ({ a: 1 })
+      }
+    }
+  }
+  const app = express()
+    .use(rewriteLargeRequests)
+    .use(sutro(config))
+
+  it('should rewrite a post for a resource find endpoint', async () =>
+    request(app).post('/users')
+      .set('Accept', 'application/json')
+      .set('X-HTTP-Method-Override', 'GET')
+      .expect('Content-Type', /json/)
+      .expect(200, config.resources.user.find())
+  )
+
+  it('should rewrite a post for a resource findById endpoint', async () =>
+    request(app).post('/users/1')
+      .set('Accept', 'application/json')
+      .set('X-HTTP-Method-Override', 'GET')
+      .expect('Content-Type', /json/)
+      .expect(200, config.resources.user.findById())
+  )
 })
