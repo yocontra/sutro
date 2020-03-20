@@ -10,7 +10,6 @@ exports.default = (req, res, next) => {
   const override = req.get('x-http-method-override');
   if (!override || override.toLowerCase() !== 'get') return next();
 
-  console.log('rewriting');
   // work
   req.originalMethod = req.originalMethod || req.method;
   req.method = 'GET';

@@ -9,6 +9,7 @@ import walkResources from './walkResources'
 import rewriteLarge from './rewriteLarge'
 
 export const rewriteLargeRequests = rewriteLarge
+
 export default ({ swagger, base, resources, pre, post, trace }={}) => {
   if (!resources) throw new Error('Missing resources option')
   const router = Router({ mergeParams: true })
