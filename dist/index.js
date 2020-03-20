@@ -1,6 +1,7 @@
 'use strict';
 
 exports.__esModule = true;
+exports.rewriteLargeRequests = undefined;
 
 var _express = require('express');
 
@@ -26,7 +27,13 @@ var _walkResources = require('./walkResources');
 
 var _walkResources2 = _interopRequireDefault(_walkResources);
 
+var _rewriteLarge = require('./rewriteLarge');
+
+var _rewriteLarge2 = _interopRequireDefault(_rewriteLarge);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const rewriteLargeRequests = exports.rewriteLargeRequests = _rewriteLarge2.default;
 
 exports.default = ({ swagger, base, resources, pre, post, trace } = {}) => {
   if (!resources) throw new Error('Missing resources option');
@@ -74,5 +81,3 @@ exports.default = ({ swagger, base, resources, pre, post, trace } = {}) => {
   router.use((req, res, next) => next(new _errors.NotFoundError()));
   return router;
 };
-
-module.exports = exports.default;
