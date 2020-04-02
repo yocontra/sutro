@@ -22,44 +22,63 @@ const traceAsync = async (trace, name, promise) => {
   }
 }
 
-const sendResponse = ({ opt, successCode, resultData }) => {
+const streamResponse = async (stream, req, res, codes) => {
+  if (stream.contentType) res.type(stream.contentType)
+  res.once('close', () => stream.destroy()) // pump does not handle close properly!
+
+  // wait until we get a chunk without an error before writing the status, in case it errors
+  stream.once('data', () => {
+    res.status(codes.success)
+  }).pause()
+
+  return new Promise((resolve, reject) => {
+    pump(stream, res, (err) => {
+      if (req.timedout) return resolve() // timed out, no point throwing a duplicate error
+      err ? reject(err) : resolve()
+    })
+  })
+}
+
+const sendBufferResponse = (resultData, req, res, codes) => {
+  res.status(codes.success)
+  res.type('json')
+  if (Buffer.isBuffer(resultData)) {
+    res.send(resultData)
+  } else if (typeof resultData === 'string') {
+    res.send(Buffer.from(resultData))
+  } else {
+    res.json(resultData)
+  }
+
+  res.end()
+}
+
+const sendResponse = async ({ opt, successCode, resultData }) => {
   const { _res, _req, method, noResponse } = opt
+  const codes = {
+    noResponse: successCode || 204,
+    success: successCode || 200
+  }
+
   // no response
   if (resultData == null) {
     if (method === 'GET') throw new NotFoundError()
-    return _res.status(successCode || 204).end()
+    return _res.status(codes.noResponse).end()
   }
 
-  // user asked for no body (low bandwidth)
+  // user asked for no body (save bandwidth)
   if (noResponse) {
-    return _res.status(successCode || 204).end()
+    return _res.status(codes.noResponse).end()
   }
-
-  // some data, status code for it
-  _res.status(successCode || 200)
 
   // stream response
   if (resultData.pipe && resultData.on) {
-    if (resultData.contentType) _res.type(resultData.contentType)
-    _res.once('close', () => resultData.destroy()) // pump does not handle close properly!
-    pump(resultData, _res, (err) => {
-      if (_req.timedout) return
-      if (err) throw err
-    })
+    await streamResponse(resultData, _req, _res, codes)
     return
   }
 
   // json obj response
-  _res.type('json')
-  if (Buffer.isBuffer(resultData)) {
-    _res.send(resultData)
-  } else if (typeof resultData === 'string') {
-    _res.send(Buffer.from(resultData))
-  } else {
-    _res.json(resultData)
-  }
-
-  _res.end()
+  sendBufferResponse(resultData, _req, _res, codes)
 }
 
 const pipeline = async (req, res, { endpoint, successCode, trace }) => {
@@ -126,7 +145,7 @@ const pipeline = async (req, res, { endpoint, successCode, trace }) => {
   if (cacheHeaders) res.set('Cache-Control', cacheControl(cacheHeaders))
 
   // send the data out
-  sendResponse({ opt, successCode, resultData })
+  await sendResponse({ opt, successCode, resultData })
 
   // write to cache if we got a fresh response
   if (!cachedData && endpoint.cache && endpoint.cache.set) {

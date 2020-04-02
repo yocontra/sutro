@@ -5,6 +5,9 @@ import sutro, { rewriteLargeRequests } from '../src'
 import request from 'supertest'
 import express from 'express'
 import Parser from 'swagger-parser'
+import through2 from 'through2'
+import pumpify from 'pumpify'
+import JSONStream from 'jsonstream-next'
 
 const parser = new Parser()
 const users = [
@@ -715,5 +718,44 @@ describe('sutro - rewriting requests', () => {
       .set('X-HTTP-Method-Override', 'GET')
       .expect('Content-Type', /json/)
       .expect(200, config.resources.user.findById())
+  )
+})
+
+describe('sutro - streaming requests', () => {
+  const config = {
+    resources: {
+      user: {
+        find: ({ options }) => {
+          const out = pumpify.obj(
+            through2.obj(),
+            JSONStream.stringify()
+          )
+          out.contentType = 'application/json'
+          options.error
+            ? out.emit('error', new Error('Bad news!'))
+            : out.end({ a: 1 })
+          return out
+        }
+      }
+    }
+  }
+  const app = express()
+    .use(sutro(config))
+    .use((err, req, res, _next) => {
+      res.status(500).send({ error: err.message })
+    })
+
+  it('should stream a resource find endpoint', async () =>
+    request(app).get('/users')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200, [ { a: 1 } ])
+  )
+  it('should handle stream errors correctly', async () =>
+    request(app).get('/users')
+      .query({ error: true })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(500, { error: 'Bad news!' })
   )
 })

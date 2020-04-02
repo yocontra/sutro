@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.1.1",
+  "version": "5.1.2",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -45,12 +45,15 @@
     "eslint-cli": "^1.0.0",
     "eslint-plugin-babel": "^5.1.0",
     "eslint-plugin-mocha": "^6.0.0",
+    "jsonstream-next": "^1.4.0",
     "lodash.pick": "^4.4.0",
     "mocha": "^7.0.0",
+    "pumpify": "^2.0.1",
     "rimraf": "^3.0.0",
     "should": "^13.0.0",
     "supertest": "^5.0.0-0",
-    "swagger-parser": "^6.0.0"
+    "swagger-parser": "^6.0.0",
+    "through2": "^3.0.1"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",

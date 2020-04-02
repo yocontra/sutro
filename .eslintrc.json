@@ -57,7 +57,11 @@
     "no-unneeded-ternary": 1,
     "no-unused-vars": [
       2,
-      { "ignoreRestSiblings": true }
+      {
+        "ignoreRestSiblings": true,
+        "args": "after-used",
+        "argsIgnorePattern": "^_"
+      }
     ],
     "no-useless-call": 1,
     "no-useless-constructor": 1,
