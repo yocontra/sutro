@@ -42,10 +42,8 @@ const streamResponse = async (stream, req, res, codes) => {
   if (stream.contentType) res.type(stream.contentType);
   res.once('close', () => stream.destroy()); // pump does not handle close properly!
 
-  // wait until we get a chunk without an error before writing the status, in case it errors
-  stream.once('data', () => {
-    res.status(codes.success);
-  }).pause();
+  // TODO: wait until we get a chunk without an error before writing the status, in case it errors
+  res.status(codes.success);
 
   return new Promise((resolve, reject) => {
     (0, _pump2.default)(stream, res, err => {
