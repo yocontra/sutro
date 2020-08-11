@@ -1,5 +1,5 @@
 import { promisify } from 'handle-async'
-import pump from 'pump'
+import { pipeline } from 'stream'
 import { NotFoundError, UnauthorizedError } from './errors'
 import parseIncludes from './parseIncludes'
 import cacheControl from './cacheControl'
@@ -30,7 +30,7 @@ const streamResponse = async (stream, req, res, codes) => {
   res.status(codes.success)
 
   return new Promise((resolve, reject) => {
-    pump(stream, res, (err) => {
+    pipeline(stream, res, (err) => {
       if (req.timedout) return resolve() // timed out, no point throwing a duplicate error
       err ? reject(err) : resolve()
     })
@@ -79,7 +79,7 @@ const sendResponse = async ({ opt, successCode, resultData }) => {
   sendBufferResponse(resultData, _req, _res, codes)
 }
 
-const pipeline = async (req, res, { endpoint, successCode, trace }) => {
+const exec = async (req, res, { endpoint, successCode, trace }) => {
   const opt = {
     ...req.params,
     ip: req.ip,
@@ -156,7 +156,7 @@ export default (resource, { trace } = {}) => {
   const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return
     try {
-      await traceAsync(trace, 'sutro/handleAPIRequest', pipeline(req, res, { ...resource, trace }))
+      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, { ...resource, trace }))
     } catch (err) {
       return next(err)
     }

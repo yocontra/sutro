@@ -4,9 +4,7 @@ exports.__esModule = true;
 
 var _handleAsync = require('handle-async');
 
-var _pump = require('pump');
-
-var _pump2 = _interopRequireDefault(_pump);
+var _stream = require('stream');
 
 var _errors = require('./errors');
 
@@ -46,7 +44,7 @@ const streamResponse = async (stream, req, res, codes) => {
   res.status(codes.success);
 
   return new Promise((resolve, reject) => {
-    (0, _pump2.default)(stream, res, err => {
+    (0, _stream.pipeline)(stream, res, err => {
       if (req.timedout) return resolve(); // timed out, no point throwing a duplicate error
       err ? reject(err) : resolve();
     });
@@ -94,7 +92,7 @@ const sendResponse = async ({ opt, successCode, resultData }) => {
   sendBufferResponse(resultData, _req, _res, codes);
 };
 
-const pipeline = async (req, res, { endpoint, successCode, trace }) => {
+const exec = async (req, res, { endpoint, successCode, trace }) => {
   const opt = Object.assign({}, req.params, {
     ip: req.ip,
     url: req.url,
@@ -165,7 +163,7 @@ exports.default = (resource, { trace } = {}) => {
   const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return;
     try {
-      await traceAsync(trace, 'sutro/handleAPIRequest', pipeline(req, res, Object.assign({}, resource, { trace })));
+      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, Object.assign({}, resource, { trace })));
     } catch (err) {
       return next(err);
     }
