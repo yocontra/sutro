@@ -44,6 +44,7 @@ const streamResponse = async (stream, req, res, codes) => {
 
     // just use a regular pipe to res, since pipeline would close it on error
     // which would make us unable to send an error back out
+    res.once('close', () => stream.destroy()) // make sure we don't keep working if the response closed!
     ourStream.pipe(res)
   })
 }
