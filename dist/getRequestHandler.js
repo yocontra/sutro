@@ -43,6 +43,7 @@ const traceAsync = async (trace, name, promise) => {
 const streamResponse = async (stream, req, res, codes) => {
   let hasFirstChunk = false;
   return new Promise((resolve, reject) => {
+    let finished = false;
     const ourStream = (0, _stream.pipeline)(stream, (0, _through2.default)((chunk, _, cb) => {
       // wait until we get a chunk without an error before writing the headers
       if (hasFirstChunk) return cb(null, chunk);
@@ -51,13 +52,19 @@ const streamResponse = async (stream, req, res, codes) => {
       res.status(codes.success);
       cb(null, chunk);
     }), err => {
+      finished = true;
       if (!err || req.timedout) return resolve(); // timed out, no point throwing a duplicate error
       reject(err);
     });
 
+    // make sure we don't keep working if the response closed!
+    res.once('close', () => {
+      if (finished) return; // no need to blow up
+      ourStream.destroy(new Error('Socket closed before response finished'));
+    });
+
     // just use a regular pipe to res, since pipeline would close it on error
     // which would make us unable to send an error back out
-    res.once('close', () => stream.destroy()); // make sure we don't keep working if the response closed!
     ourStream.pipe(res);
   });
 };
