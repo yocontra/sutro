@@ -4,7 +4,7 @@ exports.__esModule = true;
 
 var _handleAsync = require('handle-async');
 
-var _stream = require('stream');
+var _readableStream = require('readable-stream');
 
 var _through = require('through2');
 
@@ -44,7 +44,7 @@ const streamResponse = async (stream, req, res, codes) => {
   let hasFirstChunk = false;
   return new Promise((resolve, reject) => {
     let finished = false;
-    const ourStream = (0, _stream.pipeline)(stream, (0, _through2.default)((chunk, _, cb) => {
+    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through2.default)((chunk, _, cb) => {
       // wait until we get a chunk without an error before writing the headers
       if (hasFirstChunk) return cb(null, chunk);
       hasFirstChunk = true;

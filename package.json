@@ -61,6 +61,7 @@
     "lodash.omit": "^4.5.0",
     "parse-duration": "^0.4.4",
     "pluralize": "^8.0.0",
+    "readable-stream": "^3.6.0",
     "through2": "^4.0.0",
     "url-join": "^4.0.0"
   }

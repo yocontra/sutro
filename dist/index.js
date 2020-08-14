@@ -7,7 +7,7 @@ var _express = require('express');
 
 var _handleAsync = require('handle-async');
 
-var _stream = require('stream');
+var _readableStream = require('readable-stream');
 
 var _errors = require('./errors');
 
@@ -62,7 +62,7 @@ exports.default = ({ swagger, base, resources, pre, post, trace } = {}) => {
     }
     if (post) {
       handlers.unshift(async (req, res, next) => {
-        (0, _stream.finished)(res, async err => {
+        (0, _readableStream.finished)(res, async err => {
           const ourTrace = trace && trace.start('sutro/post');
           try {
             await (0, _handleAsync.promisify)(post.bind(null, resource, req, res, err));

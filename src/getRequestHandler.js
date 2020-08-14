@@ -1,5 +1,5 @@
 import { promisify } from 'handle-async'
-import { pipeline } from 'stream'
+import { pipeline } from 'readable-stream'
 import through2 from 'through2'
 import { NotFoundError, UnauthorizedError } from './errors'
 import parseIncludes from './parseIncludes'
