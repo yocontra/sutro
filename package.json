@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.1.4",
+  "version": "5.2.0",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -48,12 +48,10 @@
     "jsonstream-next": "^2.0.0",
     "lodash.pick": "^4.4.0",
     "mocha": "^8.0.0",
-    "pumpify": "^2.0.1",
     "rimraf": "^3.0.0",
     "should": "^13.0.0",
     "supertest": "^5.0.0-0",
-    "swagger-parser": "^6.0.0",
-    "through2": "^4.0.0"
+    "swagger-parser": "^6.0.0"
   },
   "dependencies": {
     "babel-runtime": "^6.26.0",
@@ -63,6 +61,7 @@
     "lodash.omit": "^4.5.0",
     "parse-duration": "^0.4.4",
     "pluralize": "^8.0.0",
+    "through2": "^4.0.0",
     "url-join": "^4.0.0"
   }
 }

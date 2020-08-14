@@ -5,8 +5,6 @@ import sutro, { rewriteLargeRequests } from '../src'
 import request from 'supertest'
 import express from 'express'
 import Parser from 'swagger-parser'
-import through2 from 'through2'
-import pumpify from 'pumpify'
 import JSONStream from 'jsonstream-next'
 
 const parser = new Parser()
@@ -726,14 +724,19 @@ describe('sutro - streaming requests', () => {
     resources: {
       user: {
         find: ({ options }) => {
-          const out = pumpify.obj(
-            through2.obj(),
-            JSONStream.stringify()
-          )
+          const out = JSONStream.stringify()
           out.contentType = 'application/json'
-          options.error
-            ? out.emit('error', new Error('Bad news!'))
-            : out.end({ a: 1 })
+          if (options.asyncError) {
+            setTimeout(() => {
+              out.emit('error', new Error('Bad news!'))
+            }, 100)
+          }
+          if (options.error) {
+            out.emit('error', new Error('Bad news!'))
+          }
+          setTimeout(() => {
+            out.end({ a: 1 })
+          }, 200)
           return out
         }
       }
@@ -751,7 +754,14 @@ describe('sutro - streaming requests', () => {
       .expect('Content-Type', /json/)
       .expect(200, [ { a: 1 } ])
   )
-  it('should handle stream errors correctly', async () =>
+  it('should handle async stream errors correctly', async () =>
+    request(app).get('/users')
+      .query({ asyncError: true })
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(500, { error: 'Bad news!' })
+  )
+  it('should handle instant stream errors correctly', async () =>
     request(app).get('/users')
       .query({ error: true })
       .set('Accept', 'application/json')

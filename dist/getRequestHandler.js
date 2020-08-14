@@ -6,6 +6,10 @@ var _handleAsync = require('handle-async');
 
 var _stream = require('stream');
 
+var _through = require('through2');
+
+var _through2 = _interopRequireDefault(_through);
+
 var _errors = require('./errors');
 
 var _parseIncludes = require('./parseIncludes');
@@ -37,17 +41,23 @@ const traceAsync = async (trace, name, promise) => {
 };
 
 const streamResponse = async (stream, req, res, codes) => {
-  if (stream.contentType) res.type(stream.contentType);
-  res.once('close', () => stream.destroy()); // pump does not handle close properly!
-
-  // TODO: wait until we get a chunk without an error before writing the status, in case it errors
-  res.status(codes.success);
-
+  let hasFirstChunk = false;
   return new Promise((resolve, reject) => {
-    (0, _stream.pipeline)(stream, res, err => {
-      if (req.timedout) return resolve(); // timed out, no point throwing a duplicate error
-      err ? reject(err) : resolve();
+    const ourStream = (0, _stream.pipeline)(stream, (0, _through2.default)((chunk, _, cb) => {
+      // wait until we get a chunk without an error before writing the headers
+      if (hasFirstChunk) return cb(null, chunk);
+      hasFirstChunk = true;
+      if (stream.contentType) res.type(stream.contentType);
+      res.status(codes.success);
+      cb(null, chunk);
+    }), err => {
+      if (!err || req.timedout) return resolve(); // timed out, no point throwing a duplicate error
+      reject(err);
     });
+
+    // just use a regular pipe to res, since pipeline would close it on error
+    // which would make us unable to send an error back out
+    ourStream.pipe(res);
   });
 };
 

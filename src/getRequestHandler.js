@@ -1,5 +1,6 @@
 import { promisify } from 'handle-async'
 import { pipeline } from 'stream'
+import through2 from 'through2'
 import { NotFoundError, UnauthorizedError } from './errors'
 import parseIncludes from './parseIncludes'
 import cacheControl from './cacheControl'
@@ -23,17 +24,27 @@ const traceAsync = async (trace, name, promise) => {
 }
 
 const streamResponse = async (stream, req, res, codes) => {
-  if (stream.contentType) res.type(stream.contentType)
-  res.once('close', () => stream.destroy()) // pump does not handle close properly!
-
-  // TODO: wait until we get a chunk without an error before writing the status, in case it errors
-  res.status(codes.success)
-
+  let hasFirstChunk = false
   return new Promise((resolve, reject) => {
-    pipeline(stream, res, (err) => {
-      if (req.timedout) return resolve() // timed out, no point throwing a duplicate error
-      err ? reject(err) : resolve()
-    })
+    const ourStream = pipeline(
+      stream,
+      through2((chunk, _, cb) => {
+        // wait until we get a chunk without an error before writing the headers
+        if (hasFirstChunk) return cb(null, chunk)
+        hasFirstChunk = true
+        if (stream.contentType) res.type(stream.contentType)
+        res.status(codes.success)
+        cb(null, chunk)
+      }),
+      (err) => {
+        if (!err || req.timedout) return resolve() // timed out, no point throwing a duplicate error
+        reject(err)
+      }
+    )
+
+    // just use a regular pipe to res, since pipeline would close it on error
+    // which would make us unable to send an error back out
+    ourStream.pipe(res)
   })
 }
 
