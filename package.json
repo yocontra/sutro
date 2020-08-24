@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.2.5",
+  "version": "5.2.6",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -39,7 +39,7 @@
     "@babel/register": "^7.10.5",
     "@stae/babel-node": "^1.0.3",
     "@stae/linters": "^1.0.1",
-    "eslint": "^7.7.0",
+    "eslint": "^6.0.0",
     "jsonstream-next": "^3.0.0",
     "lodash.pick": "^4.4.0",
     "mocha": "^8.0.0",
