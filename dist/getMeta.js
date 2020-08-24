@@ -1,34 +1,41 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
+exports.default = void 0;
 
-var _urlJoin = require('url-join');
+var _urlJoin = _interopRequireDefault(require("url-join"));
 
-var _urlJoin2 = _interopRequireDefault(_urlJoin);
+var _dotProp = _interopRequireDefault(require("dot-prop"));
 
-var _dotProp = require('dot-prop');
-
-var _dotProp2 = _interopRequireDefault(_dotProp);
-
-var _walkResources = require('./walkResources');
-
-var _walkResources2 = _interopRequireDefault(_walkResources);
+var _walkResources = _interopRequireDefault(require("./walkResources"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // TODO: handle nesting correctly
-exports.default = ({ base, resources }) => {
+var _default = ({
+  base,
+  resources
+}) => {
   const paths = {};
-  (0, _walkResources2.default)(resources, ({ hierarchy, path, method, instance, endpoint }) => {
+  (0, _walkResources.default)(resources, ({
+    hierarchy,
+    path,
+    method,
+    instance,
+    endpoint
+  }) => {
     if (endpoint.hidden) return; // skip
+
     const descriptor = {
-      path: base ? (0, _urlJoin2.default)(base, path) : path,
+      path: base ? (0, _urlJoin.default)(base, path) : path,
       method,
       instance
     };
-    _dotProp2.default.set(paths, hierarchy, descriptor);
+
+    _dotProp.default.set(paths, hierarchy, descriptor);
   });
   return paths;
 };
 
+exports.default = _default;
 module.exports = exports.default;

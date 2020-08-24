@@ -1,23 +1,22 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
+exports.default = void 0;
 
-var _parseDuration = require('parse-duration');
-
-var _parseDuration2 = _interopRequireDefault(_parseDuration);
+var _parseDuration = _interopRequireDefault(require("parse-duration"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const parseNumber = v => {
-  const n = typeof v === 'number' ? v : (0, _parseDuration2.default)(v);
+  const n = typeof v === 'number' ? v : (0, _parseDuration.default)(v);
   if (isNaN(n)) throw new Error(`Invalid number: ${v}`);
   return n / 1000;
 };
 
-exports.default = opt => {
+var _default = opt => {
   if (typeof opt === 'string') return opt; // already formatted
-  const stack = [];
 
+  const stack = [];
   if (opt.private) stack.push('private');
   if (opt.public) stack.push('public');
   if (opt.noStore) stack.push('no-store');
@@ -32,4 +31,5 @@ exports.default = opt => {
   return stack.join(', ');
 };
 
+exports.default = _default;
 module.exports = exports.default;

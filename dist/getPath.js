@@ -1,23 +1,25 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
+exports.default = void 0;
 
-var _pluralize = require('pluralize');
+var _pluralize = _interopRequireDefault(require("pluralize"));
 
-var _pluralize2 = _interopRequireDefault(_pluralize);
-
-var _methods = require('./methods');
-
-var _methods2 = _interopRequireDefault(_methods);
+var _methods = _interopRequireDefault(require("./methods"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-exports.default = ({ resource, endpoint, instance }) => {
+var _default = ({
+  resource,
+  endpoint,
+  instance
+}) => {
   let path = '';
-  if (resource) path += `/${(0, _pluralize2.default)(resource)}`;
+  if (resource) path += `/${(0, _pluralize.default)(resource)}`;
   if (resource && instance) path += `/:${resource}Id`;
-  if (endpoint && !_methods2.default[endpoint]) path += `/${endpoint}`;
+  if (endpoint && !_methods.default[endpoint]) path += `/${endpoint}`;
   return path;
 };
 
+exports.default = _default;
 module.exports = exports.default;

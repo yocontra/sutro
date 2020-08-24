@@ -5,10 +5,10 @@ const param = /:(\w+)/gi
 
 const getResponses = (method, endpoint) => {
   const out = {
-    '404': {
+    404: {
       description: 'Not found'
     },
-    '500': {
+    500: {
       description: 'Server error'
     },
     default: {

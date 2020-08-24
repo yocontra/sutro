@@ -1,7 +1,8 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
-exports.default = {
+exports.default = void 0;
+var _default = {
   find: {
     method: 'get',
     instance: false
@@ -28,4 +29,5 @@ exports.default = {
     instance: true
   }
 };
+exports.default = _default;
 module.exports = exports.default;

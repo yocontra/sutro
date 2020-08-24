@@ -1,26 +1,27 @@
-'use strict';
+"use strict";
 
 exports.__esModule = true;
+exports.default = void 0;
 
-var _handleAsync = require('handle-async');
+var _handleAsync = require("handle-async");
 
-var _readableStream = require('readable-stream');
+var _readableStream = require("readable-stream");
 
-var _through = require('through2');
+var _through = _interopRequireDefault(require("through2"));
 
-var _through2 = _interopRequireDefault(_through);
+var _errors = require("./errors");
 
-var _errors = require('./errors');
+var _parseIncludes = _interopRequireDefault(require("./parseIncludes"));
 
-var _parseIncludes = require('./parseIncludes');
-
-var _parseIncludes2 = _interopRequireDefault(_parseIncludes);
-
-var _cacheControl = require('./cacheControl');
-
-var _cacheControl2 = _interopRequireDefault(_cacheControl);
+var _cacheControl = _interopRequireDefault(require("./cacheControl"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 const defaultCacheHeaders = {
   private: true,
@@ -29,7 +30,9 @@ const defaultCacheHeaders = {
 
 const traceAsync = async (trace, name, promise) => {
   if (!trace) return promise; // no tracing, just return
+
   const ourTrace = trace.start(name);
+
   try {
     const res = await promise;
     ourTrace.end();
@@ -44,7 +47,7 @@ const streamResponse = async (stream, req, res, codes) => {
   let hasFirstChunk = false;
   return new Promise((resolve, reject) => {
     let finished = false;
-    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through2.default)((chunk, _, cb) => {
+    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through.default)((chunk, _, cb) => {
       // wait until we get a chunk without an error before writing the headers
       if (hasFirstChunk) return cb(null, chunk);
       hasFirstChunk = true;
@@ -54,17 +57,17 @@ const streamResponse = async (stream, req, res, codes) => {
     }), err => {
       finished = true;
       if (!err || req.timedout) return resolve(); // timed out, no point throwing a duplicate error
-      reject(err);
-    });
 
-    // make sure we don't keep working if the response closed!
+      reject(err);
+    }); // make sure we don't keep working if the response closed!
+
     res.once('close', () => {
       if (finished) return; // no need to blow up
-      ourStream.destroy(new Error('Socket closed before response finished'));
-    });
 
-    // just use a regular pipe to res, since pipeline would close it on error
+      ourStream.destroy(new Error('Socket closed before response finished'));
+    }); // just use a regular pipe to res, since pipeline would close it on error
     // which would make us unable to send an error back out
+
     ourStream.pipe(res);
   });
 };
@@ -72,6 +75,7 @@ const streamResponse = async (stream, req, res, codes) => {
 const sendBufferResponse = (resultData, req, res, codes) => {
   res.status(codes.success);
   res.type('json');
+
   if (Buffer.isBuffer(resultData)) {
     res.send(resultData);
   } else if (typeof resultData === 'string') {
@@ -83,35 +87,48 @@ const sendBufferResponse = (resultData, req, res, codes) => {
   res.end();
 };
 
-const sendResponse = async ({ opt, successCode, resultData }) => {
-  const { _res, _req, method, noResponse } = opt;
+const sendResponse = async ({
+  opt,
+  successCode,
+  resultData
+}) => {
+  const {
+    _res,
+    _req,
+    method,
+    noResponse
+  } = opt;
   const codes = {
     noResponse: successCode || 204,
     success: successCode || 200
+  }; // no response
 
-    // no response
-  };if (resultData == null) {
+  if (resultData == null) {
     if (method === 'GET') throw new _errors.NotFoundError();
     return _res.status(codes.noResponse).end();
-  }
+  } // user asked for no body (save bandwidth)
 
-  // user asked for no body (save bandwidth)
+
   if (noResponse) {
     return _res.status(codes.noResponse).end();
-  }
+  } // stream response
 
-  // stream response
+
   if (resultData.pipe && resultData.on) {
     await streamResponse(resultData, _req, _res, codes);
     return;
-  }
+  } // json obj response
 
-  // json obj response
+
   sendBufferResponse(resultData, _req, _res, codes);
 };
 
-const exec = async (req, res, { endpoint, successCode, trace }) => {
-  const opt = Object.assign({}, req.params, {
+const exec = async (req, res, {
+  endpoint,
+  successCode,
+  trace
+}) => {
+  const opt = _objectSpread(_objectSpread({}, req.params), {}, {
     ip: req.ip,
     url: req.url,
     protocol: req.protocol,
@@ -124,7 +141,7 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
     data: req.body,
     options: req.query,
     session: req.session,
-    includes: (0, _parseIncludes2.default)(req.query.includes),
+    includes: (0, _parseIncludes.default)(req.query.includes),
     noResponse: req.query.response === 'false',
     onFinish: fn => {
       res.once('finish', fn.bind(null, req, res));
@@ -134,59 +151,64 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
     },
     _req: req,
     _res: res
+  }); // check isAuthorized
 
-    // check isAuthorized
-  });const authorized = !endpoint.isAuthorized || (await traceAsync(trace, 'sutro/isAuthorized', (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt))));
+
+  const authorized = !endpoint.isAuthorized || (await traceAsync(trace, 'sutro/isAuthorized', (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt))));
   if (authorized !== true) throw new _errors.UnauthorizedError();
   if (req.timedout) return;
+  let resultData; // check cache
 
-  let resultData;
-
-  // check cache
   const cacheKey = endpoint.cache && endpoint.cache.key && (await traceAsync(trace, 'sutro/cache.key', (0, _handleAsync.promisify)(endpoint.cache.key.bind(null, opt))));
   if (req.timedout) return;
-
   const cachedData = endpoint.cache && endpoint.cache.get && (await traceAsync(trace, 'sutro/cache.get', (0, _handleAsync.promisify)(endpoint.cache.get.bind(null, opt, cacheKey))));
-  if (req.timedout) return;
+  if (req.timedout) return; // call execute
 
-  // call execute
   if (!cachedData) {
     const executeFn = typeof endpoint === 'function' ? endpoint : endpoint.execute;
     const rawData = typeof executeFn === 'function' ? await traceAsync(trace, 'sutro/execute', (0, _handleAsync.promisify)(executeFn.bind(null, opt))) : executeFn || null;
-    if (req.timedout) return;
+    if (req.timedout) return; // call format on execute result
 
-    // call format on execute result
     resultData = endpoint.format ? await traceAsync(trace, 'sutro/format', (0, _handleAsync.promisify)(endpoint.format.bind(null, opt, rawData))) : rawData;
     if (req.timedout) return;
   } else {
     resultData = cachedData;
-  }
+  } // call cacheControl
 
-  // call cacheControl
+
   const cacheHeaders = endpoint.cache && endpoint.cache.header ? typeof endpoint.cache.header === 'function' ? await traceAsync(trace, 'sutro/cache.header', (0, _handleAsync.promisify)(endpoint.cache.header.bind(null, opt, resultData))) : endpoint.cache.header : defaultCacheHeaders;
   if (req.timedout) return;
-  if (cacheHeaders) res.set('Cache-Control', (0, _cacheControl2.default)(cacheHeaders));
+  if (cacheHeaders) res.set('Cache-Control', (0, _cacheControl.default)(cacheHeaders)); // send the data out
 
-  // send the data out
-  await sendResponse({ opt, successCode, resultData });
+  await sendResponse({
+    opt,
+    successCode,
+    resultData
+  }); // write to cache if we got a fresh response
 
-  // write to cache if we got a fresh response
   if (!cachedData && endpoint.cache && endpoint.cache.set) {
     await traceAsync(trace, 'sutro/cache.set', (0, _handleAsync.promisify)(endpoint.cache.set.bind(null, opt, resultData, cacheKey)));
   }
 };
 
-exports.default = (resource, { trace } = {}) => {
+var _default = (resource, {
+  trace
+} = {}) => {
   // wrap it so it has a name
   const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return;
+
     try {
-      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, Object.assign({}, resource, { trace })));
+      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, _objectSpread(_objectSpread({}, resource), {}, {
+        trace
+      })));
     } catch (err) {
       return next(err);
     }
   };
+
   return handleAPIRequest;
 };
 
+exports.default = _default;
 module.exports = exports.default;

@@ -23,9 +23,7 @@ export class UnauthorizedError extends Error {
     this.status = status
     Error.captureStackTrace(this, UnauthorizedError)
   }
-  toString() {
-    return `${super.toString()} (HTTP ${this.status})`
-  }
+  toString = () => `${super.toString()} (HTTP ${this.status})`;
 }
 
 export class BadRequestError extends Error {
@@ -35,9 +33,7 @@ export class BadRequestError extends Error {
     this.status = status
     Error.captureStackTrace(this, BadRequestError)
   }
-  toString() {
-    return `${super.toString()} (HTTP ${this.status})`
-  }
+  toString = () => `${super.toString()} (HTTP ${this.status})`;
 }
 
 export class ValidationError extends BadRequestError {
@@ -66,7 +62,5 @@ export class NotFoundError extends Error {
     this.status = status
     Error.captureStackTrace(this, NotFoundError)
   }
-  toString() {
-    return `${super.toString()} (HTTP ${this.status})`
-  }
+  toString = () => `${super.toString()} (HTTP ${this.status})`;
 }

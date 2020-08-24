@@ -115,8 +115,12 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
     session: req.session,
     includes: parseIncludes(req.query.includes),
     noResponse: req.query.response === 'false',
-    onFinish: (fn) => { res.once('finish', fn.bind(null, req, res)) },
-    withRaw: (fn) => { fn(req, res) },
+    onFinish: (fn) => {
+      res.once('finish', fn.bind(null, req, res))
+    },
+    withRaw: (fn) => {
+      fn(req, res)
+    },
     _req: req,
     _res: res
   }

@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.2.3",
+  "version": "5.2.5",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/shastajs/sutro.git"
   },
-  "author": "Contra <yo@contra.io> (http://contra.io)",
+  "author": "Contra <yo@contra.io> (https://contra.io)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/shastajs/sutro/issues"
@@ -25,27 +25,22 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=10"
+  },
   "scripts": {
     "build": "npm run clean && babel src --out-dir dist",
     "clean": "rimraf dist",
-    "lint": "eslint src test",
-    "lint:fix": "eslint src test --fix",
-    "test": "mocha --require babel-register --recursive --reporter spec && npm run lint"
+    "lint": "eslint src test --fix",
+    "test": "mocha --require @babel/register --recursive --reporter spec && npm run lint"
   },
   "devDependencies": {
-    "babel-cli": "^6.4.0",
-    "babel-core": "^6.4.0",
-    "babel-eslint": "^10.0.0",
-    "babel-plugin-add-module-exports": "^1.0.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.4.3",
-    "babel-preset-env": "^1.7.0",
-    "babel-register": "^6.26.0",
-    "eslint": "^6.0.0",
-    "eslint-cli": "^1.0.0",
-    "eslint-plugin-babel": "^5.1.0",
-    "eslint-plugin-mocha": "^6.0.0",
-    "jsonstream-next": "^2.0.0",
+    "@babel/cli": "^7.10.5",
+    "@babel/register": "^7.10.5",
+    "@stae/babel-node": "^1.0.3",
+    "@stae/linters": "^1.0.1",
+    "eslint": "^7.7.0",
+    "jsonstream-next": "^3.0.0",
     "lodash.pick": "^4.4.0",
     "mocha": "^8.0.0",
     "rimraf": "^3.0.0",
@@ -54,7 +49,6 @@
     "swagger-parser": "^6.0.0"
   },
   "dependencies": {
-    "babel-runtime": "^6.26.0",
     "dot-prop": "^5.1.0",
     "express": "^4.16.3",
     "handle-async": "^1.0.1",
