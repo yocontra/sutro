@@ -10,7 +10,11 @@ const inspectOptions = {
   breakLength: Infinity
 };
 
-const serializeIssues = fields => fields.map(f => `\n - ${(0, _util.inspect)(f, inspectOptions)}`);
+function _ref(f) {
+  return `\n - ${(0, _util.inspect)(f, inspectOptions)}`;
+}
+
+const serializeIssues = fields => fields.map(_ref);
 
 const codes = {
   badRequest: 400,

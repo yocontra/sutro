@@ -9,12 +9,6 @@ var _walkResources = _interopRequireDefault(require("./walkResources"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 const param = /:(\w+)/gi;
 
 const getResponses = (method, endpoint) => {
@@ -54,13 +48,25 @@ const getResponses = (method, endpoint) => {
 
 const flattenConfig = (base, override = {}) => {
   const filtered = (0, _lodash.default)(override, ['consumes', 'produces', 'responses', 'parameters']);
-  return _objectSpread({
+  return {
     consumes: override.consumes || base.consumes,
     produces: override.produces || base.produces,
-    responses: override.responses ? _objectSpread(_objectSpread({}, base.responses), override.responses) : base.responses,
-    parameters: override.parameters ? [...(base.parameters || []), ...override.parameters] : base.parameters
-  }, filtered);
+    responses: override.responses ? { ...base.responses,
+      ...override.responses
+    } : base.responses,
+    parameters: override.parameters ? [...(base.parameters || []), ...override.parameters] : base.parameters,
+    ...filtered
+  };
 };
+
+function _ref(name) {
+  return {
+    name: name.slice(1),
+    in: 'path',
+    required: true,
+    type: 'string'
+  };
+}
 
 const getPaths = resources => {
   const paths = {};
@@ -75,12 +81,7 @@ const getPaths = resources => {
     const base = {
       consumes: method !== 'get' && ['application/json'] || undefined,
       produces: ['application/json'],
-      parameters: params && params.map(name => ({
-        name: name.slice(1),
-        in: 'path',
-        required: true,
-        type: 'string'
-      })) || undefined,
+      parameters: params && params.map(_ref) || undefined,
       responses: getResponses(method, endpoint)
     };
     const fixedPath = path.replace(param, '{$1}');
@@ -95,7 +96,7 @@ var _default = ({
   base,
   resources
 }) => {
-  const out = _objectSpread({
+  const out = {
     swagger: '2.0',
     info: {
       title: 'Sutro API',
@@ -103,9 +104,9 @@ var _default = ({
     },
     basePath: base,
     schemes: ['http'],
-    paths: getPaths(resources)
-  }, swagger);
-
+    paths: getPaths(resources),
+    ...swagger
+  };
   return out;
 };
 

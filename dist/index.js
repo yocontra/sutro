@@ -26,6 +26,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 const rewriteLargeRequests = _rewriteLarge.default;
 exports.rewriteLargeRequests = rewriteLargeRequests;
 
+function _ref3(req, res, next) {
+  return next(new _errors.NotFoundError());
+}
+
 var _default = ({
   swagger,
   base,
@@ -55,43 +59,47 @@ var _default = ({
       trace
     })];
 
+    async function _ref(req, res, next) {
+      const ourTrace = trace && trace.start('sutro/pre');
+
+      try {
+        await (0, _handleAsync.promisify)(pre.bind(null, resource, req, res));
+      } catch (err) {
+        if (ourTrace) ourTrace.end();
+        return next(err);
+      }
+
+      if (ourTrace) ourTrace.end();
+      next();
+    }
+
     if (pre) {
-      handlers.unshift(async (req, res, next) => {
-        const ourTrace = trace && trace.start('sutro/pre');
+      handlers.unshift(_ref);
+    }
+
+    async function _ref2(req, res, next) {
+      (0, _readableStream.finished)(res, async err => {
+        const ourTrace = trace && trace.start('sutro/post');
 
         try {
-          await (0, _handleAsync.promisify)(pre.bind(null, resource, req, res));
+          await (0, _handleAsync.promisify)(post.bind(null, resource, req, res, err));
         } catch (err) {
           if (ourTrace) ourTrace.end();
-          return next(err);
         }
 
         if (ourTrace) ourTrace.end();
-        next();
       });
+      next();
     }
 
     if (post) {
-      handlers.unshift(async (req, res, next) => {
-        (0, _readableStream.finished)(res, async err => {
-          const ourTrace = trace && trace.start('sutro/post');
-
-          try {
-            await (0, _handleAsync.promisify)(post.bind(null, resource, req, res, err));
-          } catch (err) {
-            if (ourTrace) ourTrace.end();
-          }
-
-          if (ourTrace) ourTrace.end();
-        });
-        next();
-      });
+      handlers.unshift(_ref2);
     }
 
     router[resource.method](resource.path, ...handlers);
   }); // handle 404s
 
-  router.use((req, res, next) => next(new _errors.NotFoundError()));
+  router.use(_ref3);
   return router;
 };
 

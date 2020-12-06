@@ -17,12 +17,6 @@ var _cacheControl = _interopRequireDefault(require("./cacheControl"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 const defaultCacheHeaders = {
   private: true,
   noCache: true
@@ -45,16 +39,19 @@ const traceAsync = async (trace, name, promise) => {
 
 const streamResponse = async (stream, req, res, codes) => {
   let hasFirstChunk = false;
+
+  function _ref(chunk, _, cb) {
+    // wait until we get a chunk without an error before writing the headers
+    if (hasFirstChunk) return cb(null, chunk);
+    hasFirstChunk = true;
+    if (stream.contentType) res.type(stream.contentType);
+    res.status(codes.success);
+    cb(null, chunk);
+  }
+
   return new Promise((resolve, reject) => {
     let finished = false;
-    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through.default)((chunk, _, cb) => {
-      // wait until we get a chunk without an error before writing the headers
-      if (hasFirstChunk) return cb(null, chunk);
-      hasFirstChunk = true;
-      if (stream.contentType) res.type(stream.contentType);
-      res.status(codes.success);
-      cb(null, chunk);
-    }), err => {
+    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through.default)(_ref), err => {
       finished = true;
       if (!err || req.timedout) return resolve(); // timed out, no point throwing a duplicate error
 
@@ -128,7 +125,7 @@ const exec = async (req, res, {
   successCode,
   trace
 }) => {
-  const opt = _objectSpread(_objectSpread({}, req.params), {}, {
+  const opt = { ...req.params,
     ip: req.ip,
     url: req.url,
     protocol: req.protocol,
@@ -151,8 +148,7 @@ const exec = async (req, res, {
     },
     _req: req,
     _res: res
-  }); // check isAuthorized
-
+  }; // check isAuthorized
 
   const authorized = !endpoint.isAuthorized || (await traceAsync(trace, 'sutro/isAuthorized', (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt))));
   if (authorized !== true) throw new _errors.UnauthorizedError();
@@ -199,9 +195,9 @@ var _default = (resource, {
     if (req.timedout) return;
 
     try {
-      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, _objectSpread(_objectSpread({}, resource), {}, {
+      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, { ...resource,
         trace
-      })));
+      }));
     } catch (err) {
       return next(err);
     }

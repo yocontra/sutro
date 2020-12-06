@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.2.6",
+  "version": "5.2.7",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -14,19 +14,19 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shastajs/sutro.git"
+    "url": "git+https://github.com/contra/sutro.git"
   },
   "author": "Contra <yo@contra.io> (https://contra.io)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/shastajs/sutro/issues"
+    "url": "https://github.com/contra/sutro/issues"
   },
-  "homepage": "https://github.com/shastajs/sutro#readme",
+  "homepage": "https://github.com/contra/sutro#readme",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "scripts": {
     "build": "npm run clean && babel src --out-dir dist",
@@ -39,17 +39,17 @@
     "@babel/register": "^7.10.5",
     "@stae/babel-node": "^1.0.3",
     "@stae/linters": "^1.0.1",
-    "eslint": "^6.0.0",
+    "eslint": "^7.0.0",
     "jsonstream-next": "^3.0.0",
     "lodash.pick": "^4.4.0",
     "mocha": "^8.0.0",
     "rimraf": "^3.0.0",
     "should": "^13.0.0",
-    "supertest": "^5.0.0-0",
+    "supertest": "^6.0.0",
     "swagger-parser": "^6.0.0"
   },
   "dependencies": {
-    "dot-prop": "^5.1.0",
+    "dot-prop": "^6.0.0",
     "express": "^4.16.3",
     "handle-async": "^1.0.1",
     "lodash.omit": "^4.5.0",
