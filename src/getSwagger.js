@@ -37,7 +37,7 @@ const getResponses = (method, endpoint) => {
   return out
 }
 
-const flattenConfig = (base, override={}) => {
+const flattenConfig = (base, override = {}) => {
   const filtered = omit(override, [
     'consumes', 'produces', 'responses', 'parameters'
   ])
@@ -78,7 +78,7 @@ const getPaths = (resources) => {
   return paths
 }
 
-export default ({ swagger={}, base, resources }) => {
+export default ({ swagger = {}, base, resources }) => {
   const out = {
     swagger: '2.0',
     info: {

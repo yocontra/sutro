@@ -17,7 +17,7 @@ export const codes = {
 }
 
 export class UnauthorizedError extends Error {
-  constructor(message='Unauthorized', status=codes.unauthorized) {
+  constructor(message = 'Unauthorized', status = codes.unauthorized) {
     super(message)
     this.message = message
     this.status = status
@@ -27,7 +27,7 @@ export class UnauthorizedError extends Error {
 }
 
 export class BadRequestError extends Error {
-  constructor(message='Bad Request', status=codes.badRequest) {
+  constructor(message = 'Bad Request', status = codes.badRequest) {
     super(message)
     this.message = message
     this.status = status
@@ -56,7 +56,7 @@ export class ValidationError extends BadRequestError {
 }
 
 export class NotFoundError extends Error {
-  constructor(message='Not Found', status=codes.notFound) {
+  constructor(message = 'Not Found', status = codes.notFound) {
     super(message)
     this.message = message
     this.status = status

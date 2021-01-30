@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.2.7",
+  "version": "5.3.0",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [

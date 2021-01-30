@@ -1,6 +1,9 @@
 "use strict";
 
 exports.__esModule = true;
+var _exportNames = {
+  rewriteLargeRequests: true
+};
 exports.default = exports.rewriteLargeRequests = void 0;
 
 var _express = require("express");
@@ -10,6 +13,13 @@ var _handleAsync = require("handle-async");
 var _readableStream = require("readable-stream");
 
 var _errors = require("./errors");
+
+Object.keys(_errors).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  if (key in exports && exports[key] === _errors[key]) return;
+  exports[key] = _errors[key];
+});
 
 var _getRequestHandler = _interopRequireDefault(require("./getRequestHandler"));
 
