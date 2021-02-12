@@ -50,11 +50,11 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
       ourStream.destroy(new Error('Socket closed before response finished'))
     })
 
+    if (cacheStream) ourStream.pipe(cacheStream).pause()
+
     // just use a regular pipe to res, since pipeline would close it on error
     // which would make us unable to send an error back out
     ourStream.pipe(res)
-
-    if (cacheStream) ourStream.pipe(cacheStream)
   })
 }
 
