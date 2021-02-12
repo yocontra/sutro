@@ -23,11 +23,11 @@ const traceAsync = async (trace, name, promise) => {
   }
 }
 
-const streamResponse = async (stream, req, res, codes) => {
+const streamResponse = async (stream, req, res, codes, cacheStream) => {
   let hasFirstChunk = false
   return new Promise((resolve, reject) => {
     let finished = false
-    const ourStream = pipeline(
+    const streams = [
       stream,
       through2((chunk, _, cb) => {
         // wait until we get a chunk without an error before writing the headers
@@ -36,7 +36,11 @@ const streamResponse = async (stream, req, res, codes) => {
         if (stream.contentType) res.type(stream.contentType)
         res.status(codes.success)
         cb(null, chunk)
-      }),
+      })
+    ]
+    if (cacheStream) streams.push(cacheStream)
+    const ourStream = pipeline(
+      ...streams,
       (err) => {
         finished = true
         if (!err || req.timedout) return resolve() // timed out, no point throwing a duplicate error
@@ -56,7 +60,7 @@ const streamResponse = async (stream, req, res, codes) => {
   })
 }
 
-const sendBufferResponse = (resultData, req, res, codes) => {
+const sendBufferResponse = (resultData, _req, res, codes) => {
   res.status(codes.success)
   res.type('json')
   if (Buffer.isBuffer(resultData)) {
@@ -70,7 +74,7 @@ const sendBufferResponse = (resultData, req, res, codes) => {
   res.end()
 }
 
-const sendResponse = async ({ opt, successCode, resultData }) => {
+const sendResponse = async ({ opt, successCode, resultData, writeCache }) => {
   const { _res, _req, method, noResponse } = opt
   const codes = {
     noResponse: successCode || 204,
@@ -90,12 +94,14 @@ const sendResponse = async ({ opt, successCode, resultData }) => {
 
   // stream response
   if (resultData.pipe && resultData.on) {
-    await streamResponse(resultData, _req, _res, codes)
+    const cacheStream = await writeCache(resultData)
+    await streamResponse(resultData, _req, _res, codes, cacheStream)
     return
   }
 
   // json obj response
   sendBufferResponse(resultData, _req, _res, codes)
+  await writeCache(resultData)
 }
 
 const exec = async (req, res, { endpoint, successCode, trace }) => {
@@ -165,13 +171,16 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
   if (req.timedout) return
   if (cacheHeaders) res.set('Cache-Control', cacheControl(cacheHeaders))
 
-  const final = [
-    sendResponse({ opt, successCode, resultData })
-  ]
-  if (!cachedData && endpoint.cache && endpoint.cache.set) {
-    final.push(traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, resultData, cacheKey))))
+  const writeCache = async (v) => {
+    if (cachedData || !endpoint.cache?.set) return
+    await traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, v, cacheKey)))
   }
-  await Promise.all(final)
+  await sendResponse({
+    opt,
+    successCode,
+    resultData,
+    writeCache
+  })
 }
 
 export default (resource, { trace } = {}) => {
