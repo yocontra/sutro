@@ -174,17 +174,18 @@ const exec = async (req, res, {
 
   const cacheHeaders = endpoint.cache && endpoint.cache.header ? typeof endpoint.cache.header === 'function' ? await traceAsync(trace, 'sutro/cache.header', (0, _handleAsync.promisify)(endpoint.cache.header.bind(null, opt, resultData))) : endpoint.cache.header : defaultCacheHeaders;
   if (req.timedout) return;
-  if (cacheHeaders) res.set('Cache-Control', (0, _cacheControl.default)(cacheHeaders)); // send the data out
-
-  await sendResponse({
+  if (cacheHeaders) res.set('Cache-Control', (0, _cacheControl.default)(cacheHeaders));
+  const final = [sendResponse({
     opt,
     successCode,
     resultData
-  }); // write to cache if we got a fresh response
+  })];
 
   if (!cachedData && endpoint.cache && endpoint.cache.set) {
-    await traceAsync(trace, 'sutro/cache.set', (0, _handleAsync.promisify)(endpoint.cache.set.bind(null, opt, resultData, cacheKey)));
+    final.push(traceAsync(trace, 'sutro/cache.set', (0, _handleAsync.promisify)(endpoint.cache.set.bind(null, opt, resultData, cacheKey))));
   }
+
+  await Promise.all(final);
 };
 
 var _default = (resource, {

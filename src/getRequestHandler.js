@@ -165,13 +165,13 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
   if (req.timedout) return
   if (cacheHeaders) res.set('Cache-Control', cacheControl(cacheHeaders))
 
-  // send the data out
-  await sendResponse({ opt, successCode, resultData })
-
-  // write to cache if we got a fresh response
+  const final = [
+    sendResponse({ opt, successCode, resultData })
+  ]
   if (!cachedData && endpoint.cache && endpoint.cache.set) {
-    await traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, resultData, cacheKey)))
+    final.push(traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, resultData, cacheKey))))
   }
+  await Promise.all(final)
 }
 
 export default (resource, { trace } = {}) => {
