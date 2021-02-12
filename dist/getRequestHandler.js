@@ -51,9 +51,7 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
 
   return new Promise((resolve, reject) => {
     let finished = false;
-    const streams = [stream, (0, _through.default)(_ref)];
-    if (cacheStream) streams.push(cacheStream);
-    const ourStream = (0, _readableStream.pipeline)(...streams, err => {
+    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through.default)(_ref), err => {
       finished = true;
       if (!err || req.timedout) return resolve(); // timed out, no point throwing a duplicate error
 
@@ -68,6 +66,7 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
     // which would make us unable to send an error back out
 
     ourStream.pipe(res);
+    if (cacheStream) ourStream.pipe(cacheStream);
   });
 };
 
@@ -183,7 +182,7 @@ const exec = async (req, res, {
 
   const writeCache = async v => {
     if (cachedData || !endpoint.cache?.set) return;
-    await traceAsync(trace, 'sutro/cache.set', (0, _handleAsync.promisify)(endpoint.cache.set.bind(null, opt, v, cacheKey)));
+    return traceAsync(trace, 'sutro/cache.set', (0, _handleAsync.promisify)(endpoint.cache.set.bind(null, opt, v, cacheKey)));
   };
 
   await sendResponse({

@@ -27,7 +27,7 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
   let hasFirstChunk = false
   return new Promise((resolve, reject) => {
     let finished = false
-    const streams = [
+    const ourStream = pipeline(
       stream,
       through2((chunk, _, cb) => {
         // wait until we get a chunk without an error before writing the headers
@@ -36,11 +36,7 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
         if (stream.contentType) res.type(stream.contentType)
         res.status(codes.success)
         cb(null, chunk)
-      })
-    ]
-    if (cacheStream) streams.push(cacheStream)
-    const ourStream = pipeline(
-      ...streams,
+      }),
       (err) => {
         finished = true
         if (!err || req.timedout) return resolve() // timed out, no point throwing a duplicate error
@@ -57,6 +53,8 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
     // just use a regular pipe to res, since pipeline would close it on error
     // which would make us unable to send an error back out
     ourStream.pipe(res)
+
+    if (cacheStream) ourStream.pipe(cacheStream)
   })
 }
 
@@ -173,7 +171,7 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
 
   const writeCache = async (v) => {
     if (cachedData || !endpoint.cache?.set) return
-    await traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, v, cacheKey)))
+    return traceAsync(trace, 'sutro/cache.set', promisify(endpoint.cache.set.bind(null, opt, v, cacheKey)))
   }
   await sendResponse({
     opt,
