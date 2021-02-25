@@ -5,9 +5,7 @@ exports.default = void 0;
 
 var _handleAsync = require("handle-async");
 
-var _readableStream = require("readable-stream");
-
-var _through = _interopRequireDefault(require("through2"));
+var _stream = require("stream");
 
 var _errors = require("./errors");
 
@@ -39,19 +37,19 @@ const traceAsync = async (trace, name, promise) => {
 
 const streamResponse = async (stream, req, res, codes, cacheStream) => {
   let hasFirstChunk = false;
-
-  function _ref(chunk, _, cb) {
-    // wait until we get a chunk without an error before writing the headers
-    if (hasFirstChunk) return cb(null, chunk);
-    hasFirstChunk = true;
-    if (stream.contentType) res.type(stream.contentType);
-    res.status(codes.success);
-    cb(null, chunk);
-  }
-
   return new Promise((resolve, reject) => {
     let finished = false;
-    const ourStream = (0, _readableStream.pipeline)(stream, (0, _through.default)(_ref), err => {
+    const ourStream = (0, _stream.pipeline)(stream, new _stream.Transform({
+      transform(chunk, _, cb) {
+        // wait until we get a chunk without an error before writing the headers
+        if (hasFirstChunk) return cb(null, chunk);
+        hasFirstChunk = true;
+        if (stream.contentType) res.type(stream.contentType);
+        res.status(codes.success);
+        cb(null, chunk);
+      }
+
+    }), err => {
       finished = true;
       if (!err || req.timedout) return resolve(); // timed out, no point throwing a duplicate error
 

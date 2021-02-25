@@ -1,6 +1,5 @@
 import { promisify } from 'handle-async'
-import { pipeline } from 'readable-stream'
-import through2 from 'through2'
+import { pipeline, Transform } from 'stream'
 import { NotFoundError, UnauthorizedError } from './errors'
 import parseIncludes from './parseIncludes'
 import cacheControl from './cacheControl'
@@ -29,13 +28,15 @@ const streamResponse = async (stream, req, res, codes, cacheStream) => {
     let finished = false
     const ourStream = pipeline(
       stream,
-      through2((chunk, _, cb) => {
-        // wait until we get a chunk without an error before writing the headers
-        if (hasFirstChunk) return cb(null, chunk)
-        hasFirstChunk = true
-        if (stream.contentType) res.type(stream.contentType)
-        res.status(codes.success)
-        cb(null, chunk)
+      new Transform({
+        transform(chunk, _, cb) {
+          // wait until we get a chunk without an error before writing the headers
+          if (hasFirstChunk) return cb(null, chunk)
+          hasFirstChunk = true
+          if (stream.contentType) res.type(stream.contentType)
+          res.status(codes.success)
+          cb(null, chunk)
+        }
       }),
       (err) => {
         finished = true

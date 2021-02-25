@@ -10,7 +10,7 @@ var _express = require("express");
 
 var _handleAsync = require("handle-async");
 
-var _readableStream = require("readable-stream");
+var _stream = require("stream");
 
 var _errors = require("./errors");
 
@@ -88,7 +88,7 @@ var _default = ({
     }
 
     async function _ref2(req, res, next) {
-      (0, _readableStream.finished)(res, async err => {
+      (0, _stream.finished)(res, async err => {
         const ourTrace = trace && trace.start('sutro/post');
 
         try {

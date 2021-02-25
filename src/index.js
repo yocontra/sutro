@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { promisify } from 'handle-async'
-import { finished } from 'readable-stream'
+import { finished } from 'stream'
 import { NotFoundError } from './errors'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'
