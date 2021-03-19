@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "5.4.0",
+  "version": "6.0.0",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "keywords": [
@@ -53,7 +53,7 @@
     "express": "^4.16.3",
     "handle-async": "^1.0.1",
     "lodash.omit": "^4.5.0",
-    "parse-duration": "^0.4.4",
+    "parse-duration": "^1.0.0",
     "pluralize": "^8.0.0",
     "url-join": "^4.0.0"
   }

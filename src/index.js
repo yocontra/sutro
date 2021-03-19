@@ -12,7 +12,7 @@ export const rewriteLargeRequests = rewriteLarge
 
 export * from './errors'
 
-export default ({ swagger, base, resources, pre, post, trace } = {}) => {
+export default ({ swagger, base, resources, pre, post, augmentContext, trace } = {}) => {
   if (!resources) throw new Error('Missing resources option')
   const router = Router({ mergeParams: true })
   router.swagger = getSwagger({ swagger, base, resources })
@@ -27,7 +27,7 @@ export default ({ swagger, base, resources, pre, post, trace } = {}) => {
   )
 
   walkResources(resources, (resource) => {
-    const handlers = [ getRequestHandler(resource, { trace }) ]
+    const handlers = [ getRequestHandler(resource, { augmentContext, trace }) ]
     if (pre) {
       handlers.unshift(async (req, res, next) => {
         const ourTrace = trace && trace.start('sutro/pre')

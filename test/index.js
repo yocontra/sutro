@@ -454,17 +454,7 @@ describe('sutro - flat value handlers', () => {
       user: {
         create: () => ({ created: true }),
         find: () => users,
-        findById: (opts) => {
-          const out = users[opts.userId]
-          opts.includes.forEach((i) => {
-            if (i.resource !== 'cars') return
-            const ls = cars[opts.userId]
-            out.cars = i.attributes
-              ? ls.map((c) => pick(c, i.attributes))
-              : ls
-          })
-          return out
-        },
+        findById: (opts) => users[opts.userId],
         deleteById: () => ({ deleted: true }),
         updateById: () => ({ updated: true }),
         replaceById: () => ({ replaced: true }),
@@ -500,40 +490,6 @@ describe('sutro - flat value handlers', () => {
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200, users)
-  )
-
-  it('should work with plain includes queries', async () =>
-    request(app).get('/users/1')
-      .set('Accept', 'application/json')
-      .query({ includes: [ 'cars' ] })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .expect(({ body }) => {
-        should.exist(body.cars)
-      })
-  )
-
-  it('should work with includes queries and ignore bad ones', async () =>
-    request(app).get('/users/1')
-      .set('Accept', 'application/json')
-      .query({ includes: [ 'zzz' ] })
-      .expect('Content-Type', /json/)
-      .expect(200, users[1])
-  )
-
-  it('should work with attributes includes queries', async () =>
-    request(app).get('/users/1')
-      .set('Accept', 'application/json')
-      .query({ includes: [ { resource: 'cars', attributes: [ 'name', 'id' ] } ] })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .expect(({ body }) => {
-        body.cars.forEach((c) => {
-          should.equal(Object.keys(c).length, 2)
-          should.exist(c.name)
-          should.exist(c.id)
-        })
-      })
   )
 
   it('should register a resource findById endpoint', async () =>

@@ -46,6 +46,7 @@ var _default = ({
   resources,
   pre,
   post,
+  augmentContext,
   trace
 } = {}) => {
   if (!resources) throw new Error('Missing resources option');
@@ -66,6 +67,7 @@ var _default = ({
   router.get('/swagger', (req, res) => res.status(200).json(router.swagger).end());
   (0, _walkResources.default)(resources, resource => {
     const handlers = [(0, _getRequestHandler.default)(resource, {
+      augmentContext,
       trace
     })];
 

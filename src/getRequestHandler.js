@@ -1,7 +1,6 @@
 import { promisify } from 'handle-async'
 import { pipeline, Transform } from 'stream'
 import { NotFoundError, UnauthorizedError } from './errors'
-import parseIncludes from './parseIncludes'
 import cacheControl from './cacheControl'
 
 const defaultCacheHeaders = {
@@ -103,8 +102,8 @@ const sendResponse = async ({ opt, successCode, resultData, writeCache }) => {
   await writeCache(resultData)
 }
 
-const exec = async (req, res, { endpoint, successCode, trace }) => {
-  const opt = {
+const exec = async (req, res, { endpoint, successCode }, { trace, augmentContext }) => {
+  let opt = {
     ...req.params,
     ip: req.ip,
     url: req.url,
@@ -118,7 +117,6 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
     data: req.body,
     options: req.query,
     session: req.session,
-    includes: parseIncludes(req.query.includes),
     noResponse: req.query.response === 'false',
     onFinish: (fn) => {
       res.once('finish', fn.bind(null, req, res))
@@ -129,6 +127,7 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
     _req: req,
     _res: res
   }
+  if (augmentContext) opt = await traceAsync(trace, 'sutro/augmentContext', promisify(augmentContext.bind(null, opt, req)))
 
   // check isAuthorized
   const authorized = !endpoint.isAuthorized || await traceAsync(trace, 'sutro/isAuthorized', promisify(endpoint.isAuthorized.bind(null, opt)))
@@ -182,12 +181,12 @@ const exec = async (req, res, { endpoint, successCode, trace }) => {
   })
 }
 
-export default (resource, { trace } = {}) => {
+export default (resource, { trace, augmentContext } = {}) => {
   // wrap it so it has a name
   const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return
     try {
-      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, { ...resource, trace }))
+      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, resource, { trace, augmentContext }))
     } catch (err) {
       return next(err)
     }

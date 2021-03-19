@@ -9,8 +9,6 @@ var _stream = require("stream");
 
 var _errors = require("./errors");
 
-var _parseIncludes = _interopRequireDefault(require("./parseIncludes"));
-
 var _cacheControl = _interopRequireDefault(require("./cacheControl"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -124,10 +122,12 @@ const sendResponse = async ({
 
 const exec = async (req, res, {
   endpoint,
-  successCode,
-  trace
+  successCode
+}, {
+  trace,
+  augmentContext
 }) => {
-  const opt = { ...req.params,
+  let opt = { ...req.params,
     ip: req.ip,
     url: req.url,
     protocol: req.protocol,
@@ -140,7 +140,6 @@ const exec = async (req, res, {
     data: req.body,
     options: req.query,
     session: req.session,
-    includes: (0, _parseIncludes.default)(req.query.includes),
     noResponse: req.query.response === 'false',
     onFinish: fn => {
       res.once('finish', fn.bind(null, req, res));
@@ -150,7 +149,8 @@ const exec = async (req, res, {
     },
     _req: req,
     _res: res
-  }; // check isAuthorized
+  };
+  if (augmentContext) opt = await traceAsync(trace, 'sutro/augmentContext', (0, _handleAsync.promisify)(augmentContext.bind(null, opt, req))); // check isAuthorized
 
   const authorized = !endpoint.isAuthorized || (await traceAsync(trace, 'sutro/isAuthorized', (0, _handleAsync.promisify)(endpoint.isAuthorized.bind(null, opt))));
   if (authorized !== true) throw new _errors.UnauthorizedError();
@@ -192,15 +192,17 @@ const exec = async (req, res, {
 };
 
 var _default = (resource, {
-  trace
+  trace,
+  augmentContext
 } = {}) => {
   // wrap it so it has a name
   const handleAPIRequest = async (req, res, next) => {
     if (req.timedout) return;
 
     try {
-      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, { ...resource,
-        trace
+      await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, resource, {
+        trace,
+        augmentContext
       }));
     } catch (err) {
       return next(err);
