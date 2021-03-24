@@ -1,10 +1,20 @@
 import omit from 'lodash.omit'
 import walkResources from './walkResources'
+import {
+  getSwaggerArgs,
+  MethodVerbs,
+  Resources,
+  Responses,
+  Swagger,
+  Endpoint,
+  SwaggerConfig,
+  Paths
+} from './types'
 
 const param = /:(\w+)/gi
 
-const getResponses = (method, endpoint) => {
-  const out = {
+const getResponses = (method: MethodVerbs, endpoint: Endpoint) => {
+  const out: Responses = {
     404: {
       description: 'Not found'
     },
@@ -37,38 +47,49 @@ const getResponses = (method, endpoint) => {
   return out
 }
 
-const flattenConfig = (base, override = {}) => {
+const flattenConfig = (
+  base: SwaggerConfig,
+  override: SwaggerConfig
+): SwaggerConfig => {
   const filtered = omit(override, [
-    'consumes', 'produces', 'responses', 'parameters'
+    'consumes',
+    'produces',
+    'responses',
+    'parameters'
   ])
   return {
     consumes: override.consumes || base.consumes,
     produces: override.produces || base.produces,
-    responses: override.responses ? {
-      ...base.responses,
-      ...override.responses
-    } : base.responses,
+    responses: override.responses
+      ? {
+          ...base.responses,
+          ...override.responses
+        }
+      : base.responses,
     parameters: override.parameters
-      ? [ ...base.parameters || [], ...override.parameters ]
+      ? [...(base.parameters || []), ...override.parameters]
       : base.parameters,
     ...filtered
   }
 }
 
-const getPaths = (resources) => {
-  const paths = {}
+const getPaths = (resources: Resources): Paths => {
+  const paths: Paths = {}
   walkResources(resources, ({ path, method, endpoint }) => {
     if (endpoint.hidden || endpoint.swagger === false) return // skip
     const params = path.match(param)
-    const base = {
-      consumes: method !== 'get' && [ 'application/json' ] || undefined,
-      produces: [ 'application/json' ],
-      parameters: params && params.map((name) => ({
-        name: name.slice(1),
-        in: 'path',
-        required: true,
-        type: 'string'
-      })) || undefined,
+    const base: SwaggerConfig = {
+      consumes: (method !== 'get' && ['application/json']) || undefined,
+      produces: ['application/json'],
+      parameters:
+        (params &&
+          params.map((name) => ({
+            name: name.slice(1),
+            in: 'path',
+            required: true,
+            type: 'string'
+          }))) ||
+        undefined,
       responses: getResponses(method, endpoint)
     }
     const fixedPath = path.replace(param, '{$1}')
@@ -78,7 +99,7 @@ const getPaths = (resources) => {
   return paths
 }
 
-export default ({ swagger = {}, base, resources }) => {
+export default ({ swagger = {}, base, resources }: getSwaggerArgs): Swagger => {
   const out = {
     swagger: '2.0',
     info: {
@@ -86,7 +107,7 @@ export default ({ swagger = {}, base, resources }) => {
       version: '1.0.0'
     },
     basePath: base,
-    schemes: [ 'http' ],
+    schemes: ['http'],
     paths: getPaths(resources),
     ...swagger
   }

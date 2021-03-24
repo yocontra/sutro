@@ -30,6 +30,7 @@
   },
   "scripts": {
     "build": "npm run clean && babel src --out-dir dist",
+    "build-ts": "npm run clean && tsc -b",
     "clean": "rimraf dist",
     "lint": "eslint src test --fix",
     "test": "mocha --require @babel/register --recursive --reporter spec"
@@ -39,6 +40,11 @@
     "@babel/register": "^7.10.5",
     "@stae/babel-node": "^1.0.3",
     "@stae/linters": "^1.0.1",
+    "@types/express": "^4.17.11",
+    "@types/lodash.omit": "^4.5.6",
+    "@types/node": "^14.14.35",
+    "@types/pluralize": "^0.0.29",
+    "@types/url-join": "^4.0.0",
     "eslint": "^7.0.0",
     "jsonstream-next": "^3.0.0",
     "lodash.pick": "^4.4.0",
@@ -55,6 +61,7 @@
     "lodash.omit": "^4.5.0",
     "parse-duration": "^1.0.0",
     "pluralize": "^8.0.0",
+    "ts-node": "^9.1.1",
     "url-join": "^4.0.0"
   }
 }

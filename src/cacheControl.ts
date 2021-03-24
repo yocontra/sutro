@@ -1,14 +1,13 @@
 import parseDuration from 'parse-duration'
+import { CacheOptions } from './types'
 
-const parseNumber = (v) => {
-  const n = typeof v === 'number'
-    ? v
-    : parseDuration(v)
+const parseNumber = (v: number | string): number => {
+  const n = (typeof v === 'number' ? v : parseDuration(v)) as number
   if (isNaN(n)) throw new Error(`Invalid number: ${v}`)
   return n / 1000
 }
 
-export default (opt) => {
+export default (opt: string | CacheOptions) => {
   if (typeof opt === 'string') return opt // already formatted
   const stack = []
 
@@ -19,8 +18,12 @@ export default (opt) => {
   if (opt.noTransform) stack.push('no-transform')
   if (opt.proxyRevalidate) stack.push('proxy-revalidate')
   if (opt.mustRevalidate) stack.push('proxy-revalidate')
-  if (opt.staleIfError) stack.push(`stale-if-error=${parseNumber(opt.staleIfError)}`)
-  if (opt.staleWhileRevalidate) stack.push(`stale-while-revalidate=${parseNumber(opt.staleWhileRevalidate)}`)
+  if (opt.staleIfError)
+    stack.push(`stale-if-error=${parseNumber(opt.staleIfError)}`)
+  if (opt.staleWhileRevalidate)
+    stack.push(
+      `stale-while-revalidate=${parseNumber(opt.staleWhileRevalidate)}`
+    )
   if (opt.maxAge) stack.push(`max-age=${parseNumber(opt.maxAge)}`)
   if (opt.sMaxAge) stack.push(`s-maxage=${parseNumber(opt.sMaxAge)}`)
   return stack.join(', ')

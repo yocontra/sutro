@@ -1,4 +1,20 @@
-export default {
+export type MethodKeys =
+  | 'find'
+  | 'create'
+  | 'findById'
+  | 'replaceById'
+  | 'updateById'
+  | 'deleteById'
+export type MethodVerbs = 'get' | 'post' | 'put' | 'patch' | 'delete'
+export type Methods = {
+  [key in MethodKeys]: {
+    method: MethodVerbs
+    instance: boolean
+    successCode?: number
+  }
+}
+
+const methods: Methods = {
   find: {
     method: 'get',
     instance: false
@@ -25,3 +41,5 @@ export default {
     instance: true
   }
 }
+
+export default methods
