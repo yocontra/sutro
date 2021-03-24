@@ -7,7 +7,7 @@ import getSwagger from './getSwagger'
 import getMeta from './getMeta'
 import walkResources from './walkResources'
 import rewriteLarge from './rewriteLarge'
-import { MethodVerbs, SutroArgs, SutroRouter, Trace } from './types'
+import { MethodVerbs, SutroArgs, SutroRouter, PathParams } from './types'
 
 export const rewriteLargeRequests = rewriteLarge
 
@@ -62,7 +62,10 @@ export default ({
         next()
       })
     }
-    router[resource.method as MethodVerbs](resource.path, ...handlers)
+    router[resource.method as MethodVerbs](
+      resource.path as PathParams,
+      ...handlers
+    )
   })
 
   // handle 404s

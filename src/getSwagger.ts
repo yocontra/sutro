@@ -6,14 +6,14 @@ import {
   Resources,
   Responses,
   Swagger,
-  Endpoint,
+  ResourceRoot,
   SwaggerConfig,
   Paths
 } from './types'
 
 const param = /:(\w+)/gi
 
-const getResponses = (method: MethodVerbs, endpoint: Endpoint) => {
+const getResponses = (method: MethodVerbs, endpoint: ResourceRoot) => {
   const out: Responses = {
     404: {
       description: 'Not found'
@@ -76,25 +76,28 @@ const flattenConfig = (
 const getPaths = (resources: Resources): Paths => {
   const paths: Paths = {}
   walkResources(resources, ({ path, method, endpoint }) => {
-    if (endpoint.hidden || endpoint.swagger === false) return // skip
-    const params = path.match(param)
+    if (endpoint?.hidden || endpoint?.swagger === false) return // skip
+    const params = (path as string)?.match(param)
     const base: SwaggerConfig = {
       consumes: (method !== 'get' && ['application/json']) || undefined,
       produces: ['application/json'],
       parameters:
         (params &&
-          params.map((name) => ({
+          params.map((name: string) => ({
             name: name.slice(1),
             in: 'path',
             required: true,
             type: 'string'
           }))) ||
         undefined,
-      responses: getResponses(method, endpoint)
+      responses: getResponses(method as MethodVerbs, endpoint as ResourceRoot)
     }
-    const fixedPath = path.replace(param, '{$1}')
+    const fixedPath = (path as string).replace(param, '{$1}')
     if (!paths[fixedPath]) paths[fixedPath] = {}
-    paths[fixedPath][method] = flattenConfig(base, endpoint.swagger)
+    paths[fixedPath][method as MethodVerbs] = flattenConfig(
+      base,
+      endpoint?.swagger
+    )
   })
   return paths
 }

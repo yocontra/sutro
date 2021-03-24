@@ -1,6 +1,8 @@
-import { IRouter, Request, Response, PathParams } from 'express'
+import { IRouter, Request, Response } from 'express'
 import { Stream } from 'stream'
 export type Opt = { [key: string]: any }
+
+export type PathParams = string | RegExp | Array<string | RegExp>
 
 export type CacheOptions = {
   private?: boolean
@@ -35,65 +37,44 @@ export type Methods = {
 }
 
 export type ResourceRoot = {
-  [key: string]: {
-    isAuthorized: () => boolean
-    execute: <T>() => Promise<T>
-    format: <T>() => Promise<T> // TODO review type
-    cache: {
-      header: CacheOptions | (() => CacheOptions)
-      key: () => string
-      get: (opt: Opt, key: string) => Promise<string>
-      set: (opt: Opt, data: any, key: string) => Promise<string>
-    }
-    http: {
-      method: MethodVerbs
-      instance: boolean
-    }
-    swagger: {}
-    [key: string]: any // TODO find a better way to allow infinite nesting
-  }
-}
-
-export type Resources = {
-  [key: string]: ResourceRoot | Resources
-}
-
-// TODO review this typing
-export type Endpoint = {
   hidden?: boolean
   path?: PathParams
   method: string
   instance?: boolean
   swagger?: any // TODO type this
-  isAuthorized?: () => boolean
+  isAuthorized?: () => Promise<boolean>
   execute: <T>() => Promise<T>
   format: <T>() => Promise<T>
   cache?: {
     header: CacheOptions | (() => CacheOptions)
     key: () => string
-    get: (opt: Opt | string, key: string) => Promise<string>
-    set: (opt: Opt | string, data: any, key: string) => Promise<string>
+    get: <T>(opt: Opt | string, key: string) => Promise<T>
+    set: <T>(opt: Opt | string, data: any, key: string) => Promise<T>
   }
-  endpoint?: Endpoint
+  http: {
+    method: MethodVerbs
+    instance: boolean
+  }
+  endpoint?: ResourceRoot
   successCode?: number
+  hierarchy?: string
 }
 
-export type handlerArgs = {
-  hierarchy: string
-  path: PathParams
-  method: MethodVerbs
-  instance: boolean
-  // TODO review types
-  endpoint: Endpoint
+export type Resource = {
+  [key: string]: ResourceRoot
 }
 
-export type Handler = (args: Endpoint) => void
+export type Resources = {
+  [key: string]: Resource
+}
+
+export type Handler = (args: ResourceRoot) => void
 
 export type walkResourceArgs = {
-  base: string
+  base?: string
   name: string
-  resource: ResourceRoot
-  hierarchy: string
+  resource: Resource
+  hierarchy?: string
   // TODO review types
   handler: Handler
 }
@@ -166,16 +147,20 @@ export type SutroArgs = {
   base: string
   resources: Resources
   swagger?: any // TODO
-  pre?: any // TODO
-  post?: any // TODO
-  augmentContext?: any // TODO
+  pre?: <T>(
+    resource: ResourceRoot,
+    req: SutroRequest,
+    res: Response
+  ) => Promise<T> // TODO verify this is correct
+  post?: <T>() => Promise<T> // TODO
+  augmentContext?: (context: Opt, req: SutroRequest) => Opt // TODO
   trace?: Trace
 }
 
 export interface SutroRouter extends IRouter {
-  swagger?: any
-  meta?: any
-  base?: any
+  swagger?: any // TODO
+  meta?: any // TODO
+  base?: any // TODO
 }
 
 export type ResponseStatusKeys =

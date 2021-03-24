@@ -1,5 +1,4 @@
 /*eslint no-console: 0*/
-import pick from 'lodash.pick'
 import should from 'should'
 import sutro, { rewriteLargeRequests } from '../src'
 import request from 'supertest'
@@ -14,10 +13,7 @@ const users = [
   { id: 2, name: 'baz' }
 ]
 
-const passengers = [
-  { name: 'todd' },
-  { name: 'rob' }
-]
+const passengers = [{ name: 'todd' }, { name: 'rob' }]
 const cars = [
   [
     { id: 0, name: 'foo', passengers },
@@ -79,8 +75,13 @@ describe('sutro - function handlers', () => {
 
           passenger: {
             create: (opts, cb) => cb(null, { created: true }),
-            find: (opts, cb) => cb(null, cars[opts.userId][opts.carId].passengers),
-            findById: (opts, cb) => cb(null, cars[opts.userId][opts.carId].passengers[opts.passengerId]),
+            find: (opts, cb) =>
+              cb(null, cars[opts.userId][opts.carId].passengers),
+            findById: (opts, cb) =>
+              cb(
+                null,
+                cars[opts.userId][opts.carId].passengers[opts.passengerId]
+              ),
             deleteById: (opts, cb) => cb(null, { deleted: true }),
             updateById: (opts, cb) => cb(null, { updated: true }),
             replaceById: (opts, cb) => cb(null, { replaced: true })
@@ -100,150 +101,148 @@ describe('sutro - function handlers', () => {
   const app = express().use(sutro(config))
 
   it('should register a resource find endpoint', async () =>
-    request(app).get('/users')
+    request(app)
+      .get('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, users)
-  )
+      .expect(200, users))
 
   it('should register a resource findById endpoint', async () =>
-    request(app).get('/users/1')
+    request(app)
+      .get('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, users[1])
-  )
-
+      .expect(200, users[1]))
 
   it('should register a resource create endpoint', async () =>
-    request(app).post('/users')
+    request(app)
+      .post('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(201, { created: true })
-  )
+      .expect(201, { created: true }))
 
   it('should register a resource create endpoint that works with response=false', async () =>
-    request(app).post('/users')
+    request(app)
+      .post('/users')
       .set('Accept', 'application/json')
       .query({ response: false })
       .expect(201)
-      .expect(({ body }) => !body)
-  )
+      .expect(({ body }) => !body))
 
   it('should register a resource delete endpoint', async () =>
-    request(app).delete('/users/1')
+    request(app)
+      .delete('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { deleted: true })
-  )
+      .expect(200, { deleted: true }))
 
   it('should register a resource replace endpoint', async () =>
-    request(app).put('/users/1')
+    request(app)
+      .put('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { replaced: true })
-  )
+      .expect(200, { replaced: true }))
 
   it('should register a resource update endpoint', async () =>
-    request(app).patch('/users/1')
+    request(app)
+      .patch('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { updated: true })
-  )
+      .expect(200, { updated: true }))
 
   it('should register a custom resource', async () =>
-    request(app).get('/users/me')
+    request(app)
+      .get('/users/me')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { me: true })
-  )
+      .expect(200, { me: true }))
 
   it('should register a nested resource find endpoint', async () =>
-    request(app).get('/users/1/cars')
+    request(app)
+      .get('/users/1/cars')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, cars[1])
-  )
+      .expect(200, cars[1]))
 
   it('should register a nested resource findById endpoint', async () =>
-    request(app).get('/users/1/cars/1')
+    request(app)
+      .get('/users/1/cars/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, cars[1][1])
-  )
-
+      .expect(200, cars[1][1]))
 
   it('should register a nested resource create endpoint', async () =>
-    request(app).post('/users/1/cars')
+    request(app)
+      .post('/users/1/cars')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(201, { created: true })
-  )
+      .expect(201, { created: true }))
 
   it('should register a nested resource delete endpoint', async () =>
-    request(app).delete('/users/1/cars/1')
+    request(app)
+      .delete('/users/1/cars/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { deleted: true })
-  )
+      .expect(200, { deleted: true }))
 
   it('should register a nested resource replace endpoint', async () =>
-    request(app).put('/users/1/cars/1')
+    request(app)
+      .put('/users/1/cars/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { replaced: true })
-  )
+      .expect(200, { replaced: true }))
 
   it('should register a nested resource update endpoint', async () =>
-    request(app).patch('/users/1/cars/1')
+    request(app)
+      .patch('/users/1/cars/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { updated: true })
-  )
+      .expect(200, { updated: true }))
   it('should register a double nested resource find endpoint', async () =>
-    request(app).get('/users/1/cars/1/passengers')
+    request(app)
+      .get('/users/1/cars/1/passengers')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, cars[1][1].passengers)
-  )
+      .expect(200, cars[1][1].passengers))
 
   it('should register a double nested resource findById endpoint', async () =>
-    request(app).get('/users/1/cars/1/passengers/0')
+    request(app)
+      .get('/users/1/cars/1/passengers/0')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, cars[1][1].passengers[0])
-  )
-
+      .expect(200, cars[1][1].passengers[0]))
 
   it('should register a double nested resource create endpoint', async () =>
-    request(app).post('/users/1/cars/1/passengers')
+    request(app)
+      .post('/users/1/cars/1/passengers')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(201, { created: true })
-  )
+      .expect(201, { created: true }))
 
   it('should register a double nested resource delete endpoint', async () =>
-    request(app).delete('/users/1/cars/1/passengers/1')
+    request(app)
+      .delete('/users/1/cars/1/passengers/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { deleted: true })
-  )
+      .expect(200, { deleted: true }))
 
   it('should register a double nested resource replace endpoint', async () =>
-    request(app).put('/users/1/cars/1/passengers/1')
+    request(app)
+      .put('/users/1/cars/1/passengers/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { replaced: true })
-  )
+      .expect(200, { replaced: true }))
 
   it('should register a double nested resource update endpoint', async () =>
-    request(app).patch('/users/1/cars/1/passengers/1')
+    request(app)
+      .patch('/users/1/cars/1/passengers/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { updated: true })
-  )
+      .expect(200, { updated: true }))
 
   it('should have a valid swagger file', async () => {
-    const { body } = await request(app).get('/swagger')
+    const { body } = await request(app)
+      .get('/swagger')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -252,7 +251,8 @@ describe('sutro - function handlers', () => {
   })
 
   it('should have a meta index', async () => {
-    const { body } = await request(app).get('/')
+    const { body } = await request(app)
+      .get('/')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -387,54 +387,53 @@ describe('sutro - async function handlers', () => {
   const app = express().use(sutro(config))
 
   it('should register a resource find endpoint', async () =>
-    request(app).get('/users')
+    request(app)
+      .get('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, users)
-  )
+      .expect(200, users))
 
   it('should register a resource findById endpoint', async () =>
-    request(app).get('/users/1')
+    request(app)
+      .get('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, users[1])
-  )
-
+      .expect(200, users[1]))
 
   it('should register a resource create endpoint', async () =>
-    request(app).post('/users')
+    request(app)
+      .post('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(201, { created: true })
-  )
+      .expect(201, { created: true }))
 
   it('should register a resource delete endpoint', async () =>
-    request(app).delete('/users/1')
+    request(app)
+      .delete('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { deleted: true })
-  )
+      .expect(200, { deleted: true }))
 
   it('should register a resource replace endpoint', async () =>
-    request(app).put('/users/1')
+    request(app)
+      .put('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { replaced: true })
-  )
+      .expect(200, { replaced: true }))
 
   it('should register a resource update endpoint', async () =>
-    request(app).patch('/users/1')
+    request(app)
+      .patch('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { updated: true })
-  )
+      .expect(200, { updated: true }))
 
   it('should register a custom resource', async () =>
-    request(app).get('/users/me')
+    request(app)
+      .get('/users/me')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { me: true })
-  )
+      .expect(200, { me: true }))
 })
 
 describe('sutro - flat value handlers', () => {
@@ -486,67 +485,66 @@ describe('sutro - flat value handlers', () => {
   const app = express().use(sutro(config))
 
   it('should register a resource find endpoint', async () =>
-    request(app).get('/users')
+    request(app)
+      .get('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, users)
-  )
+      .expect(200, users))
 
   it('should register a resource findById endpoint', async () =>
-    request(app).get('/users/1')
+    request(app)
+      .get('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, users[1])
-  )
-
+      .expect(200, users[1]))
 
   it('should register a resource create endpoint', async () =>
-    request(app).post('/users')
+    request(app)
+      .post('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(201, { created: true })
-  )
+      .expect(201, { created: true }))
 
   it('should register a resource delete endpoint', async () =>
-    request(app).delete('/users/1')
+    request(app)
+      .delete('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { deleted: true })
-  )
+      .expect(200, { deleted: true }))
 
   it('should register a resource replace endpoint', async () =>
-    request(app).put('/users/1')
+    request(app)
+      .put('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { replaced: true })
-  )
+      .expect(200, { replaced: true }))
 
   it('should register a resource update endpoint', async () =>
-    request(app).patch('/users/1')
+    request(app)
+      .patch('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { updated: true })
-  )
+      .expect(200, { updated: true }))
 
   it('should register a custom resource', async () =>
-    request(app).get('/users/me')
+    request(app)
+      .get('/users/me')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, { me: true })
-  )
+      .expect(200, { me: true }))
 
   it('should return 200 with data from a custom falsey resource', async () =>
-    request(app).get('/users/123/isCool')
+    request(app)
+      .get('/users/123/isCool')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, 'false')
-  )
+      .expect(200, 'false'))
 
   it('should return 404 from a custom null resource', async () =>
-    request(app).get('/users/nulled')
+    request(app)
+      .get('/users/nulled')
       .set('Accept', 'application/json')
-      .expect(404)
-  )
+      .expect(404))
 })
 
 describe('sutro - caching', () => {
@@ -562,7 +560,7 @@ describe('sutro - caching', () => {
             header: () => ({ public: true, maxAge: '1hr' }),
             key: () => 'yo',
             get: async (opt, key) => keyedCache[key],
-            set: async (opt, data, key) => keyedCache[key] = data
+            set: async (opt, data, key) => (keyedCache[key] = data)
           }
         },
         findById: {
@@ -570,7 +568,7 @@ describe('sutro - caching', () => {
           cache: {
             header: () => ({ public: true }),
             get: async (opt) => findByIdCache[opt.userId],
-            set: async (opt, data) => findByIdCache[opt.userId] = data
+            set: async (opt, data) => (findByIdCache[opt.userId] = data)
           }
         },
         me: {
@@ -578,7 +576,7 @@ describe('sutro - caching', () => {
           cache: {
             header: { private: true },
             get: async () => meCache,
-            set: async (opt, data) => meCache = data
+            set: async (opt, data) => (meCache = data)
           },
           http: {
             method: 'get',
@@ -592,25 +590,29 @@ describe('sutro - caching', () => {
   const app = express().use(sutro(config))
 
   it('should cache a findById endpoint', async () => {
-    await request(app).get('/users/1')
+    await request(app)
+      .get('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect('Cache-Control', 'public')
       .expect(200, users[1])
 
-    await request(app).get('/users/2')
+    await request(app)
+      .get('/users/2')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect('Cache-Control', 'public')
       .expect(200, users[2])
 
-    await request(app).get('/users/1')
+    await request(app)
+      .get('/users/1')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect('Cache-Control', 'public')
       .expect(200, users[1])
 
-    await request(app).get('/users/2')
+    await request(app)
+      .get('/users/2')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect('Cache-Control', 'public')
@@ -623,7 +625,8 @@ describe('sutro - caching', () => {
     })
   })
   it('should cache a custom resource', async () => {
-    await request(app).get('/users/me')
+    await request(app)
+      .get('/users/me')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect('Cache-Control', 'private')
@@ -633,7 +636,8 @@ describe('sutro - caching', () => {
     meCache.should.eql({ me: true })
   })
   it('should cache with a key function', async () => {
-    await request(app).get('/users')
+    await request(app)
+      .get('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect('Cache-Control', 'public, max-age=3600')
@@ -644,35 +648,32 @@ describe('sutro - caching', () => {
   })
 })
 
-
 describe('sutro - rewriting requests', () => {
   const config = {
     resources: {
       user: {
-        find: () => [ { a: 1 } ],
+        find: () => [{ a: 1 }],
         findById: () => ({ a: 1 })
       }
     }
   }
-  const app = express()
-    .use(rewriteLargeRequests)
-    .use(sutro(config))
+  const app = express().use(rewriteLargeRequests).use(sutro(config))
 
   it('should rewrite a post for a resource find endpoint', async () =>
-    request(app).post('/users')
+    request(app)
+      .post('/users')
       .set('Accept', 'application/json')
       .set('X-HTTP-Method-Override', 'GET')
       .expect('Content-Type', /json/)
-      .expect(200, config.resources.user.find())
-  )
+      .expect(200, config.resources.user.find()))
 
   it('should rewrite a post for a resource findById endpoint', async () =>
-    request(app).post('/users/1')
+    request(app)
+      .post('/users/1')
       .set('Accept', 'application/json')
       .set('X-HTTP-Method-Override', 'GET')
       .expect('Content-Type', /json/)
-      .expect(200, config.resources.user.findById())
-  )
+      .expect(200, config.resources.user.findById()))
 })
 
 describe('sutro - streaming requests', () => {
@@ -705,23 +706,23 @@ describe('sutro - streaming requests', () => {
     })
 
   it('should stream a resource find endpoint', async () =>
-    request(app).get('/users')
+    request(app)
+      .get('/users')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(200, [ { a: 1 } ])
-  )
+      .expect(200, [{ a: 1 }]))
   it('should handle async stream errors correctly', async () =>
-    request(app).get('/users')
+    request(app)
+      .get('/users')
       .query({ asyncError: true })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(500, { error: 'Bad news!' })
-  )
+      .expect(500, { error: 'Bad news!' }))
   it('should handle instant stream errors correctly', async () =>
-    request(app).get('/users')
+    request(app)
+      .get('/users')
       .query({ error: true })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
-      .expect(500, { error: 'Bad news!' })
-  )
+      .expect(500, { error: 'Bad news!' }))
 })

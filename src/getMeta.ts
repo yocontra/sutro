@@ -9,13 +9,13 @@ export default ({ base, resources }: getMetaArgs): Meta => {
   walkResources(
     resources,
     ({ hierarchy, path, method, instance, endpoint }) => {
-      if (endpoint.hidden) return // skip
+      if (endpoint?.hidden) return // skip
       const descriptor = {
-        path: base ? join(base, path) : path,
+        path: base ? join(base, path as string) : path,
         method,
         instance
       }
-      dp.set(paths, hierarchy, descriptor)
+      dp.set(paths, hierarchy as string, descriptor)
     }
   )
   return paths

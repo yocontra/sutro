@@ -3,7 +3,8 @@ import getPath from './getPath'
 import methods from './methods'
 import { Resources, walkResourceArgs, Handler, MethodKeys } from './types'
 
-const idxd = (o) => o.index || o
+// TODO fix me
+const idxd = (o: any) => o.index || o
 
 const walkResource = ({
   base,

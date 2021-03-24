@@ -7,7 +7,7 @@ import {
   Trace,
   SutroRequest,
   SutroStream,
-  Endpoint,
+  ResourceRoot,
   CacheOptions,
   sendResponseArgs
 } from './types'
@@ -132,8 +132,8 @@ const sendResponse = async ({
 const exec = async (
   req: SutroRequest,
   res: Response,
-  { endpoint, successCode }: Endpoint,
-  { trace, augmentContext }: { trace: Trace; augmentContext: any } // TODO update me
+  { endpoint, successCode }: ResourceRoot,
+  { trace, augmentContext }: { trace?: Trace; augmentContext?: any } // TODO update me
 ) => {
   let opt = {
     ...req.params,
@@ -259,7 +259,7 @@ const exec = async (
 
 // TODO type me better
 export default (
-  resource: Endpoint,
+  resource: ResourceRoot,
   { trace, augmentContext }: { trace?: Trace; augmentContext?: any }
 ) => {
   // wrap it so it has a name

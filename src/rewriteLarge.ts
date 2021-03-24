@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express'
-import { SutroRequest } from './types'
+import { SutroRequest, MethodVerbs } from './types'
 
 // allow people to send a POST and alias it into a GET
 // this is a work-around for really large queries
@@ -10,7 +10,7 @@ export default (req: SutroRequest, res: Response, next: NextFunction) => {
   if (!override || override.toLowerCase() !== 'get') return next()
 
   // work
-  req.originalMethod = req.originalMethod || req.method
+  req.originalMethod = (req.originalMethod || req.method) as MethodVerbs
   req.method = 'GET'
   req.query = {
     ...req.query,
