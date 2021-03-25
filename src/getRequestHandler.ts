@@ -11,7 +11,6 @@ import {
   ResourceRoot,
   CacheOptions
 } from './types'
-import { Readable } from 'node:stream'
 
 const defaultCacheHeaders = {
   private: true,

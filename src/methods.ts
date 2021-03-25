@@ -1,18 +1,4 @@
-export type MethodKeys =
-  | 'find'
-  | 'create'
-  | 'findById'
-  | 'replaceById'
-  | 'updateById'
-  | 'deleteById'
-export type MethodVerbs = 'get' | 'post' | 'put' | 'patch' | 'delete'
-export type Methods = {
-  [key in MethodKeys]: {
-    method: MethodVerbs
-    instance: boolean
-    successCode?: number
-  }
-}
+import { Methods } from './types'
 
 const methods: Methods = {
   find: {

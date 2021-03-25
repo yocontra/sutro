@@ -37,13 +37,13 @@ export type Methods = {
 
 export type ResourceRoot = {
   hidden?: boolean
-  path?: PathParams
+  path: PathParams
   method: string
-  instance?: boolean
+  instance: boolean
   swagger?: any // TODO type this
-  isAuthorized?: () => Promise<boolean>
-  execute: <T>() => Promise<T>
-  format: <T>() => Promise<T>
+  isAuthorized?: (opt: SutroRequest) => Promise<boolean> | boolean
+  execute: <T>(opt: SutroRequest) => Promise<T> | T
+  format: <T>() => Promise<T> | T
   cache?: {
     header: CacheOptions | (() => CacheOptions)
     key: () => string
@@ -54,9 +54,9 @@ export type ResourceRoot = {
     method: MethodVerbs
     instance: boolean
   }
-  endpoint?: ResourceRoot
+  endpoint: ResourceRoot
   successCode?: number
-  hierarchy?: string
+  hierarchy: string
 }
 
 export type Resource = {
@@ -88,11 +88,6 @@ export type Paths = {
   [key: string]: {
     [key in MethodVerbs]?: SwaggerConfig
   }
-}
-
-export type getMetaArgs = {
-  base?: string
-  resources: Resources
 }
 
 export type MetaRoot = {
@@ -205,8 +200,8 @@ export interface SutroRequest {
   noResponse?: boolean
   onFinish?: (fn: (req: Request, res: Response) => void) => void
   withRaw?: (fn: (req: Request, res: Response) => void) => void
-  _req?: ExpressRequest
-  _res?: Response
+  _req: ExpressRequest
+  _res: Response
 }
 
 export interface SutroStream extends Readable {

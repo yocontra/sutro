@@ -1,10 +1,15 @@
 import join from 'url-join'
 import dp from 'dot-prop'
 import walkResources from './walkResources'
-import { getMetaArgs, Meta } from './types'
+import { Resources, Meta } from './types'
 
-// TODO: handle nesting correctly
-export default ({ base, resources }: getMetaArgs): Meta => {
+export default ({
+  base,
+  resources
+}: {
+  base?: string
+  resources: Resources
+}): Meta => {
   const paths = {}
   walkResources(
     resources,
@@ -15,7 +20,7 @@ export default ({ base, resources }: getMetaArgs): Meta => {
         method,
         instance
       }
-      dp.set(paths, hierarchy as string, descriptor)
+      dp.set(paths, hierarchy, descriptor)
     }
   )
   return paths
