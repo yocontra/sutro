@@ -3,7 +3,6 @@ build
 lib-cov
 *.seed
 *.log
-*.csv
 *.dat
 *.out
 *.pid
@@ -14,8 +13,8 @@ pids
 logs
 results
 
-package-lock.json
 yarn.lock
+npm-shrinkwrap.json
 npm-debug.log
 node_modules
 *.sublime*
@@ -24,3 +23,5 @@ coverage
 *.orig
 .idea
 sandbox
+docs
+package-lock.json

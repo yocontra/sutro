@@ -94,10 +94,9 @@ const getPaths = (resources: Resources): Paths => {
     }
     const fixedPath = (path as string).replace(param, '{$1}')
     if (!paths[fixedPath]) paths[fixedPath] = {}
-    paths[fixedPath][method as MethodVerbs] = flattenConfig(
-      base,
-      endpoint?.swagger
-    )
+    paths[fixedPath][method as MethodVerbs] = endpoint?.swagger
+      ? flattenConfig(base, endpoint?.swagger)
+      : base
   })
   return paths
 }

@@ -1,6 +1,5 @@
 import { IRouter, Request, Response } from 'express'
-import { Stream } from 'stream'
-export type Opt = { [key: string]: any }
+import { Readable } from 'stream'
 
 export type PathParams = string | RegExp | Array<string | RegExp>
 
@@ -48,8 +47,8 @@ export type ResourceRoot = {
   cache?: {
     header: CacheOptions | (() => CacheOptions)
     key: () => string
-    get: <T>(opt: Opt | string, key: string) => Promise<T>
-    set: <T>(opt: Opt | string, data: any, key: string) => Promise<T>
+    get: <T>(opt: SutroRequest | string, key: string) => Promise<T>
+    set: <T>(opt: SutroRequest | string, data: any, key: string) => Promise<T>
   }
   http: {
     method: MethodVerbs
@@ -65,7 +64,7 @@ export type Resource = {
 }
 
 export type Resources = {
-  [key: string]: Resource
+  [key: string]: any // this type is recursive and not possible ATM
 }
 
 export type Handler = (args: ResourceRoot) => void
@@ -92,7 +91,7 @@ export type Paths = {
 }
 
 export type getMetaArgs = {
-  base: string
+  base?: string
   resources: Resources
 }
 
@@ -109,7 +108,7 @@ export type Meta = {
 
 export type getSwaggerArgs = {
   swagger: any // TODO
-  base: string
+  base?: string
   resources: Resources
 }
 
@@ -144,23 +143,27 @@ export type Trace = {
 }
 
 export type SutroArgs = {
-  base: string
+  base?: string
   resources: Resources
   swagger?: any // TODO
-  pre?: <T>(
+  pre?: (resource: ResourceRoot, req: Request, res: Response) => void
+  post?: (
     resource: ResourceRoot,
-    req: SutroRequest,
-    res: Response
-  ) => Promise<T> // TODO verify this is correct
-  post?: <T>() => Promise<T> // TODO
-  augmentContext?: (context: Opt, req: SutroRequest) => Opt // TODO
+    req: Request,
+    res: Response,
+    err?: any
+  ) => void
+  augmentContext?: (
+    context: SutroRequest,
+    req: Request
+  ) => Promise<SutroRequest> | SutroRequest
   trace?: Trace
 }
 
 export interface SutroRouter extends IRouter {
   swagger?: any // TODO
-  meta?: any // TODO
-  base?: any // TODO
+  meta?: Meta
+  base?: string
 }
 
 export type ResponseStatusKeys =
@@ -178,27 +181,34 @@ export type Responses = {
   }
 }
 
-export interface SutroRequest extends Request {
-  originalMethod?: MethodVerbs
-  timedout?: boolean
-  user?: any // todo
-  data?: any // todo
-  options?: any // todo
-  session?: any // todo
+// our custom express overrides
+export interface ExpressRequest extends Request {
+  timedout: boolean
+  user?: unknown
+  session?: unknown
+}
+
+// our core primitives
+export interface SutroRequest {
+  ip: Request['ip']
+  url: Request['url']
+  protocol: Request['protocol']
+  method: Request['method']
+  subdomains: Request['subdomains']
+  path: Request['path']
+  headers: Request['headers']
+  cookies: Request['cookies']
+  user?: unknown
+  data?: unknown
+  options: Request['query']
+  session?: unknown
   noResponse?: boolean
-  onFinish?: (fn: (req: SutroRequest, res: Response) => void) => void
-  withRaw?: (fn: (req: SutroRequest, res: Response) => void) => void
-  _req?: SutroRequest
+  onFinish?: (fn: (req: Request, res: Response) => void) => void
+  withRaw?: (fn: (req: Request, res: Response) => void) => void
+  _req?: ExpressRequest
   _res?: Response
 }
 
-export interface SutroStream extends Stream {
+export interface SutroStream extends Readable {
   contentType?: string
-}
-
-export type sendResponseArgs = {
-  opt: any
-  successCode?: number
-  resultData: any
-  writeCache: any
 }

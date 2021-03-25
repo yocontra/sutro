@@ -1,15 +1,15 @@
 import { NextFunction, Response } from 'express'
 import { promisify } from 'handle-async'
-import { pipeline, Transform } from 'stream'
+import { pipeline, Transform, Writable } from 'stream'
 import { NotFoundError, UnauthorizedError } from './errors'
 import cacheControl from './cacheControl'
 import {
   Trace,
+  ExpressRequest,
   SutroRequest,
   SutroStream,
   ResourceRoot,
-  CacheOptions,
-  sendResponseArgs
+  CacheOptions
 } from './types'
 import { Readable } from 'node:stream'
 
@@ -34,16 +34,16 @@ const traceAsync = async <T>(trace: any, name: string, promise: Promise<T>) => {
 
 const streamResponse = async (
   stream: SutroStream,
-  req: SutroRequest,
+  req: ExpressRequest,
   res: Response,
   codes: { [key in 'noResponse' | 'success']: number },
-  cacheStream: any // TODO type me
+  cacheStream?: Writable
 ) => {
   let hasFirstChunk = false
   return new Promise((resolve, reject) => {
     let finished = false
     const ourStream = pipeline(
-      stream as Readable,
+      stream,
       new Transform({
         transform(chunk, _, cb) {
           // wait until we get a chunk without an error before writing the headers
@@ -67,7 +67,10 @@ const streamResponse = async (
       ourStream.destroy(new Error('Socket closed before response finished'))
     })
 
-    if (cacheStream) ourStream.pipe(cacheStream).pause()
+    if (cacheStream) {
+      ourStream.pipe(cacheStream)
+      ourStream.pause()
+    }
 
     // just use a regular pipe to res, since pipeline would close it on error
     // which would make us unable to send an error back out
@@ -77,7 +80,7 @@ const streamResponse = async (
 
 const sendBufferResponse = (
   resultData: any,
-  _req: SutroRequest,
+  _req: ExpressRequest,
   res: Response,
   codes: { [key in 'noResponse' | 'success']: number }
 ) => {
@@ -94,12 +97,14 @@ const sendBufferResponse = (
   res.end()
 }
 
-const sendResponse = async ({
-  opt,
-  successCode,
-  resultData,
-  writeCache
-}: sendResponseArgs) => {
+const sendResponse = async (
+  opt: SutroRequest,
+  successCode: number | undefined,
+  resultData: any,
+  writeCache: (
+    data: any
+  ) => Promise<Writable | undefined> | Writable | undefined
+) => {
   const { _res, _req, method, noResponse } = opt
   const codes = {
     noResponse: successCode || 204,
@@ -130,12 +135,12 @@ const sendResponse = async ({
 }
 
 const exec = async (
-  req: SutroRequest,
+  req: ExpressRequest,
   res: Response,
   { endpoint, successCode }: ResourceRoot,
   { trace, augmentContext }: { trace?: Trace; augmentContext?: any } // TODO update me
 ) => {
-  let opt = {
+  let opt: SutroRequest = {
     ...req.params,
     ip: req.ip,
     url: req.url,
@@ -150,10 +155,10 @@ const exec = async (
     options: req.query,
     session: req.session,
     noResponse: req.query.response === 'false',
-    onFinish: (fn: (req: SutroRequest, res: Response) => void) => {
+    onFinish: (fn: (req: ExpressRequest, res: Response) => void) => {
       res.once('finish', fn.bind(null, req, res))
     },
-    withRaw: (fn: (req: SutroRequest, res: Response) => void) => {
+    withRaw: (fn: (req: ExpressRequest, res: Response) => void) => {
       fn(req, res)
     },
     _req: req,
@@ -247,14 +252,9 @@ const exec = async (
       trace,
       'sutro/cache.set',
       promisify(endpoint.cache.set.bind(null, opt, data, cacheKey as string))
-    )
+    ) as Promise<Writable>
   }
-  await sendResponse({
-    opt,
-    successCode,
-    resultData,
-    writeCache
-  })
+  await sendResponse(opt, successCode, resultData, writeCache)
 }
 
 // TODO type me better
@@ -264,7 +264,7 @@ export default (
 ) => {
   // wrap it so it has a name
   const handleAPIRequest = async (
-    req: SutroRequest,
+    req: ExpressRequest,
     res: Response,
     next: NextFunction
   ) => {

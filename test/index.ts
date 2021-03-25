@@ -5,6 +5,7 @@ import request from 'supertest'
 import express from 'express'
 import Parser from 'swagger-parser'
 import JSONStream from 'jsonstream-next'
+import { SutroArgs } from '../src/types'
 
 const parser = new Parser()
 const users = [
@@ -35,12 +36,12 @@ const cars = [
 describe('sutro', () => {
   it('should export a function', () => {
     should.exist(sutro)
-    sutro.should.be.a.function
+    should(typeof sutro).eql('function')
   })
   it('should return a router', () => {
     const router = sutro({ resources: {} })
     should.exist(router)
-    router.should.be.a.function
+    should(typeof router).eql('function')
   })
   it('should error if missing resources', () => {
     sutro.should.throw()
@@ -49,13 +50,11 @@ describe('sutro', () => {
 })
 
 describe('sutro - function handlers', () => {
-  const config = {
-    pre: (o, req, res, next) => {
+  const config: SutroArgs = {
+    pre: async (o, req, res) => {
       should.exist(o)
       should.exist(req)
       should.exist(res)
-      should.exist(next)
-      next()
     },
     resources: {
       user: {
@@ -364,7 +363,7 @@ describe('sutro - function handlers', () => {
 })
 
 describe('sutro - async function handlers', () => {
-  const config = {
+  const config: SutroArgs = {
     resources: {
       user: {
         create: async () => ({ created: true }),
@@ -437,7 +436,7 @@ describe('sutro - async function handlers', () => {
 })
 
 describe('sutro - flat value handlers', () => {
-  const config = {
+  const config: SutroArgs = {
     pre: async (o, req, res) => {
       should.exist(o)
       should.exist(req)
@@ -550,8 +549,8 @@ describe('sutro - flat value handlers', () => {
 describe('sutro - caching', () => {
   let meCache
   const findByIdCache = {}
-  const keyedCache = {}
-  const config = {
+  const keyedCache: { yo?: any } = {}
+  const config: SutroArgs = {
     resources: {
       user: {
         find: {
@@ -649,7 +648,7 @@ describe('sutro - caching', () => {
 })
 
 describe('sutro - rewriting requests', () => {
-  const config = {
+  const config: SutroArgs = {
     resources: {
       user: {
         find: () => [{ a: 1 }],
@@ -677,7 +676,7 @@ describe('sutro - rewriting requests', () => {
 })
 
 describe('sutro - streaming requests', () => {
-  const config = {
+  const config: SutroArgs = {
     resources: {
       user: {
         find: ({ options }) => {

@@ -28,8 +28,8 @@ export default ({
   router.meta = getMeta({ base, resources })
   router.base = base
 
-  router.get('/', (req, res) => res.status(200).json(router.meta).end())
-  router.get('/swagger', (req, res) =>
+  router.get('/', (_req, res) => res.status(200).json(router.meta).end())
+  router.get('/swagger', (_req, res) =>
     res.status(200).json(router.swagger).end()
   )
 
@@ -69,6 +69,6 @@ export default ({
   })
 
   // handle 404s
-  router.use((req, res, next) => next(new NotFoundError()))
+  router.use((_req, _res, next) => next(new NotFoundError()))
   return router
 }
