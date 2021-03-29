@@ -29,7 +29,7 @@ export declare type ResourceRoot = {
     path: PathParams;
     method: string;
     instance: boolean;
-    swagger?: any;
+    swagger?: SwaggerConfig;
     isAuthorized?: (opt: SutroRequest) => Promise<boolean> | boolean;
     execute: <T>(opt: SutroRequest) => Promise<T> | T;
     format: <T>() => Promise<T> | T;
@@ -81,19 +81,29 @@ export declare type Meta = {
     [key: string]: Meta | MetaRoot;
 };
 export declare type getSwaggerArgs = {
-    swagger: any;
+    swagger: Swagger;
     base?: string;
     resources: Resources;
 };
 export declare type Swagger = {
-    swagger: string;
-    info: {
-        title: string;
-        version: string;
+    swagger?: string;
+    info?: {
+        title?: string;
+        version?: string;
+        termsOfService?: string;
+        contact?: {
+            name?: string;
+            url?: string;
+        };
+        description?: string;
     };
-    basePath: string;
-    schemes: string[];
-    paths: Meta;
+    basePath?: string;
+    schemes?: string[];
+    paths?: {
+        [key: string]: {
+            [key: string]: SwaggerConfig;
+        };
+    };
 };
 export declare type SwaggerConfig = {
     consumes?: string[];
@@ -105,6 +115,9 @@ export declare type SwaggerConfig = {
         type: string;
     }[] | undefined;
     responses?: Responses;
+    operationId?: string;
+    summary?: string;
+    description?: string;
 };
 export declare type Trace = {
     start: (name: string) => Trace;
@@ -113,14 +126,14 @@ export declare type Trace = {
 export declare type SutroArgs = {
     base?: string;
     resources: Resources;
-    swagger?: any;
+    swagger?: Swagger;
     pre?: (resource: ResourceRoot, req: Request, res: Response) => void;
     post?: (resource: ResourceRoot, req: Request, res: Response, err?: any) => void;
     augmentContext?: (context: SutroRequest, req: Request) => Promise<SutroRequest> | SutroRequest;
     trace?: Trace;
 };
 export interface SutroRouter extends IRouter {
-    swagger?: any;
+    swagger?: Swagger;
     meta?: Meta;
     base?: string;
 }

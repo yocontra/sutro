@@ -40,7 +40,7 @@ export type ResourceRoot = {
   path: PathParams
   method: string
   instance: boolean
-  swagger?: any // TODO type this
+  swagger?: SwaggerConfig
   isAuthorized?: (opt: SutroRequest) => Promise<boolean> | boolean
   execute: <T>(opt: SutroRequest) => Promise<T> | T
   format: <T>() => Promise<T> | T
@@ -74,7 +74,6 @@ export type walkResourceArgs = {
   name: string
   resource: Resource
   hierarchy?: string
-  // TODO review types
   handler: Handler
 }
 
@@ -102,20 +101,30 @@ export type Meta = {
 }
 
 export type getSwaggerArgs = {
-  swagger: any // TODO
+  swagger: Swagger
   base?: string
   resources: Resources
 }
 
 export type Swagger = {
-  swagger: string
-  info: {
-    title: string
-    version: string
+  swagger?: string
+  info?: {
+    title?: string
+    version?: string
+    termsOfService?: string
+    contact?: {
+      name?: string
+      url?: string
+    }
+    description?: string
   }
-  basePath: string
-  schemes: string[]
-  paths: Meta // TODO verify that this is the correct type to use
+  basePath?: string
+  schemes?: string[]
+  paths?: {
+    [key: string]: {
+      [key: string]: SwaggerConfig
+    }
+  }
 }
 
 export type SwaggerConfig = {
@@ -130,6 +139,9 @@ export type SwaggerConfig = {
       }[]
     | undefined
   responses?: Responses
+  operationId?: string
+  summary?: string
+  description?: string
 }
 
 export type Trace = {
@@ -140,7 +152,7 @@ export type Trace = {
 export type SutroArgs = {
   base?: string
   resources: Resources
-  swagger?: any // TODO
+  swagger?: Swagger
   pre?: (resource: ResourceRoot, req: Request, res: Response) => void
   post?: (
     resource: ResourceRoot,
@@ -156,7 +168,7 @@ export type SutroArgs = {
 }
 
 export interface SutroRouter extends IRouter {
-  swagger?: any // TODO
+  swagger?: Swagger
   meta?: Meta
   base?: string
 }
