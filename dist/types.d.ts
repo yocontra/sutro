@@ -57,7 +57,7 @@ export declare type Handler = (args: ResourceRoot) => void;
 export declare type walkResourceArgs = {
     base?: string;
     name: string;
-    resource: Resource;
+    resource: ResourceRoot;
     hierarchy?: string;
     handler: Handler;
 };
@@ -129,9 +129,10 @@ export declare type SutroArgs = {
     swagger?: Swagger;
     pre?: (resource: ResourceRoot, req: Request, res: Response) => void;
     post?: (resource: ResourceRoot, req: Request, res: Response, err?: any) => void;
-    augmentContext?: (context: SutroRequest, req: Request) => Promise<SutroRequest> | SutroRequest;
+    augmentContext?: AugmentContext;
     trace?: Trace;
 };
+export declare type AugmentContext = (context: SutroRequest, req: Request) => Promise<SutroRequest> | SutroRequest;
 export interface SutroRouter extends IRouter {
     swagger?: Swagger;
     meta?: Meta;

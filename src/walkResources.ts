@@ -3,8 +3,7 @@ import getPath from './getPath'
 import methods from './methods'
 import { Resources, walkResourceArgs, Handler, MethodKeys } from './types'
 
-// TODO fix me
-const idxd = (o: any) => o.index || o
+const idxd = (o: Resources) => o.index || o
 
 const walkResource = ({
   base,
@@ -18,7 +17,6 @@ const walkResource = ({
   // sort custom stuff first
   const endpointNames: string[] = []
   Object.keys(res).forEach((k) =>
-    // TODO REVIEW THIS TYPE ASSERTION
     methods[k as MethodKeys] ? endpointNames.push(k) : endpointNames.unshift(k)
   )
 

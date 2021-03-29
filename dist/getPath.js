@@ -11,7 +11,6 @@ exports.default = ({ resource, endpoint, instance }) => {
         path += `/${pluralize_1.default(resource)}`;
     if (resource && instance)
         path += `/:${resource}Id`;
-    // TODO REVIEW THIS TYPE ASSERTION
     if (endpoint && !methods_1.default[endpoint])
         path += `/${endpoint}`;
     return path;

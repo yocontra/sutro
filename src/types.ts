@@ -72,7 +72,7 @@ export type Handler = (args: ResourceRoot) => void
 export type walkResourceArgs = {
   base?: string
   name: string
-  resource: Resource
+  resource: ResourceRoot
   hierarchy?: string
   handler: Handler
 }
@@ -160,12 +160,14 @@ export type SutroArgs = {
     res: Response,
     err?: any
   ) => void
-  augmentContext?: (
-    context: SutroRequest,
-    req: Request
-  ) => Promise<SutroRequest> | SutroRequest
+  augmentContext?: AugmentContext
   trace?: Trace
 }
+
+export type AugmentContext = (
+  context: SutroRequest,
+  req: Request
+) => Promise<SutroRequest> | SutroRequest
 
 export interface SutroRouter extends IRouter {
   swagger?: Swagger

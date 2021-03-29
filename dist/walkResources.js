@@ -6,15 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const url_join_1 = __importDefault(require("url-join"));
 const getPath_1 = __importDefault(require("./getPath"));
 const methods_1 = __importDefault(require("./methods"));
-// TODO fix me
 const idxd = (o) => o.index || o;
 const walkResource = ({ base, name, resource, hierarchy, handler }) => {
     const res = idxd(resource);
     // sort custom stuff first
     const endpointNames = [];
-    Object.keys(res).forEach((k) => 
-    // TODO REVIEW THIS TYPE ASSERTION
-    methods_1.default[k] ? endpointNames.push(k) : endpointNames.unshift(k));
+    Object.keys(res).forEach((k) => methods_1.default[k] ? endpointNames.push(k) : endpointNames.unshift(k));
     endpointNames.forEach((endpointName) => {
         const endpoint = res[endpointName];
         const methodInfo = endpoint.http || methods_1.default[endpointName];

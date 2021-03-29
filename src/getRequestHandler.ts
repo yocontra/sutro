@@ -9,7 +9,8 @@ import {
   SutroRequest,
   SutroStream,
   ResourceRoot,
-  CacheOptions
+  CacheOptions,
+  AugmentContext
 } from './types'
 
 const defaultCacheHeaders = {
@@ -17,8 +18,11 @@ const defaultCacheHeaders = {
   noCache: true
 }
 
-// TODO type trace
-const traceAsync = async <T>(trace: any, name: string, promise: Promise<T>) => {
+const traceAsync = async <T>(
+  trace: Trace,
+  name: string,
+  promise: Promise<T>
+) => {
   if (!trace) return promise // no tracing, just return
   const ourTrace = trace.start(name)
   try {
@@ -137,7 +141,7 @@ const exec = async (
   req: ExpressRequest,
   res: Response,
   { endpoint, successCode }: ResourceRoot,
-  { trace, augmentContext }: { trace?: Trace; augmentContext?: any } // TODO update me
+  { trace, augmentContext }: { trace?: Trace; augmentContext?: AugmentContext }
 ) => {
   let opt: SutroRequest = {
     ...req.params,
@@ -256,10 +260,9 @@ const exec = async (
   await sendResponse(opt, successCode, resultData, writeCache)
 }
 
-// TODO type me better
 export default (
   resource: ResourceRoot,
-  { trace, augmentContext }: { trace?: Trace; augmentContext?: any }
+  { trace, augmentContext }: { trace?: Trace; augmentContext?: AugmentContext }
 ) => {
   // wrap it so it has a name
   const handleAPIRequest = async (

@@ -11,7 +11,6 @@ const defaultCacheHeaders = {
     private: true,
     noCache: true
 };
-// TODO type trace
 const traceAsync = async (trace, name, promise) => {
     if (!trace)
         return promise; // no tracing, just return
@@ -102,8 +101,7 @@ const sendResponse = async (opt, successCode, resultData, writeCache) => {
     sendBufferResponse(resultData, _req, _res, codes);
     await writeCache(resultData);
 };
-const exec = async (req, res, { endpoint, successCode }, { trace, augmentContext } // TODO update me
-) => {
+const exec = async (req, res, { endpoint, successCode }, { trace, augmentContext }) => {
     let opt = {
         ...req.params,
         ip: req.ip,
@@ -184,7 +182,6 @@ const exec = async (req, res, { endpoint, successCode }, { trace, augmentContext
     };
     await sendResponse(opt, successCode, resultData, writeCache);
 };
-// TODO type me better
 exports.default = (resource, { trace, augmentContext }) => {
     // wrap it so it has a name
     const handleAPIRequest = async (req, res, next) => {
