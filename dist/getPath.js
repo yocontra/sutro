@@ -1,25 +1,18 @@
 "use strict";
-
-exports.__esModule = true;
-exports.default = void 0;
-
-var _pluralize = _interopRequireDefault(require("pluralize"));
-
-var _methods = _interopRequireDefault(require("./methods"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var _default = ({
-  resource,
-  endpoint,
-  instance
-}) => {
-  let path = '';
-  if (resource) path += `/${(0, _pluralize.default)(resource)}`;
-  if (resource && instance) path += `/:${resource}Id`;
-  if (endpoint && !_methods.default[endpoint]) path += `/${endpoint}`;
-  return path;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-
-exports.default = _default;
-module.exports = exports.default;
+Object.defineProperty(exports, "__esModule", { value: true });
+const pluralize_1 = __importDefault(require("pluralize"));
+const methods_1 = __importDefault(require("./methods"));
+exports.default = ({ resource, endpoint, instance }) => {
+    let path = '';
+    if (resource)
+        path += `/${pluralize_1.default(resource)}`;
+    if (resource && instance)
+        path += `/:${resource}Id`;
+    if (endpoint && !methods_1.default[endpoint])
+        path += `/${endpoint}`;
+    return path;
+};
+//# sourceMappingURL=getPath.js.map

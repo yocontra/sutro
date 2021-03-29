@@ -1,41 +1,23 @@
 "use strict";
-
-exports.__esModule = true;
-exports.default = void 0;
-
-var _urlJoin = _interopRequireDefault(require("url-join"));
-
-var _dotProp = _interopRequireDefault(require("dot-prop"));
-
-var _walkResources = _interopRequireDefault(require("./walkResources"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// TODO: handle nesting correctly
-var _default = ({
-  base,
-  resources
-}) => {
-  const paths = {};
-  (0, _walkResources.default)(resources, ({
-    hierarchy,
-    path,
-    method,
-    instance,
-    endpoint
-  }) => {
-    if (endpoint.hidden) return; // skip
-
-    const descriptor = {
-      path: base ? (0, _urlJoin.default)(base, path) : path,
-      method,
-      instance
-    };
-
-    _dotProp.default.set(paths, hierarchy, descriptor);
-  });
-  return paths;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-
-exports.default = _default;
-module.exports = exports.default;
+Object.defineProperty(exports, "__esModule", { value: true });
+const url_join_1 = __importDefault(require("url-join"));
+const dot_prop_1 = __importDefault(require("dot-prop"));
+const walkResources_1 = __importDefault(require("./walkResources"));
+exports.default = ({ base, resources }) => {
+    const paths = {};
+    walkResources_1.default(resources, ({ hierarchy, path, method, instance, endpoint }) => {
+        if (endpoint?.hidden)
+            return; // skip
+        const descriptor = {
+            path: base ? url_join_1.default(base, path) : path,
+            method,
+            instance
+        };
+        dot_prop_1.default.set(paths, hierarchy, descriptor);
+    });
+    return paths;
+};
+//# sourceMappingURL=getMeta.js.map

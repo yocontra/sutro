@@ -1,4 +1,6 @@
-export default {
+import { Methods } from './types'
+
+const methods: Methods = {
   find: {
     method: 'get',
     instance: false
@@ -25,3 +27,5 @@ export default {
     instance: true
   }
 }
+
+export default methods

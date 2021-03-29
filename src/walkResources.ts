@@ -1,21 +1,28 @@
 import join from 'url-join'
 import getPath from './getPath'
 import methods from './methods'
+import { Resources, walkResourceArgs, Handler, MethodKeys } from './types'
 
-const idxd = (o) => o.index || o
+const idxd = (o: Resources) => o.index || o
 
-const walkResource = ({ base, name, resource, hierarchy, handler }) => {
+const walkResource = ({
+  base,
+  name,
+  resource,
+  hierarchy,
+  handler
+}: walkResourceArgs) => {
   const res = idxd(resource)
 
   // sort custom stuff first
-  const endpointNames = []
+  const endpointNames: string[] = []
   Object.keys(res).forEach((k) =>
-    methods[k] ? endpointNames.push(k) : endpointNames.unshift(k)
+    methods[k as MethodKeys] ? endpointNames.push(k) : endpointNames.unshift(k)
   )
 
   endpointNames.forEach((endpointName) => {
     const endpoint = res[endpointName]
-    const methodInfo = endpoint.http || methods[endpointName]
+    const methodInfo = endpoint.http || methods[endpointName as MethodKeys]
     if (!methodInfo) {
       // TODO: error if still nothing found
       const newBase = getPath({ resource: name, instance: true })
@@ -28,11 +35,13 @@ const walkResource = ({ base, name, resource, hierarchy, handler }) => {
       })
       return
     }
-    const path = endpoint.path || getPath({
-      resource: name,
-      endpoint: endpointName,
-      instance: methodInfo.instance
-    })
+    const path =
+      endpoint.path ||
+      getPath({
+        resource: name,
+        endpoint: endpointName,
+        instance: methodInfo.instance
+      })
     const fullPath = base ? join(base, path) : path
     handler({
       hierarchy: hierarchy
@@ -45,7 +54,7 @@ const walkResource = ({ base, name, resource, hierarchy, handler }) => {
   })
 }
 
-export default (resources, handler) => {
+export default (resources: Resources, handler: Handler) => {
   Object.keys(idxd(resources)).forEach((resourceName) => {
     walkResource({
       name: resourceName,

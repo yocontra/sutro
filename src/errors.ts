@@ -5,7 +5,7 @@ const inspectOptions = {
   breakLength: Infinity
 }
 
-const serializeIssues = (fields) =>
+const serializeIssues = (fields: string[]) =>
   fields.map((f) => `\n - ${inspect(f, inspectOptions)}`)
 
 export const codes = {
@@ -17,27 +17,37 @@ export const codes = {
 }
 
 export class UnauthorizedError extends Error {
+  message: string
+  status: number
+
   constructor(message = 'Unauthorized', status = codes.unauthorized) {
     super(message)
     this.message = message
     this.status = status
     Error.captureStackTrace(this, UnauthorizedError)
   }
-  toString = () => `${super.toString()} (HTTP ${this.status})`;
+  toString = () => `${super.toString()} (HTTP ${this.status})`
 }
 
 export class BadRequestError extends Error {
+  message: string
+  status: number
+
   constructor(message = 'Bad Request', status = codes.badRequest) {
     super(message)
     this.message = message
     this.status = status
     Error.captureStackTrace(this, BadRequestError)
   }
-  toString = () => `${super.toString()} (HTTP ${this.status})`;
+  toString() {
+    return `${super.toString()} (HTTP ${this.status})`
+  }
 }
 
 export class ValidationError extends BadRequestError {
-  constructor(message, fields) {
+  fields?: string | string[]
+
+  constructor(message: string, fields: string[]) {
     super()
     if (message && fields) {
       this.message = message
@@ -51,16 +61,22 @@ export class ValidationError extends BadRequestError {
   toString() {
     const original = super.toString()
     if (!this.fields) return original // no custom validation
-    return `${original}\nIssues:${serializeIssues(this.fields)}`
+    if (Array.isArray(this.fields)) {
+      return `${original}\nIssues:${serializeIssues(this.fields)}`
+    }
+    return this.fields
   }
 }
 
 export class NotFoundError extends Error {
+  message: string
+  status: number
+
   constructor(message = 'Not Found', status = codes.notFound) {
     super(message)
     this.message = message
     this.status = status
     Error.captureStackTrace(this, NotFoundError)
   }
-  toString = () => `${super.toString()} (HTTP ${this.status})`;
+  toString = () => `${super.toString()} (HTTP ${this.status})`
 }

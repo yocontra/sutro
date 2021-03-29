@@ -1,118 +1,78 @@
 "use strict";
-
-exports.__esModule = true;
-var _exportNames = {
-  rewriteLargeRequests: true
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-exports.default = exports.rewriteLargeRequests = void 0;
-
-var _express = require("express");
-
-var _handleAsync = require("handle-async");
-
-var _stream = require("stream");
-
-var _errors = require("./errors");
-
-Object.keys(_errors).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
-  if (key in exports && exports[key] === _errors[key]) return;
-  exports[key] = _errors[key];
-});
-
-var _getRequestHandler = _interopRequireDefault(require("./getRequestHandler"));
-
-var _getSwagger = _interopRequireDefault(require("./getSwagger"));
-
-var _getMeta = _interopRequireDefault(require("./getMeta"));
-
-var _walkResources = _interopRequireDefault(require("./walkResources"));
-
-var _rewriteLarge = _interopRequireDefault(require("./rewriteLarge"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const rewriteLargeRequests = _rewriteLarge.default;
-exports.rewriteLargeRequests = rewriteLargeRequests;
-
-function _ref3(req, res, next) {
-  return next(new _errors.NotFoundError());
-}
-
-var _default = ({
-  swagger,
-  base,
-  resources,
-  pre,
-  post,
-  augmentContext,
-  trace
-} = {}) => {
-  if (!resources) throw new Error('Missing resources option');
-  const router = (0, _express.Router)({
-    mergeParams: true
-  });
-  router.swagger = (0, _getSwagger.default)({
-    swagger,
-    base,
-    resources
-  });
-  router.meta = (0, _getMeta.default)({
-    base,
-    resources
-  });
-  router.base = base;
-  router.get('/', (req, res) => res.status(200).json(router.meta).end());
-  router.get('/swagger', (req, res) => res.status(200).json(router.swagger).end());
-  (0, _walkResources.default)(resources, resource => {
-    const handlers = [(0, _getRequestHandler.default)(resource, {
-      augmentContext,
-      trace
-    })];
-
-    async function _ref(req, res, next) {
-      const ourTrace = trace && trace.start('sutro/pre');
-
-      try {
-        await (0, _handleAsync.promisify)(pre.bind(null, resource, req, res));
-      } catch (err) {
-        if (ourTrace) ourTrace.end();
-        return next(err);
-      }
-
-      if (ourTrace) ourTrace.end();
-      next();
-    }
-
-    if (pre) {
-      handlers.unshift(_ref);
-    }
-
-    async function _ref2(req, res, next) {
-      (0, _stream.finished)(res, async err => {
-        const ourTrace = trace && trace.start('sutro/post');
-
-        try {
-          await (0, _handleAsync.promisify)(post.bind(null, resource, req, res, err));
-        } catch (err) {
-          if (ourTrace) ourTrace.end();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.rewriteLargeRequests = void 0;
+const express_1 = require("express");
+const handle_async_1 = require("handle-async");
+const stream_1 = require("stream");
+const errors_1 = require("./errors");
+const getRequestHandler_1 = __importDefault(require("./getRequestHandler"));
+const getSwagger_1 = __importDefault(require("./getSwagger"));
+const getMeta_1 = __importDefault(require("./getMeta"));
+const walkResources_1 = __importDefault(require("./walkResources"));
+const rewriteLarge_1 = __importDefault(require("./rewriteLarge"));
+exports.rewriteLargeRequests = rewriteLarge_1.default;
+__exportStar(require("./errors"), exports);
+exports.default = ({ swagger, base, resources, pre, post, augmentContext, trace }) => {
+    if (!resources)
+        throw new Error('Missing resources option');
+    const router = express_1.Router({ mergeParams: true });
+    router.swagger = getSwagger_1.default({ swagger, base, resources });
+    router.meta = getMeta_1.default({ base, resources });
+    router.base = base;
+    router.get('/', (_req, res) => res.status(200).json(router.meta).end());
+    router.get('/swagger', (_req, res) => res.status(200).json(router.swagger).end());
+    walkResources_1.default(resources, (resource) => {
+        const handlers = [getRequestHandler_1.default(resource, { augmentContext, trace })];
+        if (pre) {
+            handlers.unshift(async (req, res, next) => {
+                const ourTrace = trace && trace.start('sutro/pre');
+                try {
+                    await handle_async_1.promisify(pre.bind(null, resource, req, res));
+                }
+                catch (err) {
+                    if (ourTrace)
+                        ourTrace.end();
+                    return next(err);
+                }
+                if (ourTrace)
+                    ourTrace.end();
+                next();
+            });
         }
-
-        if (ourTrace) ourTrace.end();
-      });
-      next();
-    }
-
-    if (post) {
-      handlers.unshift(_ref2);
-    }
-
-    router[resource.method](resource.path, ...handlers);
-  }); // handle 404s
-
-  router.use(_ref3);
-  return router;
+        if (post) {
+            handlers.unshift(async (req, res, next) => {
+                stream_1.finished(res, async (err) => {
+                    const ourTrace = trace && trace.start('sutro/post');
+                    try {
+                        await handle_async_1.promisify(post.bind(null, resource, req, res, err));
+                    }
+                    catch (err) {
+                        if (ourTrace)
+                            ourTrace.end();
+                    }
+                    if (ourTrace)
+                        ourTrace.end();
+                });
+                next();
+            });
+        }
+        router[resource.method](resource.path, ...handlers);
+    });
+    // handle 404s
+    router.use((_req, _res, next) => next(new errors_1.NotFoundError()));
+    return router;
 };
-
-exports.default = _default;
+//# sourceMappingURL=index.js.map

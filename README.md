@@ -6,12 +6,12 @@
 ## Install
 
 One command and you're ready to make some killer APIs:
+
 ```
 npm install sutro --save
 ```
 
 **Now**, check out the [documentation](https://github.com/contra/sutro/tree/master/docs) to get started!
-
 
 ## Examples
 
