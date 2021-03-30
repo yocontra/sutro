@@ -217,8 +217,8 @@ export interface SutroStream extends Readable {
 export type EndpointIsAuthorized = (
   opt: SutroRequest
 ) => Promise<boolean> | boolean
-export type EndpointExecute = <T>(opt: SutroRequest) => Promise<T> | T
-export type EndpointFormat = <T>() => Promise<T> | T
+export type EndpointExecute = (opt: SutroRequest) => Promise<any> | any
+export type EndpointFormat = () => Promise<any> | any
 export type EndpointCache = {
   header: CacheOptions | (() => CacheOptions)
   key: () => string

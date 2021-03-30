@@ -164,8 +164,8 @@ export interface SutroStream extends Readable {
     contentType?: string;
 }
 export declare type EndpointIsAuthorized = (opt: SutroRequest) => Promise<boolean> | boolean;
-export declare type EndpointExecute = <T>(opt: SutroRequest) => Promise<T> | T;
-export declare type EndpointFormat = <T>() => Promise<T> | T;
+export declare type EndpointExecute = (opt: SutroRequest) => Promise<any> | any;
+export declare type EndpointFormat = () => Promise<any> | any;
 export declare type EndpointCache = {
     header: CacheOptions | (() => CacheOptions);
     key: () => string;
