@@ -30,19 +30,11 @@ export declare type ResourceRoot = {
     method: string;
     instance: boolean;
     swagger?: SwaggerConfig;
-    isAuthorized?: (opt: SutroRequest) => Promise<boolean> | boolean;
-    execute: <T>(opt: SutroRequest) => Promise<T> | T;
-    format: <T>() => Promise<T> | T;
-    cache?: {
-        header: CacheOptions | (() => CacheOptions);
-        key: () => string;
-        get: <T>(opt: SutroRequest | string, key: string) => Promise<T>;
-        set: <T>(opt: SutroRequest | string, data: any, key: string) => Promise<T>;
-    };
-    http: {
-        method: MethodVerbs;
-        instance: boolean;
-    };
+    isAuthorized?: EndpointIsAuthorized;
+    execute: EndpointExecute;
+    format?: EndpointFormat;
+    cache?: EndpointCache;
+    http: EndpointHTTP;
     endpoint: ResourceRoot;
     successCode?: number;
     hierarchy: string;
@@ -171,3 +163,16 @@ export interface SutroRequest {
 export interface SutroStream extends Readable {
     contentType?: string;
 }
+export declare type EndpointIsAuthorized = (opt: SutroRequest) => Promise<boolean> | boolean;
+export declare type EndpointExecute = <T>(opt: SutroRequest) => Promise<T> | T;
+export declare type EndpointFormat = <T>() => Promise<T> | T;
+export declare type EndpointCache = {
+    header: CacheOptions | (() => CacheOptions);
+    key: () => string;
+    get: (opt: SutroRequest | string, key: string) => Promise<any> | any;
+    set: (opt: SutroRequest | string, data: any, key: string) => Promise<any> | any;
+};
+export declare type EndpointHTTP = {
+    method: MethodVerbs;
+    instance: boolean;
+};
