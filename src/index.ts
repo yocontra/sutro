@@ -7,10 +7,31 @@ import getSwagger from './getSwagger'
 import getMeta from './getMeta'
 import walkResources from './walkResources'
 import rewriteLarge from './rewriteLarge'
-import { MethodVerbs, SutroArgs, SutroRouter, PathParams } from './types'
+import {
+  MethodVerbs,
+  SutroArgs,
+  SutroRouter,
+  PathParams,
+  EndpointIsAuthorized,
+  EndpointExecute,
+  EndpointFormat,
+  EndpointCache,
+  EndpointHTTP,
+  SutroRequest,
+  SutroStream
+} from './types'
 
 export const rewriteLargeRequests = rewriteLarge
 
+export type {
+  EndpointIsAuthorized,
+  EndpointExecute,
+  EndpointFormat,
+  EndpointCache,
+  EndpointHTTP,
+  SutroRequest,
+  SutroStream
+}
 export * from './errors'
 
 export default ({
