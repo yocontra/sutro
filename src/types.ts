@@ -185,8 +185,8 @@ export type Responses = {
 // our custom express overrides
 export interface ExpressRequest extends Request {
   timedout: boolean
-  user?: unknown
-  session?: unknown
+  user?: any
+  session?: any
 }
 
 // our core primitives
@@ -199,15 +199,16 @@ export interface SutroRequest {
   path: Request['path']
   headers: Request['headers']
   cookies: Request['cookies']
-  user?: unknown
-  data?: unknown
+  user?: any
+  data?: any
   options: Request['query']
-  session?: unknown
+  session?: any
   noResponse?: boolean
   onFinish?: (fn: (req: Request, res: Response) => void) => void
   withRaw?: (fn: (req: Request, res: Response) => void) => void
   _req: ExpressRequest
   _res: Response
+  [key: string]: any
 }
 
 export interface SutroStream extends Readable {
