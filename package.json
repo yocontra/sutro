@@ -1,9 +1,9 @@
 {
   "name": "sutro",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "description": "API Resource Framework",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/types.d.ts",
   "keywords": [
     "api",
     "realtime",
