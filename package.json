@@ -60,6 +60,7 @@
     "supertest": "^6.0.0",
     "swagger-parser": "^6.0.0",
     "ts-node": "^9.1.1",
+    "typedoc": "^0.20.34",
     "typescript": "^4.2.3"
   },
   "dependencies": {
