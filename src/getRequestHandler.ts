@@ -10,8 +10,14 @@ import {
   SutroStream,
   ResourceRoot,
   CacheOptions,
-  AugmentContext
+  SutroArgs
 } from './types'
+
+type Args = {
+  trace?: Trace
+  serializeResponse: SutroArgs['serializeResponse']
+  augmentContext?: SutroArgs['augmentContext']
+}
 
 const defaultCacheHeaders = {
   private: true,
@@ -140,9 +146,10 @@ const sendResponse = async (
 const exec = async (
   req: ExpressRequest,
   res: Response,
-  { endpoint, successCode }: ResourceRoot,
-  { trace, augmentContext }: { trace?: Trace; augmentContext?: AugmentContext }
+  resource: ResourceRoot,
+  { trace, augmentContext, serializeResponse }: Args
 ) => {
+  const { endpoint, successCode } = resource
   let opt: SutroRequest = {
     ...req.params,
     ip: req.ip,
@@ -171,7 +178,7 @@ const exec = async (
     opt = await traceAsync(
       trace,
       'sutro/augmentContext',
-      promisify(augmentContext.bind(null, opt, req))
+      promisify(augmentContext.bind(null, opt, req, resource))
     )
 
   // check isAuthorized
@@ -231,6 +238,16 @@ const exec = async (
         )
       : rawData
     if (req.timedout) return
+
+    // call serialize on final result
+    resultData = serializeResponse
+      ? await traceAsync(
+          trace,
+          'sutro/serializeResponse',
+          promisify(serializeResponse.bind(null, opt, req, endpoint, rawData))
+        )
+      : resultData
+    if (req.timedout) return
   } else {
     resultData = cachedData
   }
@@ -262,7 +279,7 @@ const exec = async (
 
 export default (
   resource: ResourceRoot,
-  { trace, augmentContext }: { trace?: Trace; augmentContext?: AugmentContext }
+  { trace, augmentContext, serializeResponse }: Args
 ) => {
   // wrap it so it has a name
   const handleAPIRequest = async (
@@ -275,7 +292,7 @@ export default (
       await traceAsync(
         trace,
         'sutro/handleAPIRequest',
-        exec(req, res, resource, { trace, augmentContext })
+        exec(req, res, resource, { trace, augmentContext, serializeResponse })
       )
     } catch (err) {
       return next(err)

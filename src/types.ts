@@ -152,14 +152,19 @@ export type SutroArgs = {
     res: Response,
     err?: any
   ) => void
-  augmentContext?: AugmentContext
+  augmentContext?: (
+    context: SutroRequest,
+    req: Request,
+    resource: ResourceRoot
+  ) => Promise<SutroRequest> | SutroRequest
+  serializeResponse?: (
+    context: SutroRequest,
+    req: Request,
+    resource: ResourceRoot,
+    rawData: any
+  ) => void
   trace?: Trace
 }
-
-export type AugmentContext = (
-  context: SutroRequest,
-  req: Request
-) => Promise<SutroRequest> | SutroRequest
 
 export interface SutroRouter extends IRouter {
   swagger?: Swagger

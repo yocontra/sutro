@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { promisify } from 'handle-async'
 import { finished } from 'stream'
+import { format, stream } from './formatOutput'
 import { NotFoundError } from './errors'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'
@@ -21,8 +22,8 @@ import {
   SutroStream
 } from './types'
 
+// other exports
 export const rewriteLargeRequests = rewriteLarge
-
 export type {
   EndpointIsAuthorized,
   EndpointExecute,
@@ -33,6 +34,7 @@ export type {
   SutroStream
 }
 export * from './errors'
+export { format as serializeResponse, stream as serializeResponseStream }
 
 export default ({
   swagger,
@@ -41,6 +43,7 @@ export default ({
   pre,
   post,
   augmentContext,
+  serializeResponse,
   trace
 }: SutroArgs) => {
   if (!resources) throw new Error('Missing resources option')
@@ -55,7 +58,9 @@ export default ({
   )
 
   walkResources(resources, (resource) => {
-    const handlers = [getRequestHandler(resource, { augmentContext, trace })]
+    const handlers = [
+      getRequestHandler(resource, { augmentContext, serializeResponse, trace })
+    ]
     if (pre) {
       handlers.unshift(async (req, res, next) => {
         const ourTrace = trace && trace.start('sutro/pre')
