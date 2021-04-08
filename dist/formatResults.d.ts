@@ -1,4 +1,4 @@
-export declare const format: (inp: any, meta?: object) => {
+export declare const format: (inp?: any, meta?: object) => {
     results: any[];
     meta: {
         results: number;

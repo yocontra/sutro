@@ -10,7 +10,7 @@ const isTypeORM = (inp) => Array.isArray(inp) &&
     Array.isArray(inp[0]) &&
     typeof inp[1] === 'number';
 const isSequelize = (inp) => inp.rows && typeof inp.count !== 'undefined';
-const format = (inp, meta) => {
+const format = (inp = [], meta) => {
     let rows;
     let count;
     if (isSequelize(inp)) {
