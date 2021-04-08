@@ -15,7 +15,7 @@ import {
 
 type Args = {
   trace?: Trace
-  serializeResponse: SutroArgs['serializeResponse']
+  formatResults: SutroArgs['formatResults']
   augmentContext?: SutroArgs['augmentContext']
 }
 
@@ -147,7 +147,7 @@ const exec = async (
   req: ExpressRequest,
   res: Response,
   resource: ResourceRoot,
-  { trace, augmentContext, serializeResponse }: Args
+  { trace, augmentContext, formatResults }: Args
 ) => {
   const { endpoint, successCode } = resource
   let opt: SutroRequest = {
@@ -240,11 +240,11 @@ const exec = async (
     if (req.timedout) return
 
     // call serialize on final result
-    resultData = serializeResponse
+    resultData = formatResults
       ? await traceAsync(
           trace,
-          'sutro/serializeResponse',
-          promisify(serializeResponse.bind(null, opt, req, endpoint, rawData))
+          'sutro/formatResults',
+          promisify(formatResults.bind(null, opt, req, endpoint, rawData))
         )
       : resultData
     if (req.timedout) return
@@ -279,7 +279,7 @@ const exec = async (
 
 export default (
   resource: ResourceRoot,
-  { trace, augmentContext, serializeResponse }: Args
+  { trace, augmentContext, formatResults }: Args
 ) => {
   // wrap it so it has a name
   const handleAPIRequest = async (
@@ -292,7 +292,7 @@ export default (
       await traceAsync(
         trace,
         'sutro/handleAPIRequest',
-        exec(req, res, resource, { trace, augmentContext, serializeResponse })
+        exec(req, res, resource, { trace, augmentContext, formatResults })
       )
     } catch (err) {
       return next(err)

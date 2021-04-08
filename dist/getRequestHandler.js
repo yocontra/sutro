@@ -101,7 +101,7 @@ const sendResponse = async (opt, successCode, resultData, writeCache) => {
     sendBufferResponse(resultData, _req, _res, codes);
     await writeCache(resultData);
 };
-const exec = async (req, res, resource, { trace, augmentContext, serializeResponse }) => {
+const exec = async (req, res, resource, { trace, augmentContext, formatResults }) => {
     const { endpoint, successCode } = resource;
     let opt = {
         ...req.params,
@@ -163,8 +163,8 @@ const exec = async (req, res, resource, { trace, augmentContext, serializeRespon
         if (req.timedout)
             return;
         // call serialize on final result
-        resultData = serializeResponse
-            ? await traceAsync(trace, 'sutro/serializeResponse', handle_async_1.promisify(serializeResponse.bind(null, opt, req, endpoint, rawData)))
+        resultData = formatResults
+            ? await traceAsync(trace, 'sutro/formatResults', handle_async_1.promisify(formatResults.bind(null, opt, req, endpoint, rawData)))
             : resultData;
         if (req.timedout)
             return;
@@ -189,13 +189,13 @@ const exec = async (req, res, resource, { trace, augmentContext, serializeRespon
     };
     await sendResponse(opt, successCode, resultData, writeCache);
 };
-exports.default = (resource, { trace, augmentContext, serializeResponse }) => {
+exports.default = (resource, { trace, augmentContext, formatResults }) => {
     // wrap it so it has a name
     const handleAPIRequest = async (req, res, next) => {
         if (req.timedout)
             return;
         try {
-            await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, resource, { trace, augmentContext, serializeResponse }));
+            await traceAsync(trace, 'sutro/handleAPIRequest', exec(req, res, resource, { trace, augmentContext, formatResults }));
         }
         catch (err) {
             return next(err);

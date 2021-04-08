@@ -157,7 +157,7 @@ export type SutroArgs = {
     req: Request,
     resource: ResourceRoot
   ) => Promise<SutroRequest> | SutroRequest
-  serializeResponse?: (
+  formatResults?: (
     context: SutroRequest,
     req: Request,
     resource: ResourceRoot,

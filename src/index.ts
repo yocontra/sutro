@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { promisify } from 'handle-async'
 import { finished } from 'stream'
-import { format, stream } from './serializeResponse'
+import { format, stream } from './formatResults'
 import { NotFoundError } from './errors'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'
@@ -34,7 +34,7 @@ export type {
   SutroStream
 }
 export * from './errors'
-export { format as serializeResponse, stream as serializeResponseStream }
+export { format as formatResults, stream as formatResultsStream }
 
 export default ({
   swagger,
@@ -43,7 +43,7 @@ export default ({
   pre,
   post,
   augmentContext,
-  serializeResponse,
+  formatResults,
   trace
 }: SutroArgs) => {
   if (!resources) throw new Error('Missing resources option')
@@ -59,7 +59,7 @@ export default ({
 
   walkResources(resources, (resource) => {
     const handlers = [
-      getRequestHandler(resource, { augmentContext, serializeResponse, trace })
+      getRequestHandler(resource, { augmentContext, formatResults, trace })
     ]
     if (pre) {
       handlers.unshift(async (req, res, next) => {

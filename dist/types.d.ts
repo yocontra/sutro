@@ -122,7 +122,7 @@ export declare type SutroArgs = {
     pre?: (resource: ResourceRoot, req: Request, res: Response) => void;
     post?: (resource: ResourceRoot, req: Request, res: Response, err?: any) => void;
     augmentContext?: (context: SutroRequest, req: Request, resource: ResourceRoot) => Promise<SutroRequest> | SutroRequest;
-    serializeResponse?: (context: SutroRequest, req: Request, resource: ResourceRoot, rawData: any) => void;
+    formatResults?: (context: SutroRequest, req: Request, resource: ResourceRoot, rawData: any) => void;
     trace?: Trace;
 };
 export interface SutroRouter extends IRouter {
