@@ -1,6 +1,6 @@
 {
   "name": "sutro",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "description": "API Resource Framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -50,7 +50,6 @@
     "@types/url-join": "^4.0.0",
     "gh-pages": "^3.1.0",
     "husky": "^4.3.8",
-    "jsonstream-next": "^3.0.0",
     "lodash.pick": "^4.4.0",
     "mocha": "^8.0.0",
     "prettier": "^2.2.1",
@@ -67,6 +66,7 @@
     "dot-prop": "^6.0.0",
     "express": "^4.16.3",
     "handle-async": "^1.0.1",
+    "jsonstream-next": "^3.0.0",
     "lodash.omit": "^4.5.0",
     "parse-duration": "^1.0.0",
     "pluralize": "^8.0.0",
