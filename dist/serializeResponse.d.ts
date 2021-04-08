@@ -1,4 +1,4 @@
-export declare const format: (inp: any, meta: object) => {
+export declare const format: (inp: any, meta?: object) => {
     results: any[];
     meta: {
         results: number;
@@ -6,6 +6,6 @@ export declare const format: (inp: any, meta: object) => {
     };
 };
 export declare const stream: {
-    (counter: Promise<number>, meta: object): any;
+    (counter?: Promise<number>, meta?: object): any;
     contentType: string;
 };

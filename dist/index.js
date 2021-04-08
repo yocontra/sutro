@@ -17,9 +17,9 @@ exports.serializeResponseStream = exports.serializeResponse = exports.rewriteLar
 const express_1 = require("express");
 const handle_async_1 = require("handle-async");
 const stream_1 = require("stream");
-const formatOutput_1 = require("./formatOutput");
-Object.defineProperty(exports, "serializeResponse", { enumerable: true, get: function () { return formatOutput_1.format; } });
-Object.defineProperty(exports, "serializeResponseStream", { enumerable: true, get: function () { return formatOutput_1.stream; } });
+const serializeResponse_1 = require("./serializeResponse");
+Object.defineProperty(exports, "serializeResponse", { enumerable: true, get: function () { return serializeResponse_1.format; } });
+Object.defineProperty(exports, "serializeResponseStream", { enumerable: true, get: function () { return serializeResponse_1.stream; } });
 const errors_1 = require("./errors");
 const getRequestHandler_1 = __importDefault(require("./getRequestHandler"));
 const getSwagger_1 = __importDefault(require("./getSwagger"));

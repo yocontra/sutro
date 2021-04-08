@@ -7,7 +7,7 @@ const isTypeORM = (inp: any) =>
   typeof inp[1] === 'number'
 const isSequelize = (inp: any) => inp.rows && typeof inp.count !== 'undefined'
 
-export const format = (inp: any, meta: object) => {
+export const format = (inp: any, meta?: object) => {
   let rows: any[]
   let count: number
   if (isSequelize(inp)) {
@@ -34,7 +34,7 @@ export const format = (inp: any, meta: object) => {
   }
 }
 
-export const stream = (counter: Promise<number>, meta: object) => {
+export const stream = (counter?: Promise<number>, meta?: object) => {
   let results = 0
   const tail = JSONStream.stringify('{"results":[', ',', (cb) => {
     const fin = (res: number, total: number) => {

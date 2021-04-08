@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { promisify } from 'handle-async'
 import { finished } from 'stream'
-import { format, stream } from './formatOutput'
+import { format, stream } from './serializeResponse'
 import { NotFoundError } from './errors'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'

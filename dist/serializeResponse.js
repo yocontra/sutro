@@ -68,4 +68,4 @@ const stream = (counter, meta) => {
 };
 exports.stream = stream;
 exports.stream.contentType = 'application/json';
-//# sourceMappingURL=formatOutput.js.map
+//# sourceMappingURL=serializeResponse.js.map
