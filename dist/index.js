@@ -13,19 +13,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rewriteLargeRequests = void 0;
+exports.serializeResponseStream = exports.serializeResponse = exports.rewriteLargeRequests = void 0;
 const express_1 = require("express");
 const handle_async_1 = require("handle-async");
 const stream_1 = require("stream");
+const formatOutput_1 = require("./formatOutput");
+Object.defineProperty(exports, "serializeResponse", { enumerable: true, get: function () { return formatOutput_1.format; } });
+Object.defineProperty(exports, "serializeResponseStream", { enumerable: true, get: function () { return formatOutput_1.stream; } });
 const errors_1 = require("./errors");
 const getRequestHandler_1 = __importDefault(require("./getRequestHandler"));
 const getSwagger_1 = __importDefault(require("./getSwagger"));
 const getMeta_1 = __importDefault(require("./getMeta"));
 const walkResources_1 = __importDefault(require("./walkResources"));
 const rewriteLarge_1 = __importDefault(require("./rewriteLarge"));
+// other exports
 exports.rewriteLargeRequests = rewriteLarge_1.default;
 __exportStar(require("./errors"), exports);
-exports.default = ({ swagger, base, resources, pre, post, augmentContext, trace }) => {
+exports.default = ({ swagger, base, resources, pre, post, augmentContext, serializeResponse, trace }) => {
     if (!resources)
         throw new Error('Missing resources option');
     const router = express_1.Router({ mergeParams: true });
@@ -35,7 +39,9 @@ exports.default = ({ swagger, base, resources, pre, post, augmentContext, trace 
     router.get('/', (_req, res) => res.status(200).json(router.meta).end());
     router.get('/swagger', (_req, res) => res.status(200).json(router.swagger).end());
     walkResources_1.default(resources, (resource) => {
-        const handlers = [getRequestHandler_1.default(resource, { augmentContext, trace })];
+        const handlers = [
+            getRequestHandler_1.default(resource, { augmentContext, serializeResponse, trace })
+        ];
         if (pre) {
             handlers.unshift(async (req, res, next) => {
                 const ourTrace = trace && trace.start('sutro/pre');

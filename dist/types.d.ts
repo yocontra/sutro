@@ -121,10 +121,10 @@ export declare type SutroArgs = {
     swagger?: Swagger;
     pre?: (resource: ResourceRoot, req: Request, res: Response) => void;
     post?: (resource: ResourceRoot, req: Request, res: Response, err?: any) => void;
-    augmentContext?: AugmentContext;
+    augmentContext?: (context: SutroRequest, req: Request, resource: ResourceRoot) => Promise<SutroRequest> | SutroRequest;
+    serializeResponse?: (context: SutroRequest, req: Request, resource: ResourceRoot, rawData: any) => void;
     trace?: Trace;
 };
-export declare type AugmentContext = (context: SutroRequest, req: Request) => Promise<SutroRequest> | SutroRequest;
 export interface SutroRouter extends IRouter {
     swagger?: Swagger;
     meta?: Meta;
