@@ -224,7 +224,10 @@ export type EndpointIsAuthorized = (
   opt: SutroRequest
 ) => Promise<boolean> | boolean
 export type EndpointExecute = (opt: SutroRequest) => Promise<any> | any
-export type EndpointFormat = () => Promise<any> | any
+export type EndpointFormat = (
+  opt: SutroRequest,
+  rawData: any
+) => Promise<any> | any
 export type EndpointCache = {
   header: CacheOptions | (() => CacheOptions)
   key: () => string
