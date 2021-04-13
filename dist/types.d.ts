@@ -10,10 +10,10 @@ export declare type CacheOptions = {
     noTransform?: boolean;
     proxyRevalidate?: boolean;
     mustRevalidate?: boolean;
-    staleIfError?: number;
-    staleWhileRevalidate?: number;
-    maxAge?: number;
-    sMaxAge?: number;
+    staleIfError?: number | string;
+    staleWhileRevalidate?: number | string;
+    maxAge?: number | string;
+    sMaxAge?: number | string;
 };
 export declare type MethodKeys = 'find' | 'create' | 'findById' | 'replaceById' | 'updateById' | 'deleteById';
 export declare type MethodVerbs = 'get' | 'post' | 'put' | 'patch' | 'delete';

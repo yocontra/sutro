@@ -11,10 +11,10 @@ export type CacheOptions = {
   noTransform?: boolean
   proxyRevalidate?: boolean
   mustRevalidate?: boolean
-  staleIfError?: number
-  staleWhileRevalidate?: number
-  maxAge?: number
-  sMaxAge?: number
+  staleIfError?: number | string
+  staleWhileRevalidate?: number | string
+  maxAge?: number | string
+  sMaxAge?: number | string
 }
 
 export type MethodKeys =
