@@ -3,6 +3,7 @@ import { promisify } from 'handle-async'
 import { finished } from 'stream'
 import { format, stream } from './formatResults'
 import { NotFoundError } from './errors'
+import cacheControl from './cacheControl'
 import getRequestHandler from './getRequestHandler'
 import getSwagger from './getSwagger'
 import getMeta from './getMeta'
@@ -35,6 +36,7 @@ export type {
 }
 export * from './errors'
 export { format as formatResults, stream as formatResultsStream }
+export { cacheControl }
 
 export default ({
   swagger,

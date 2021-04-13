@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatResultsStream = exports.formatResults = exports.rewriteLargeRequests = void 0;
+exports.cacheControl = exports.formatResultsStream = exports.formatResults = exports.rewriteLargeRequests = void 0;
 const express_1 = require("express");
 const handle_async_1 = require("handle-async");
 const stream_1 = require("stream");
@@ -21,6 +21,8 @@ const formatResults_1 = require("./formatResults");
 Object.defineProperty(exports, "formatResults", { enumerable: true, get: function () { return formatResults_1.format; } });
 Object.defineProperty(exports, "formatResultsStream", { enumerable: true, get: function () { return formatResults_1.stream; } });
 const errors_1 = require("./errors");
+const cacheControl_1 = __importDefault(require("./cacheControl"));
+exports.cacheControl = cacheControl_1.default;
 const getRequestHandler_1 = __importDefault(require("./getRequestHandler"));
 const getSwagger_1 = __importDefault(require("./getSwagger"));
 const getMeta_1 = __importDefault(require("./getMeta"));
