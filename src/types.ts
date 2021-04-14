@@ -229,10 +229,10 @@ export type EndpointFormat = (
   rawData: any
 ) => Promise<any> | any
 export type EndpointCache = {
-  header: CacheOptions | (() => CacheOptions)
-  key: () => string
-  get: (opt: SutroRequest | string, key: string) => Promise<any> | any
-  set: (
+  header?: CacheOptions | (() => CacheOptions)
+  key?: () => string
+  get?: (opt: SutroRequest | string, key: string) => Promise<any> | any
+  set?: (
     opt: SutroRequest | string,
     data: any,
     key: string

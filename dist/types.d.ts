@@ -168,10 +168,10 @@ export declare type EndpointIsAuthorized = (opt: SutroRequest) => Promise<boolea
 export declare type EndpointExecute = (opt: SutroRequest) => Promise<any> | any;
 export declare type EndpointFormat = (opt: SutroRequest, rawData: any) => Promise<any> | any;
 export declare type EndpointCache = {
-    header: CacheOptions | (() => CacheOptions);
-    key: () => string;
-    get: (opt: SutroRequest | string, key: string) => Promise<any> | any;
-    set: (opt: SutroRequest | string, data: any, key: string) => Promise<any> | any;
+    header?: CacheOptions | (() => CacheOptions);
+    key?: () => string;
+    get?: (opt: SutroRequest | string, key: string) => Promise<any> | any;
+    set?: (opt: SutroRequest | string, data: any, key: string) => Promise<any> | any;
 };
 export declare type EndpointHTTP = {
     method: MethodVerbs;
