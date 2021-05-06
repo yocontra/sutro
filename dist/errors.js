@@ -37,15 +37,9 @@ class BadRequestError extends Error {
 }
 exports.BadRequestError = BadRequestError;
 class ValidationError extends BadRequestError {
-    constructor(message, fields) {
+    constructor(fields) {
         super();
-        if (message && fields) {
-            this.message = message;
-            this.fields = fields;
-        }
-        if (message && !fields) {
-            this.fields = message;
-        }
+        this.fields = fields;
         Error.captureStackTrace(this, ValidationError);
     }
     toString() {

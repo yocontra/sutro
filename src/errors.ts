@@ -5,7 +5,7 @@ const inspectOptions = {
   breakLength: Infinity
 }
 
-const serializeIssues = (fields: string[]) =>
+const serializeIssues = (fields: any[]) =>
   fields.map((f) => `\n - ${inspect(f, inspectOptions)}`)
 
 export const codes = {
@@ -45,17 +45,11 @@ export class BadRequestError extends Error {
 }
 
 export class ValidationError extends BadRequestError {
-  fields?: string | string[]
+  fields?: any[]
 
-  constructor(message: string, fields: string[]) {
+  constructor(fields?: any[]) {
     super()
-    if (message && fields) {
-      this.message = message
-      this.fields = fields
-    }
-    if (message && !fields) {
-      this.fields = message
-    }
+    this.fields = fields
     Error.captureStackTrace(this, ValidationError)
   }
   toString() {

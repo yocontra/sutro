@@ -18,8 +18,8 @@ export declare class BadRequestError extends Error {
     toString(): string;
 }
 export declare class ValidationError extends BadRequestError {
-    fields?: string | string[];
-    constructor(message: string, fields: string[]);
+    fields?: any[];
+    constructor(fields?: any[]);
     toString(): string;
 }
 export declare class NotFoundError extends Error {
