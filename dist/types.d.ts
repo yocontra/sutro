@@ -150,7 +150,6 @@ export interface SutroRequest {
     path: Request['path'];
     headers: Request['headers'];
     cookies: Request['cookies'];
-    user?: any;
     data?: any;
     options: Request['query'];
     session?: any;
