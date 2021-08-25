@@ -23,6 +23,7 @@ const defaultCacheHeaders = {
   private: true,
   noCache: true
 }
+const responded = (req, res) => res.headersSent || req.timedout
 
 const traceAsync = async <T>(
   trace: Trace,
@@ -149,6 +150,8 @@ const exec = async (
   resource: ResourceRoot,
   { trace, augmentContext, formatResults }: Args
 ) => {
+  if (responded(req, res)) return
+
   const { endpoint, successCode } = resource
   let opt: SutroRequest = {
     ...req.params,
@@ -174,12 +177,15 @@ const exec = async (
     _req: req,
     _res: res
   }
-  if (augmentContext)
+  if (augmentContext) {
     opt = await traceAsync(
       trace,
       'sutro/augmentContext',
       promisify(augmentContext.bind(null, opt, req, resource))
     )
+  }
+
+  if (responded(req, res)) return
 
   // check isAuthorized
   const authorized =
@@ -190,7 +196,7 @@ const exec = async (
       promisify(endpoint.isAuthorized.bind(null, opt))
     ))
   if (authorized !== true) throw new UnauthorizedError()
-  if (req.timedout) return
+  if (responded(req, res)) return
 
   let resultData
 
@@ -203,7 +209,7 @@ const exec = async (
       'sutro/cache.key',
       promisify(endpoint.cache.key.bind(null, opt))
     ))
-  if (req.timedout) return
+  if (responded(req, res)) return
 
   const cachedData =
     endpoint?.cache &&
@@ -213,7 +219,7 @@ const exec = async (
       'sutro/cache.get',
       promisify(endpoint.cache.get.bind(null, opt, cacheKey as string))
     ))
-  if (req.timedout) return
+  if (responded(req, res)) return
 
   // call execute
   if (!cachedData) {
@@ -227,7 +233,7 @@ const exec = async (
             promisify(executeFn.bind(null, opt))
           )
         : executeFn || null
-    if (req.timedout) return
+    if (responded(req, res)) return
 
     // call format on execute result
     resultData = endpoint?.format
@@ -237,7 +243,7 @@ const exec = async (
           promisify(endpoint.format.bind(null, opt, rawData))
         )
       : rawData
-    if (req.timedout) return
+    if (responded(req, res)) return
 
     // call serialize on final result
     resultData = formatResults
@@ -247,7 +253,7 @@ const exec = async (
           promisify(formatResults.bind(null, opt, req, endpoint, rawData))
         )
       : resultData
-    if (req.timedout) return
+    if (responded(req, res)) return
   } else {
     resultData = cachedData
   }
@@ -263,7 +269,7 @@ const exec = async (
           )
         : endpoint.cache.header
       : defaultCacheHeaders
-  if (req.timedout) return
+  if (responded(req, res)) return
   if (cacheHeaders) res.set('Cache-Control', cacheControl(cacheHeaders))
 
   const writeCache = async (data: any) => {

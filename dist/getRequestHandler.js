@@ -11,6 +11,7 @@ const defaultCacheHeaders = {
     private: true,
     noCache: true
 };
+const responded = (req, res) => res.headersSent || req.timedout;
 const traceAsync = async (trace, name, promise) => {
     if (!trace)
         return promise; // no tracing, just return
@@ -102,6 +103,8 @@ const sendResponse = async (opt, successCode, resultData, writeCache) => {
     await writeCache(resultData);
 };
 const exec = async (req, res, resource, { trace, augmentContext, formatResults }) => {
+    if (responded(req, res))
+        return;
     const { endpoint, successCode } = resource;
     let opt = {
         ...req.params,
@@ -127,26 +130,29 @@ const exec = async (req, res, resource, { trace, augmentContext, formatResults }
         _req: req,
         _res: res
     };
-    if (augmentContext)
+    if (augmentContext) {
         opt = await traceAsync(trace, 'sutro/augmentContext', handle_async_1.promisify(augmentContext.bind(null, opt, req, resource)));
+    }
+    if (responded(req, res))
+        return;
     // check isAuthorized
     const authorized = !endpoint?.isAuthorized ||
         (await traceAsync(trace, 'sutro/isAuthorized', handle_async_1.promisify(endpoint.isAuthorized.bind(null, opt))));
     if (authorized !== true)
         throw new errors_1.UnauthorizedError();
-    if (req.timedout)
+    if (responded(req, res))
         return;
     let resultData;
     // check cache
     const cacheKey = endpoint?.cache &&
         endpoint.cache.key &&
         (await traceAsync(trace, 'sutro/cache.key', handle_async_1.promisify(endpoint.cache.key.bind(null, opt))));
-    if (req.timedout)
+    if (responded(req, res))
         return;
     const cachedData = endpoint?.cache &&
         endpoint.cache.get &&
         (await traceAsync(trace, 'sutro/cache.get', handle_async_1.promisify(endpoint.cache.get.bind(null, opt, cacheKey))));
-    if (req.timedout)
+    if (responded(req, res))
         return;
     // call execute
     if (!cachedData) {
@@ -154,19 +160,19 @@ const exec = async (req, res, resource, { trace, augmentContext, formatResults }
         const rawData = typeof executeFn === 'function'
             ? await traceAsync(trace, 'sutro/execute', handle_async_1.promisify(executeFn.bind(null, opt)))
             : executeFn || null;
-        if (req.timedout)
+        if (responded(req, res))
             return;
         // call format on execute result
         resultData = endpoint?.format
             ? await traceAsync(trace, 'sutro/format', handle_async_1.promisify(endpoint.format.bind(null, opt, rawData)))
             : rawData;
-        if (req.timedout)
+        if (responded(req, res))
             return;
         // call serialize on final result
         resultData = formatResults
             ? await traceAsync(trace, 'sutro/formatResults', handle_async_1.promisify(formatResults.bind(null, opt, req, endpoint, rawData)))
             : resultData;
-        if (req.timedout)
+        if (responded(req, res))
             return;
     }
     else {
@@ -178,7 +184,7 @@ const exec = async (req, res, resource, { trace, augmentContext, formatResults }
             ? await traceAsync(trace, 'sutro/cache.header', handle_async_1.promisify(endpoint.cache.header.bind(null, opt, resultData)))
             : endpoint.cache.header
         : defaultCacheHeaders;
-    if (req.timedout)
+    if (responded(req, res))
         return;
     if (cacheHeaders)
         res.set('Cache-Control', cacheControl_1.default(cacheHeaders));
